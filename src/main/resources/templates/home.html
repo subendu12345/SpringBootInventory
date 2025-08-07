@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.thymeleaf.org" th:replace="base::layout(~{::section})">
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+
+</head>
+
+<body>
+    <section>
+        <div class="container">
+            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#productModal">Add
+                Products</button>
+            <button type="button" class="btn btn-info" data-toggle="modal"
+                data-target="#purchaseEntryFormModal">Purchase Entry</button>
+        </div>
+
+
+        <div class="row">
+            <div class="col-sm-5">
+                <div th:replace="/product/ProductStock.html :: productStockDashBoard"></div>
+            </div>
+            <div class="col-sm-6">
+                <div class="shadow-box">
+                    <div th:replace="/sale/NewSalesEntryForm.html :: saleEntryForm"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="productModalLabel">Product Entry Form</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div th:replace="/product/productEntryForm.html :: productEntryForm"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="purchaseEntryFormModal" tabindex="-1" role="dialog"
+            aria-labelledby="purchaseEntryFormModal" aria-hidden="true">
+
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="purchaseEntryFormModal">Purchase Entry Form</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div th:replace="/purchase/PurchaseEntryForm.html :: purchaseEntryForm"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+</body>
+
+</html>

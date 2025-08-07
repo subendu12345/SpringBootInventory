@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Bill</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .bill-container {
+            @apply bg-white p-8 rounded-xl shadow-lg max-w-2xl mx-auto my-12;
+        }
+    </style>
+</head>
+
+<body >
+    <div class="modal fade container" id="billModal" tabindex="-1" role="dialog"
+        aria-labelledby="billModalLabel" aria-hidden="false">
+        <div class="modal-dialog modal-lg" role="document">
+            <div  class="modal fade" id="billModal" tabindex="-1" role="dialog"
+                aria-labelledby="billModalLabel" aria-hidden="false">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="billModalLabel">Sales Bill Details</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- The original bill-container content goes here -->
+                             <p>kfjdngjdfgnfdb djfgndfkjg djffngdfjgndfgk kdfjndfkjgndfkjg kj kjdfgndf dfkjndfjkgndgkh dkjg dgkjh dgjk bdgkjnhdgjknhdgkjnhdkg bkdjg hjdg hd</p>
+                        </div>
+                        <div class="modal-footer print-button-container">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button onclick="window.print()"
+                                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300">
+                                Print Bill
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+
+</html>
