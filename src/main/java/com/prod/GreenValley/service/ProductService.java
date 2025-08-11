@@ -36,7 +36,7 @@ public class ProductService {
         
         // Map the list of Product entities to the new DTO
         return products.stream()
-                .map(product -> new ProductSearchDTO(product.getId(), product.getName()))
+                .map(product -> new ProductSearchDTO(product.getId(), product.getName(), product.getPricePerUnit()))
                 .collect(Collectors.toList());
     }
 

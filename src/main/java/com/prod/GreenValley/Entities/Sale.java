@@ -3,8 +3,11 @@ package com.prod.GreenValley.Entities;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 @Entity
 @Table(name = "sale")
@@ -18,6 +21,9 @@ public class Sale {
     @Column(name = "sale_date", updatable = false)
     private LocalDateTime saleDate;
 
+    @Column(name="sale_date2")
+    private String saleDate2;
+
     @Column(name = "total_amount", precision = 10, scale = 2)
     private BigDecimal totalAmount;
 
@@ -30,7 +36,18 @@ public class Sale {
     @PrePersist
     protected void onCreate() {
         this.saleDate = LocalDateTime.now();
-       
+        this.saleDate2 = getDateString();
+    }
+
+    private String getDateString(){
+            Date utilDate = new Date(); // Your java.util.Date object
+    LocalDate localDate = utilDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+    int year = localDate.getYear();
+    int month = localDate.getMonthValue(); // 1-indexed
+    int day = localDate.getDayOfMonth();
+
+        return String.valueOf(year) +"-"+ String.valueOf(month)+ "-"+String.valueOf(day);
     }
 
 }

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.thymeleaf.org" th:replace="base::layout(~{::section})">
+
+</html>
+<section>
+    <!-- Main Content Area -->
+    <div class="container-fluid py-4">
+        <div class="row">
+            <!-- Sidebar / Navigation -->
+            <nav class="col-md-2 d-none d-md-block bg-dark sidebar min-vh-100 p-3">
+                <div class="sidebar-sticky">
+                    <h4 class="text-white mb-4">Menu</h4>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white active bg-secondary rounded" href="#">Purchases</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#">Sales</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#">Inventory</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main role="main" class="col-md-10 ml-sm-auto px-4">
+                <div
+                    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Purchase History</h1>
+                    <button id="addPurchaseBtn" class="btn btn-success">
+                        <i class="fas fa-plus mr-2"></i>Add New Purchase
+                    </button>
+                </div>
+
+                <!-- Purchases Table -->
+                <div class="table-responsive bg-white shadow-sm rounded p-3">
+                    <table class="table table-striped table-hover">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Purchase ID</th>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th>Total Amount</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="purchaseTableBody">
+                            <!-- Purchase data will be populated by JavaScript -->
+                            <tr>
+                                <td colspan="5" class="text-center">Loading purchases...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Message Box -->
+    <div id="messageBox" class="message-box alert fade show d-none" role="alert"></div>
+
+    <!-- Purchase Modal for Add/Edit -->
+    <div class="modal fade" id="purchaseModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Add New Purchase</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="purchaseForm">
+                        <input type="hidden" id="purchaseId" name="id">
+
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label for="purchaseDate">Purchase Date</label>
+                                <input type="date" id="purchaseDate" name="purchaseDate" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="supplierInfo">Supplier Info</label>
+                                <input type="text" id="supplierInfo" name="supplierInfo"
+                                    placeholder="Supplier Name or ID" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <h5 class="mt-4">Items</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm" id="purchaseItemTable">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Unit Price</th>
+                                        <th class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="purchaseItemTableBody">
+                                    <!-- Form rows will be added by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <button type="button" id="addItemBtn" class="btn btn-info btn-sm">
+                                <i class="fas fa-plus"></i> Add Item
+                            </button>
+                            <div class="text-right">
+                                <label for="totalAmount" class="mb-0">Total Amount</label>
+                                <input type="text" id="totalAmount" name="totalAmount" readonly
+                                    class="form-control form-control-sm text-right font-weight-bold" value="0.00">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" id="savePurchaseBtn" class="btn btn-primary">Save Purchase</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('calll')
+            const purchaseTableBody = document.getElementById('purchaseTableBody');
+            const purchaseModal = $('#purchaseModal'); // Use jQuery for Bootstrap modal functions
+            const purchaseForm = document.getElementById('purchaseForm');
+            const modalTitle = document.getElementById('modalTitle');
+            const addPurchaseBtn = document.getElementById('addPurchaseBtn');
+            const addItemBtn = document.getElementById('addItemBtn');
+            const purchaseItemTableBody = document.getElementById('purchaseItemTableBody');
+            const totalAmountInput = document.getElementById('totalAmount');
+            const savePurchaseBtn = document.getElementById('savePurchaseBtn');
+            const messageBox = document.getElementById('messageBox');
+
+            // Helper function to show a dismissible message box
+            function showMessage(text, isError = false) {
+                messageBox.textContent = text;
+                messageBox.className = 'message-box alert fade show';
+                messageBox.classList.add(isError ? 'alert-danger' : 'alert-success');
+                messageBox.classList.remove('d-none');
+                setTimeout(() => {
+                    messageBox.classList.remove('show');
+                    setTimeout(() => {
+                        messageBox.classList.add('d-none');
+                    }, 300);
+                }, 3000);
+            }
+
+            // Function to fetch all purchases from the backend
+            async function fetchPurchases() {
+                try {
+                    // Note: The controller provides a Thymeleaf endpoint at /purchases,
+                    // but the API endpoints are at /api/purchases. We should fetch from the API.
+                    const response = await fetch('/api/purchases');
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch purchases.');
+                    }
+                    const purchases = await response.json();
+                    console.log('response '+ JSON.stringify(purchases))
+                    renderPurchases(purchases);
+                } catch (error) {
+                    console.error('Error fetching purchases:', error);
+                    purchaseTableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Failed to load purchases.</td></tr>`;
+                    showMessage('Failed to load purchases.', true);
+                }
+            }
+
+            // Function to render purchases in the table
+            function renderPurchases(purchases) {
+                purchaseTableBody.innerHTML = '';
+                if (purchases.length === 0) {
+                    purchaseTableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No purchases found.</td></tr>`;
+                    return;
+                }
+
+                purchases.forEach(purchase => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${purchase.id}</td>
+                        <td>${new Date(purchase.dateOfPurchase).toLocaleDateString()}</td>
+                        <td>${purchase.supplierInfo}</td>
+                        <td>$${purchase.totalAmount.toFixed(2)}</td>
+                        <td class="text-center">
+                            <button class="editBtn btn btn-warning btn-sm mr-2" data-id="${purchase.id}">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="deleteBtn btn btn-danger btn-sm" data-id="${purchase.id}">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>
+                    `;
+                    purchaseTableBody.appendChild(row);
+                });
+                attachPurchaseEventListeners();
+            }
+
+            // Function to open the modal for adding/editing a purchase
+            function openModal(purchase = null) {
+                purchaseForm.reset();
+                purchaseItemTableBody.innerHTML = '';
+                totalAmountInput.value = '0.00';
+
+                if (purchase) {
+                    modalTitle.textContent = 'Edit Purchase';
+                    document.getElementById('purchaseId').value = purchase.id;
+                    // document.getElementById('purchaseDate').value = new Date(purchase.purchaseDate).toISOString().split('T')[0];
+                    // document.getElementById('supplierInfo').value = purchase.supplierInfo;
+
+                    purchase.purchaseEntryItems.forEach(item => addPurchaseItemRow(item));
+                    updateTotalAmount();
+                } else {
+                    modalTitle.textContent = 'Add New Purchase';
+                    document.getElementById('purchaseId').value = '';
+                    addPurchaseItemRow();
+                }
+                purchaseModal.modal('show');
+            }
+
+            // Function to close the modal
+            function closeModal() {
+                purchaseModal.modal('hide');
+            }
+
+            // Function to add a new row to the purchase item table
+            function addPurchaseItemRow(item = null) {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>
+                        <input type="text" name="productInfo" value="${item ? item.productName : ''}" placeholder="Product name" class="form-control form-control-sm" required>
+                    </td>
+                    <td>
+                        <input type="number" name="quantity" value="${item ? item.quantity : '1'}" min="1" class="form-control form-control-sm purchase-quantity" required>
+                    </td>
+                    <td>
+                        <input type="number" name="unitPrice" value="${item ? item.price : '0.00'}" min="0" step="0.01" class="form-control form-control-sm purchase-price" required>
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="removeBtn btn btn-danger btn-sm">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                purchaseItemTableBody.appendChild(newRow);
+                attachItemRowEventListeners(newRow);
+            }
+
+            // Function to update the total amount of the purchase
+            function updateTotalAmount() {
+                let total = 0;
+                purchaseItemTableBody.querySelectorAll('tr').forEach(row => {
+                    const quantity = parseFloat(row.querySelector('.purchase-quantity').value) || 0;
+                    const price = parseFloat(row.querySelector('.purchase-price').value) || 0;
+                    total += quantity * price;
+                });
+                totalAmountInput.value = total.toFixed(2);
+            }
+
+            // Function to handle the form submission
+            async function handleFormSubmit(event) {
+                event.preventDefault();
+
+                const purchaseId = document.getElementById('purchaseId').value;
+                const url = purchaseId ? `/api/purchases/${purchaseId}` : '/api/purchases';
+                const method = purchaseId ? 'PUT' : 'POST';
+
+                const purchaseDate = document.getElementById('purchaseDate').value;
+                const supplierInfo = document.getElementById('supplierInfo').value;
+                const totalAmount = parseFloat(totalAmountInput.value);
+
+                const purchaseItems = [];
+                purchaseItemTableBody.querySelectorAll('tr').forEach(row => {
+                    const productInfo = row.querySelector('input[name="productInfo"]').value;
+                    const quantity = parseInt(row.querySelector('input[name="quantity"]').value);
+                    const unitPrice = parseFloat(row.querySelector('input[name="unitPrice"]').value);
+                    purchaseItems.push({ productInfo, quantity, unitPrice });
+                });
+
+                const purchaseData = {
+                    purchaseDate,
+                    supplierInfo,
+                    totalAmount,
+                    purchaseItems
+                };
+
+                savePurchaseBtn.textContent = 'Saving...';
+                savePurchaseBtn.disabled = true;
+
+                try {
+                    const response = await fetch(url, {
+                        method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(purchaseData)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Failed to save purchase.');
+                    }
+
+                    closeModal();
+                    await fetchPurchases(); // Refresh the list
+                    showMessage('Purchase saved successfully!');
+                } catch (error) {
+                    console.error('Error saving purchase:', error);
+                    showMessage(error.message, true);
+                } finally {
+                    savePurchaseBtn.textContent = 'Save Purchase';
+                    savePurchaseBtn.disabled = false;
+                }
+            }
+
+            // Function to delete a purchase
+            async function deletePurchase(id) {
+                // IMPORTANT: For a production app, use a custom modal instead of alert/confirm.
+                if (!confirm('Are you sure you want to delete this purchase?')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/purchases/${id}`, { method: 'DELETE' });
+                    if (!response.ok) {
+                        throw new Error('Failed to delete purchase.');
+                    }
+                    await fetchPurchases();
+                    showMessage('Purchase deleted successfully!');
+                } catch (error) {
+                    console.error('Error deleting purchase:', error);
+                    showMessage(error.message, true);
+                }
+            }
+
+            // Function to attach event listeners to a new item row
+            function attachItemRowEventListeners(row) {
+                row.querySelector('.removeBtn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    row.remove();
+                    updateTotalAmount();
+                });
+                row.querySelector('.purchase-quantity').addEventListener('input', updateTotalAmount);
+                row.querySelector('.purchase-price').addEventListener('input', updateTotalAmount);
+            }
+
+            // Function to attach event listeners to the main purchase table buttons
+            async function attachPurchaseEventListeners() {
+                document.querySelectorAll('.editBtn').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const id = e.target.dataset.id;
+                        try {
+                            const response = await fetch(`/api/purchases/${id}`);
+                            console.log('responseresponseresponseresponseresponse  '+ JSON.stringify(response))
+                            // if (!response.ok) throw new Error('Purchase not found.');
+                            const purchase = await response.json();
+                            console.log('purchaseItesm   '+ JSON.stringify(purchase))
+                            openModal(purchase);
+                        } catch (error) {
+                            console.error('Error fetching purchase details:', error);
+                            showMessage('Failed to load purchase details for editing.', true);
+                        }
+                    });
+                });
+                document.querySelectorAll('.deleteBtn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const id = e.target.dataset.id;
+                        deletePurchase(id);
+                    });
+                });
+            }
+
+            // Initial setup
+            fetchPurchases();
+            addPurchaseBtn.addEventListener('click', () => openModal());
+            savePurchaseBtn.addEventListener('click', handleFormSubmit);
+            addItemBtn.addEventListener('click', () => addPurchaseItemRow());
+        });
+    </script>
+</section>

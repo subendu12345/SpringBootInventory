@@ -1,5 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
     const tableBody = document.querySelector('#purchaseItemTable tbody');
+const purchaseItemTable = document.getElementById('purchaseItemTable').getElementsByTagName('tbody')[0];
+const totalAmountInput = document.getElementById('totalAmount');
+            //add logic to update Total Amount automatic
+        function updateTotalAmount() {
+            let total = 0;
+            const rows = purchaseItemTable.rows;
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                total += quantity * price;
+            }
+            totalAmountInput.value = total.toFixed(2);
+        }
 
     // Generic function to initialize search functionality on an input
     function initializeSearch(input) {

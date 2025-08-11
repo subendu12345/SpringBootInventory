@@ -1,5 +1,7 @@
 package com.prod.GreenValley.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,14 @@ public class PurchaseEntryService {
 
         return entry;
 
+    }
+
+    public List<PurchaseEntry> getAllPurchases(){
+        return purchaseEntryRepo.findAll();
+    }
+
+    public PurchaseEntry findPurchaseById(Long id){
+        return purchaseEntryRepo.findPurchaseEntryById(id);
     }
     
 }

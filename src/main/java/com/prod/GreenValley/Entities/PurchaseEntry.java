@@ -30,7 +30,7 @@ public class PurchaseEntry {
     // 'cascade = CascadeType.ALL' ensures that any changes (save, update, delete) to the PurchaseEntry
     // are cascaded to its associated PurchaseEntryItems.
     @OneToMany(mappedBy = "purchaseEntry", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PurchaseEntryItem> items = new ArrayList<>();
+    private List<PurchaseEntryItem> purchaseEntryItems = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -72,15 +72,21 @@ public class PurchaseEntry {
         this.totalAmount = totalAmount;
     }
 
-    public List<PurchaseEntryItem> getItems() {
-        return items;
+    public List<PurchaseEntryItem> getPurchaseEntryItems() {
+        return purchaseEntryItems;
     }
 
-    public void setItems(List<PurchaseEntryItem> items) {
-        this.items = items;
+    public void setPurchaseEntryItems(List<PurchaseEntryItem> purchaseEntryItems) {
+        this.purchaseEntryItems = purchaseEntryItems;
     }
 
+    @Override
+    public String toString() {
+        return "PurchaseEntry [id=" + id + ", dateOfPurchase=" + dateOfPurchase + ", supplierInfo=" + supplierInfo
+                + ", billNumber=" + billNumber + ", totalAmount=" + totalAmount + ", purchaseEntryItems="
+                + purchaseEntryItems + "]";
+    }
 
-
+    
     
 }

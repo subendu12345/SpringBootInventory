@@ -1,125 +1,111 @@
 <div th:fragment="saleEntryForm">
-    <div class="flex flex-col md:flex-row min-h-screen">
-        <!-- Main Content Area with Sales Form -->
-        <main class="flex-grow p-8 md:p-12">
-            <!-- Sales Form Container -->
-            <div class="max-w-4xl mx-auto">
-                <header class="mb-8">
-                    <h1 class="text-4xl font-bold text-gray-900">New Sales Entry</h1>
-                    <p class="text-gray-500 mt-2">Fill out the details for a new sale transaction.</p>
+    <div class="d-flex flex-column flex-md-row min-vh-100">
+        <main class="flex-grow-1">
+            <div class="container-fluid">
+                <header class="mb-4">
+                    <h1 class="h2 font-weight-bold text-dark">New Sales Entry</h1>
+                    <p class="text-muted mt-2">Fill out the details for a new sale transaction.</p>
                 </header>
 
-                <!-- Sales Form Section -->
                 <div class="card">
-                    <form id="salesForm" th:action="@{/sale/save}" th:object="${salesForm}" method="post">
-                        <!-- Sale Details -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div class="px-6 py-4 whitespace-nowrap">
-                                <label for="totalAmount" class="block text-sm font-medium text-gray-700">Total Amount</label>
-                                <input type="number" id="totalAmount" name="totalAmount" th:field="*{totalAmount}"
-                                       placeholder="Calculated automatically"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-gray-100"
-                                       readonly>
+                    <div class="card-body">
+                        <form id="salesForm" th:action="@{/sale/save}" th:object="${salesForm}" method="post">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="totalAmount" class="form-label">Total Amount</label>
+                                    <input type="number" id="totalAmount" name="totalAmount" th:field="*{totalAmount}"
+                                           placeholder="Calculated automatically"
+                                           class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="saleDate" class="form-label">Date of Sale</label>
+                                    <input type="date" id="saleDate" name="saleDate" th:field="*{saleDate}"
+                                           class="form-control" required>
+                                </div>
                             </div>
-                            <div class="px-6 py-4 whitespace-nowrap">
-                                <label for="saleDate" class="block text-sm font-medium text-gray-700">Date of Sale</label>
-                                <input type="date" id="saleDate" name="saleDate" th:field="*{saleDate}"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-                                       required readonly>
-                            </div>
-                        </div>
 
-                        <!-- Sales Items Table -->
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Sales Items</h3>
-                        <div class="overflow-x-auto mb-6">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                            <h3 class="h4 mt-4 mb-3">Sales Items</h3>
+                            <div class="table-responsive mb-4">
+                                <table class="table table-bordered table-striped">
+                                    <thead class="thead-light">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product Info</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        <th scope="col">Product Info</th>
+                                        <th scope="col">Quantity</th>
+                                        <th scope="col">Price</th>
+                                        <th scope="col" class="text-center">Actions</th>
                                     </tr>
-                                </thead>
-                                <tbody id="salesItemTableBody" class="bg-white divide-y divide-gray-200 text-sm table-striped">
-                                    <!-- Initial sales item row -->
+                                    </thead>
+                                    <tbody id="salesItemTableBody">
                                     <tr th:each="item, stat : *{salesItems}" th:id="'row-' + ${stat.index}">
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="search-container">
-                                                <input type="text" class="form-control product-search-input" id="product-search-input"
+                                        <td>
+                                            <div class="position-relative">
+                                                <input style="width: 15rem;" type="text" class="form-control product-search-input"
                                                        th:field="*{salesItems[__${stat.index}__].productInfo}"
                                                        placeholder="Search by name" required />
-                                                       <input type="hidden" class="product-id-input-hidden"
+                                                <input type="hidden" class="product-id-input-hidden"
                                                        th:field="*{salesItems[__${stat.index}__].productId}" />
-                                                <div class="search-results hidden absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1">
-                                                    <ul></ul>
-                                                </div>
+                                                <div class="search-results list-group position-absolute w-100 z-1" style="display: none;">
+                                                    </div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td>
                                             <input type="number" class="form-control sales-quantity-input"
                                                    th:field="*{salesItems[__${stat.index}__].quantitySold}"
                                                    placeholder="Quantity" min="1" required />
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td>
                                             <input type="number" class="form-control sales-price-input"
                                                    th:field="*{salesItems[__${stat.index}__].unitPriceAtSale}"
                                                    placeholder="Price Per Unit" min="0" step="0.01" required />
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                                            <!-- Remove button for dynamically added rows, hidden for the first row -->
+                                        <td class="text-center align-middle">
                                             <button th:if="${stat.index} > 0" type="button"
-                                                class="text-red-500 hover:text-red-700 font-semibold text-sm remove-button">Remove</button>
+                                                    class="btn btn-danger btn-sm remove-button">Remove</button>
                                         </td>
                                     </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                                    </tbody>
+                                </table>
+                            </div>
 
-                        <!-- Form Actions -->
-                        <div class="flex justify-between items-center mt-6">
-                            <button type="button" onclick="addRowOnSalesEntry()"
-                                class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">
-                                Add Item
-                            </button>
-                            <button type="submit"
-                                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">
-                                Save Sale
-                            </button>
-                        </div>
-                    </form>
+                            <div class="d-flex justify-content-between align-items-center mt-4">
+                                <button type="button" onclick="addRowOnSalesEntry()"
+                                        class="btn btn-success">
+                                    Add Item
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    Save Sale
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
-    <!-- The template row for adding new sales items -->
     <template id="sales-item-row-template">
         <tr>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <div class="search-container relative">
-                    <input type="text" name="salesItems[INDEX_PLACEHOLDER].productInfo" placeholder="Search by name"
-                        class="form-control product-search-input" required>
-                        <input type="hidden" name="salesItems[INDEX_PLACEHOLDER].productId" class="product-id-input-hidden" />
-                    <div class="search-results hidden absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1">
-                        <ul></ul>
-                    </div>
+            <td>
+                <div class="position-relative">
+                    <input style="width: 15rem;" type="text" name="salesItems[INDEX_PLACEHOLDER].productInfo" placeholder="Search by name"
+                           class="form-control product-search-input" required>
+                    <input type="hidden" name="salesItems[INDEX_PLACEHOLDER].productId" class="product-id-input-hidden" />
+                    <div class="search-results list-group position-absolute w-100 z-1" style="display: none;">
+                        </div>
                 </div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td>
                 <input type="number" name="salesItems[INDEX_PLACEHOLDER].quantitySold" placeholder="Quantity"
-                    min="1" class="form-control sales-quantity-input" required>
+                       min="1" class="form-control sales-quantity-input" required>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td>
                 <input type="number" name="salesItems[INDEX_PLACEHOLDER].unitPriceAtSale" placeholder="Price per unit" min="0" step="0.01"
-                    class="form-control sales-price-input" required>
+                       class="form-control sales-price-input" required>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">
-                <button type="button"
-                    class="text-red-500 hover:text-red-700 font-semibold text-sm remove-button">Remove</button>
+            <td class="text-center align-middle">
+                <button type="button" class="btn btn-danger btn-sm remove-button">Remove</button>
             </td>
         </tr>
     </template>
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const tableBody = document.getElementById('salesItemTableBody');
@@ -162,13 +148,13 @@
             // Function to initialize the search functionality for a given input field
             function initializeSearch(input) {
                 const searchResultsContainer = input.parentNode.querySelector('.search-results');
-                const resultList = searchResultsContainer.querySelector('ul');
+                const resultList = searchResultsContainer; // Bootstrap uses list-group directly
                 const priceInput = input.closest('tr').querySelector('.sales-price-input');
                 const productIdInput = input.closest('tr').querySelector('.product-id-input-hidden');
                 input.addEventListener('input', async (e) => {
                     const query = e.target.value;
                     if (query.length < 2) {
-                        searchResultsContainer.classList.add('hidden');
+                        searchResultsContainer.style.display = 'none';
                         return;
                     }
 
@@ -180,37 +166,39 @@
                         resultList.innerHTML = '';
                         if (products.length > 0) {
                             products.forEach(product => {
-                                const li = document.createElement('li');
+                                const li = document.createElement('a'); // Using <a> for Bootstrap list-group-item
                                 li.textContent = product.name;
-                                li.classList.add('p-2', 'hover:bg-gray-100', 'cursor-pointer');
-                                li.addEventListener('click', () => {
+                                li.href = '#';
+                                li.classList.add('list-group-item', 'list-group-item-action');
+                                li.addEventListener('click', (event) => {
+                                    event.preventDefault(); // Prevent default link behavior
                                     input.value = product.name;
                                     // Set the price for the selected item
                                     if (priceInput) {
-                                        priceInput.value = product.unitPriceAtSale;
+                                        priceInput.value = product.pricePerUnit;
                                     }
                                     if(productIdInput){
                                         productIdInput.value = product.id;
                                     }
-                                    searchResultsContainer.classList.add('hidden');
+                                    searchResultsContainer.style.display = 'none';
                                     updateTotalAmount(); // Recalculate total after price is set
                                 });
                                 resultList.appendChild(li);
                             });
-                            searchResultsContainer.classList.remove('hidden');
+                            searchResultsContainer.style.display = 'block';
                         } else {
-                            searchResultsContainer.classList.add('hidden');
+                            searchResultsContainer.style.display = 'none';
                         }
                     } catch (error) {
                         console.error('Error fetching products:', error);
-                        searchResultsContainer.classList.add('hidden');
+                        searchResultsContainer.style.display = 'none';
                     }
                 });
 
                 // Hide search results when clicking outside
                 document.addEventListener('click', (e) => {
                     if (!searchResultsContainer.contains(e.target) && e.target !== input) {
-                        searchResultsContainer.classList.add('hidden');
+                        searchResultsContainer.style.display = 'none';
                     }
                 });
             }
@@ -229,9 +217,9 @@
                     const removeButton = row.querySelector('.remove-button');
                     if (removeButton) {
                         if (i === 0) {
-                             removeButton.style.display = 'none';
+                            removeButton.style.display = 'none';
                         } else {
-                             removeButton.style.display = '';
+                            removeButton.style.display = '';
                         }
                     }
                 }
