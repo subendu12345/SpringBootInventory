@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,8 +38,13 @@ public class PurchaseEntryRESTApi {
         List<PurchaseDTO> purchaseDTOs = new ArrayList<>();
         List<PurchaseEntry> purchases = pEntryService.getAllPurchases();
         for (PurchaseEntry purchaseEntry : purchases) {
+            List<String> productNames = new ArrayList<>();
+            for (PurchaseEntryItem purchaseEntryItem : purchaseEntry.getPurchaseEntryItems()) {
+                productNames.add(purchaseEntryItem.getProduct().getName());
+            }
+
             purchaseDTOs.add(new PurchaseDTO(purchaseEntry.getId(), purchaseEntry.getDateOfPurchase(),
-                    purchaseEntry.getSupplierInfo(), purchaseEntry.getBillNumber(), purchaseEntry.getTotalAmount()));
+                    purchaseEntry.getSupplierInfo(), purchaseEntry.getBillNumber(), purchaseEntry.getTotalAmount(), String.join(",", productNames)));
         }
 
         return purchaseDTOs;

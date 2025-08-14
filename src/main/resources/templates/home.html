@@ -11,16 +11,14 @@
 
 <body>
     <section>
-        <div class="container">
-            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#productModal">Add
-                Products</button>
-            <button type="button" class="btn btn-info" data-toggle="modal"
-                data-target="#purchaseEntryFormModal">Purchase Entry</button>
-        </div>
-
-
         <div class="row">
             <div class="col-sm-6">
+                <div class="">
+                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#productModal">Add
+                        Products</button>
+                    <button type="button" class="btn btn-info" data-toggle="modal"
+                        data-target="#purchaseEntryFormModal">Purchase Entry</button>
+                </div>
                 <div th:replace="/product/ProductStock.html :: productStockDashBoard"></div>
             </div>
             <div class="col-sm-6">

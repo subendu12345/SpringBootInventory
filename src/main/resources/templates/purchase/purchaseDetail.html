@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.thymeleaf.org" th:replace="base::layout(~{::section})">
 <section>
-    
+
     <!-- Message Box -->
     <div id="messageBox" class="message-box alert fade show d-none" role="alert"></div>
     <!-- Main Content Area -->
@@ -21,6 +21,7 @@
                         <thead class="thead-dark">
                             <tr>
                                 <th>Purchase ID</th>
+                                <th>Products</th>
                                 <th>Date</th>
                                 <th>Supplier</th>
                                 <th>Total Amount</th>
@@ -160,10 +161,14 @@
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${purchase.id}</td>
+                        <td>${purchase.productsInfo}</td>
                         <td>${new Date(purchase.dateOfPurchase).toLocaleDateString()}</td>
                         <td>${purchase.supplierInfo}</td>
                         <td>${purchase.totalAmount.toFixed(2)}</td>
                         <td class="text-center">
+                            <button class="viewBtn btn btn-success btn-sm" data-id="${purchase.id}">
+                                <i class="fas fa-trash"></i> View
+                            </button>
                             <button class="editBtn btn btn-warning btn-sm mr-2" data-id="${purchase.id}">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
@@ -189,7 +194,7 @@
                     document.getElementById('purchaseDate').value = new Date(purchase.dateOfPurchase).toISOString().split('T')[0];
                     document.getElementById('supplierInfo').value = purchase.supplierInfo;
 
-                    purchase.purchaseEntryItems.forEach(item => addPurchaseItemRow(item));
+                    purchase.purchaseEntryItems.forEach(item => addPurchaseItemRow(item, false));
                     updateTotalAmount();
                 } else {
                     modalTitle.textContent = 'Add New Purchase';
@@ -205,26 +210,32 @@
             }
 
             // Function to add a new row to the purchase item table
-            function addPurchaseItemRow(item = null) {
+            function addPurchaseItemRow(item = null, isReadOnly) {
                 const newRow = document.createElement('tr');
-                newRow.innerHTML = `
+                console.log('isReadOnly  '+ isReadOnly)
+                let innerHTMLStr = `
                     <td>
                         <input type="text" name="productInfo" value="${item ? item.productName : ''}" placeholder="Product name" class="form-control form-control-sm" readonly required>
                         <input type="text" name="pproduct-id" style="visibility: hidden;" value="${item ? item.productId : ''}">
                     </td>
                     <td>
-                        <input type="number" name="quantity" value="${item ? item.quantity : '1'}" min="1" class="form-control form-control-sm purchase-quantity"  required>
+                        <input type="number" ${isReadOnly ? 'readonly' : ''} name="quantity" value="${item ? item.quantity : '1'}" min="1" class="form-control form-control-sm purchase-quantity"  required>
                         
                     </td>
                     <td>
                         <input type="number" name="unitPrice" value="${item ? item.price : '0.00'}" min="0" step="0.01" class="form-control form-control-sm purchase-price" readonly required>
                     </td>
-                    <td class="text-center">
+                `;
+                if (!isReadOnly) {
+                    innerHTMLStr += `<td class="text-center">
                         <button type="button" class="removeBtn btn btn-danger btn-sm">
                             <i class="fas fa-trash"></i>
                         </button>
-                    </td>
-                `;
+                    </td>`
+                }
+
+                newRow.innerHTML = innerHTMLStr;
+
                 purchaseItemTableBody.appendChild(newRow);
                 attachItemRowEventListeners(newRow);
             }
@@ -315,15 +326,56 @@
                 }
             }
 
+            // function view form
+            async function viewPurchase(id) {
+                try {
+                    const response = await fetch(`/api/purchases/${id}`);
+                    console.log('responseresponseresponseresponseresponse  ' + JSON.stringify(response))
+                    // if (!response.ok) throw new Error('Purchase not found.');
+                    const purchase = await response.json();
+                    console.log('purchaseItesm   ' + JSON.stringify(purchase))
+                    openModalForView(purchase);
+                } catch (error) {
+                    console.error('Error fetching purchase details:', error);
+                    showMessage('Failed to load purchase details for editing.', true);
+                }
+            }
+
+            // view purchase record
+
+            function openModalForView(purchase = null) {
+                purchaseForm.reset();
+                purchaseItemTableBody.innerHTML = '';
+                totalAmountInput.value = '0.00';
+
+                if (purchase) {
+                    modalTitle.textContent = 'View Purchase';
+                    document.getElementById('purchaseId').value = purchase.id;
+
+                    document.getElementById('purchaseDate').value = new Date(purchase.dateOfPurchase).toISOString().split('T')[0];
+                    document.getElementById('purchaseDate').setAttribute("readonly", true);
+                    document.getElementById('supplierInfo').value = purchase.supplierInfo;
+                    document.getElementById('supplierInfo').setAttribute("readonly", true);
+
+                    purchase.purchaseEntryItems.forEach(item => addPurchaseItemRow(item, true));
+                    updateTotalAmount();
+                    purchaseModal.modal('show');
+                }
+
+            }
+
             // Function to attach event listeners to a new item row
             function attachItemRowEventListeners(row) {
-                row.querySelector('.removeBtn').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    row.remove();
-                    updateTotalAmount();
-                });
-                row.querySelector('.purchase-quantity').addEventListener('input', updateTotalAmount);
-                row.querySelector('.purchase-price').addEventListener('input', updateTotalAmount);
+                if (row.querySelector('.removeBtn')) {
+                    row.querySelector('.removeBtn').addEventListener('click', (e) => {
+                        e.preventDefault();
+                        row.remove();
+                        updateTotalAmount();
+                    });
+                    row.querySelector('.purchase-quantity').addEventListener('input', updateTotalAmount);
+                    row.querySelector('.purchase-price').addEventListener('input', updateTotalAmount);
+                }
+
             }
 
             // Function to attach event listeners to the main purchase table buttons
@@ -350,6 +402,15 @@
                         deletePurchase(id);
                     });
                 });
+
+                //viewPurchase
+                document.querySelectorAll('.viewBtn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const id = e.target.dataset.id;
+                        viewPurchase(id);
+                    });
+                });
+
             }
 
             // Initial setup

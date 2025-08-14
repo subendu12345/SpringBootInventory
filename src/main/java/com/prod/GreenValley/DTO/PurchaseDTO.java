@@ -11,15 +11,17 @@ public class PurchaseDTO {
     private String supplierInfo;
     private String billNumber;
     private BigDecimal totalAmount;
+    private String productsInfo;
     private List<PurchaseItemDTO> purchaseItemDTOs = new ArrayList<>();
     
 
-    public PurchaseDTO(Long id, Date dateOfPurchase, String supplierInfo, String billNumber, BigDecimal totalAmount){
+    public PurchaseDTO(Long id, Date dateOfPurchase, String supplierInfo, String billNumber, BigDecimal totalAmount, String productsInfo){
         this.id = id;
         this.dateOfPurchase = dateOfPurchase;
         this.supplierInfo = supplierInfo;
         this.billNumber = billNumber;
         this.totalAmount = totalAmount;
+        this.productsInfo = productsInfo;
     }
 
     public PurchaseDTO(Long id, Date dateOfPurchase, String supplierInfo, List<PurchaseItemDTO> purchaseEntryItems ){
@@ -59,9 +61,8 @@ public class PurchaseDTO {
         return purchaseItemDTOs;
     }
 
-
-
-
-    
+    public String getProductsInfo() {
+        return productsInfo;
+    }   
     
 }
