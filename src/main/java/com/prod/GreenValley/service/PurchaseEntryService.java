@@ -1,24 +1,41 @@
 package com.prod.GreenValley.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.prod.GreenValley.DTO.SalePurcahseDTO;
+import com.prod.GreenValley.Entities.Product;
 import com.prod.GreenValley.Entities.PurchaseEntry;
+import com.prod.GreenValley.Entities.PurchaseEntryItem;
+import com.prod.GreenValley.Entities.Sale;
+import com.prod.GreenValley.repository.ProductRepo;
 import com.prod.GreenValley.repository.PurchaseEntryRepo;
+import com.prod.GreenValley.repository.SaleRepo;
 import com.prod.GreenValley.wrapper.PurchaseEntryForm;
+import com.prod.GreenValley.wrapper.PurchaseEntryItemForm;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class PurchaseEntryService {
-    @Autowired PurchaseEntryRepo purchaseEntryRepo;
+    @Autowired
+    PurchaseEntryRepo purchaseEntryRepo;
 
+    @Autowired
+    private ProductRepo productRepo;
 
-    public void insertEntry(){
-        
+    @Autowired 
+    private SaleRepo saleRepo;
+
+    public void insertEntry() {
+
     }
 
-    public PurchaseEntry insertEntry(PurchaseEntryForm purchaseEntryForm){
+    public PurchaseEntry insertEntry(PurchaseEntryForm purchaseEntryForm) {
         PurchaseEntry entry = new PurchaseEntry();
         entry.setBillNumber(purchaseEntryForm.getBillNumber());
         entry.setDateOfPurchase(purchaseEntryForm.getDateOfPurchase());
@@ -31,12 +48,58 @@ public class PurchaseEntryService {
 
     }
 
-    public List<PurchaseEntry> getAllPurchases(){
+    public PurchaseEntry savePurchase(PurchaseEntryForm purchaseForm) {
+        System.out.println("save method calll ");
+        PurchaseEntry purchase = new PurchaseEntry();
+        if (purchaseForm.getId() != null) {
+            purchase = purchaseEntryRepo.findById(purchaseForm.getId()).orElse(purchase);
+            purchase.getPurchaseEntryItems().clear(); // Clear existing items for updates
+        } else {
+            purchase.setBillNumber(purchaseForm.getBillNumber());
+        }
+
+        purchase.setDateOfPurchase(purchaseForm.getDateOfPurchase());
+        purchase.setSupplierInfo(purchaseForm.getSupplierInfo());
+
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        for (PurchaseEntryItemForm itemForm : purchaseForm.getItems()) {
+            System.out.println("++++++++++++++++++++++++++++++++++++++++++ " + itemForm.getProductId());
+            PurchaseEntryItem item = new PurchaseEntryItem();
+            Product prod = productRepo.findById(itemForm.getProductId()).orElseThrow(
+                    () -> new EntityNotFoundException("Product not found with Name : " + itemForm.getProductInfo()));
+            item.setPurchaseEntry(purchase);
+            item.setProduct(prod);
+            item.setQuantity(itemForm.getQuantity());
+            item.setPrice(itemForm.getPrice());
+            purchase.getPurchaseEntryItems().add(item);
+
+            totalAmount = totalAmount.add(item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+        }
+        purchase.setTotalAmount(totalAmount);
+
+        return purchaseEntryRepo.save(purchase);
+    }
+
+    public List<PurchaseEntry> getAllPurchases() {
         return purchaseEntryRepo.findAll();
     }
 
-    public PurchaseEntry findPurchaseById(Long id){
+    public PurchaseEntry findPurchaseById(Long id) {
         return purchaseEntryRepo.findPurchaseEntryById(id);
     }
+
     
+    public SalePurcahseDTO genarateReport(LocalDate starDate, LocalDate endDate){
+        List<PurchaseEntry> purchases = purchaseEntryRepo.findPurchaseEntryByTwoDate(starDate, endDate);
+
+        List<Sale> sales = saleRepo.findSaleByTwoDate(starDate, endDate);
+        System.out.println("----------------*************************8888888 "+ sales);
+        for (Sale sale : sales) {
+            System.out.println("----------------*************************8888888 "+ sale);
+            System.out.println("item size "+ sale.getSaleItems().size());
+        }
+
+        return new SalePurcahseDTO(sales, purchases);
+    }
+
 }

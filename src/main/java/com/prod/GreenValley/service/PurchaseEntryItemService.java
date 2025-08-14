@@ -1,5 +1,7 @@
 package com.prod.GreenValley.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +13,7 @@ import com.prod.GreenValley.Entities.PurchaseEntry;
 import com.prod.GreenValley.Entities.PurchaseEntryItem;
 import com.prod.GreenValley.repository.ProductRepo;
 import com.prod.GreenValley.repository.PurchaseEntryItemRepo;
+import com.prod.GreenValley.repository.PurchaseEntryRepo;
 import com.prod.GreenValley.wrapper.PurchaseEntryForm;
 import com.prod.GreenValley.wrapper.PurchaseEntryItemForm;
 
@@ -24,6 +27,9 @@ public class PurchaseEntryItemService {
 
 	@Autowired
 	private ProductRepo productRepo;
+
+	@Autowired
+	private PurchaseEntryRepo purchaseEntryRepo;
 
     public void insertPurchesItems(List<PurchaseEntryItem> items){
         entryItemRepo.saveAll(items);
@@ -44,10 +50,5 @@ public class PurchaseEntryItemService {
 		}
 
 		entryItemRepo.saveAll(piList);
-      
     }
-
-
-
-
 }

@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.thymeleaf.org" th:replace="base::layout(~{::section})">
 
-</html>
-
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
@@ -11,10 +9,9 @@
 
 </head>
 
-<body>
     <section>
         <div class="container-fluid mt-5">
-            <div class="card shadow rounded-lg w-100 mx-auto" style="max-width: 1200px;">
+            <div class="card shadow rounded-lg w-100 mx-auto">
                 <div class="card-header">
                     <h3 class="mb-0">Sales Detail Report</h3>
                 </div>
@@ -62,32 +59,29 @@
                 </div>
             </div>
         </div>
-
-    </section>
-
-
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', () =>{
             //const monthFilter = document.getElementById('monthFilter');
             const dateFilter = document.getElementById('dateFilter');
             const salesTableBody = document.getElementById('salesTableBody');
             const loadingIndicator = document.getElementById('loadingIndicator');
             let totalSaleAmount = document.getElementById('totalSaleAmmunt');
 
-
+            console.log("dateFilterdateFilterdateFilter "+ dateFilter)
             // This function simulates fetching data from a backend API
             async function fetchSalesData(month, date) {
                 // In a real application, you would make a fetch call here:
                 // const response = await fetch(`/api/sales?month=${month}&date=${date}`);
                 // const data = await response.json();
                 if (date) {
+                    console.log("date -----------> "+date)
                     let dateParts = date.split('-');
-
+                    console.log('date   '+date)
                     let monthNumber = parseInt(dateParts[1]); // 8
                     let dayNumber = parseInt(dateParts[2]);
                     const filterDate = dateParts[0] + "-" + monthNumber + "-" + dayNumber;
 
-                    const response = await fetch(`/sale/details/date?date=${filterDate}`)
+                    const response = await fetch(`/sale/details/date?date=${date}`)
                     const data_x = await response.json();
                     for (const sl of data_x) {
                         console.log('dass ' + JSON.stringify(sl))
@@ -155,12 +149,15 @@
             // });
 
             dateFilter.addEventListener('change', () => {
+                console.log("---------------------------------")
                 // monthFilter.value = ''; // Clear month filter when date changes
                 filterSalesData();
             });
 
             // Initial render
-            filterSalesData();
+           // filterSalesData();
         });
     </script>
-</body>
+    </section>
+
+

@@ -22,9 +22,12 @@ public class PurchaseDTO {
         this.totalAmount = totalAmount;
     }
 
-    public PurchaseDTO(Long id,List<PurchaseItemDTO> purchaseEntryItems ){
+    public PurchaseDTO(Long id, Date dateOfPurchase, String supplierInfo, List<PurchaseItemDTO> purchaseEntryItems ){
         this.id = id;
+        this.dateOfPurchase = dateOfPurchase;
+        this.supplierInfo = supplierInfo;
         this.purchaseItemDTOs = purchaseEntryItems;
+        
     }
 
 

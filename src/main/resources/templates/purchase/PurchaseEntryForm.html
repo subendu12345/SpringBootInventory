@@ -81,8 +81,8 @@
             <!-- Total Amount -->
             <div class="form-group">
                 <label for="totalAmount">Total Amount</label>
-                <input type="number" class="form-control" id="totalAmount" th:field="*{totalAmount}"
-                    placeholder="Total Amount" step="0.01" min="0" required />
+                <input type="number" class="form-control" id="purchaseTotalAmount" th:field="*{totalAmount}"
+                    placeholder="Total Amount" step="0.01" min="0" required readonly />
             </div>
 
             <!-- Purchase Entry Items Table -->
@@ -113,12 +113,12 @@
                                 </div>
                             </td>
                             <td>
-                                <input type="number" class="form-control"
+                                <input type="number" class="form-control quantity-input"
                                     th:field="*{items[__${stat.index}__].quantity}" placeholder="Quantity" min="1"
                                     required />
                             </td>
                             <td>
-                                <input type="number" class="form-control" th:field="*{items[__${stat.index}__].price}"
+                                <input type="number" class="form-control price-input" th:field="*{items[__${stat.index}__].price}"
                                     placeholder="Price" step="0.01" min="0" required />
                             </td>
                             <td class="text-center">
@@ -149,11 +149,11 @@
                     </div>
                 </td>
                 <td>
-                    <input type="number" class="form-control" name="items[INDEX_PLACEHOLDER_X].quantity"
+                    <input type="number" class="form-control quantity-input" name="items[INDEX_PLACEHOLDER_X].quantity"
                         placeholder="Quantity" min="1" required />
                 </td>
                 <td>
-                    <input type="number" class="form-control" name="items[INDEX_PLACEHOLDER_X].price" placeholder="Price"
+                    <input type="number" class="form-control price-input" name="items[INDEX_PLACEHOLDER_X].price" placeholder="Price"
                         step="0.01" min="0" required />
                 </td>
                 <td class="text-center">

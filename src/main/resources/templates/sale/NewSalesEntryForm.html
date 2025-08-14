@@ -151,6 +151,7 @@
                 const resultList = searchResultsContainer; // Bootstrap uses list-group directly
                 const priceInput = input.closest('tr').querySelector('.sales-price-input');
                 const productIdInput = input.closest('tr').querySelector('.product-id-input-hidden');
+                const quantityInput = input.closest('tr').querySelector('.sales-quantity-input');
                 input.addEventListener('input', async (e) => {
                     const query = e.target.value;
                     if (query.length < 2) {
@@ -172,16 +173,24 @@
                                 li.classList.add('list-group-item', 'list-group-item-action');
                                 li.addEventListener('click', (event) => {
                                     event.preventDefault(); // Prevent default link behavior
-                                    input.value = product.name;
-                                    // Set the price for the selected item
-                                    if (priceInput) {
-                                        priceInput.value = product.pricePerUnit;
+                                    if(product && product.stockOnHeand && product.stockOnHeand >0 ){
+                                        input.value = product.name;
+                                        // Set the price for the selected item
+                                        if (priceInput) {
+                                            priceInput.value = product.pricePerUnit;
+                                        }
+                                        if(productIdInput){
+                                            productIdInput.value = product.id;
+                                        }
+                                        if(quantityInput){
+                                            quantityInput.placeholder = `Avl. qty-${product.stockOnHeand}`
+                                        }
+                                        searchResultsContainer.style.display = 'none';
+                                        updateTotalAmount(); // Recalculate total after price is set
+                                    }else{
+                                        alert("Stock not available..")
                                     }
-                                    if(productIdInput){
-                                        productIdInput.value = product.id;
-                                    }
-                                    searchResultsContainer.style.display = 'none';
-                                    updateTotalAmount(); // Recalculate total after price is set
+                                    
                                 });
                                 resultList.appendChild(li);
                             });

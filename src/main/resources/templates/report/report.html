@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.thymeleaf.org" th:replace="base::layout(~{::section})">
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Sale Detail</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+</head>
+
+<section>
+
+    <p>Report </p>
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h3><i class="fas fa-chart-line"></i> Purchase & Sales Report</h3>
+            </div>
+            <div class="card-body">
+                <!-- Date Range Selection -->
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="startDate">Start Date</label>
+                        <input type="date" class="form-control" id="startDate" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="endDate">End Date</label>
+                        <input type="date" class="form-control" id="endDate" required>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center mt-3">
+                    <button id="generateReportBtn" class="btn btn-primary btn-lg">
+                        <i class="fas fa-file-alt"></i> Generate Report
+                    </button>
+                </div>
+
+                <!-- Report Display Section -->
+                <div id="reportDisplayArea" class="mt-5">
+                    <!-- A loading spinner and text will be shown here during the API call -->
+                    <div id="loadingIndicator" class="text-center" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <p class="mt-2">Generating report...</p>
+                    </div>
+
+                    <div id="reportDataContainer" class="row text-center">
+                        <div class="col-md-6">
+                            <div class="card bg-success text-white mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Total Purchases</h5>
+                                    <p class="card-text display-4" id="totalPurchasesValue">N/A</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-info text-white mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Total Sales</h5>
+                                    <p class="card-text display-4" id="totalSalesValue">N/A</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    document.getElementById('generateReportBtn').addEventListener('click', async function() {
+        // Get the date values from the input fields
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const reportDataContainer = document.getElementById('reportDataContainer');
+        const totalPurchasesValue = document.getElementById('totalPurchasesValue');
+        const totalSalesValue = document.getElementById('totalSalesValue');
+
+        // Basic validation
+        if (!startDate || !endDate) {
+            alert('Please select both a start and end date.');
+            return;
+        }
+
+        // Show loading indicator and hide previous results
+        loadingIndicator.style.display = 'block';
+        reportDataContainer.style.display = 'none';
+
+        // Construct the URL with query parameters
+        const apiUrl = `/api/report/details?startDate=${startDate}&endDate=${endDate}`;
+
+        try {
+            // Use the fetch API to make a GET request
+            const response = await fetch(apiUrl);
+
+            // Check if the request was successful
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            // Parse the JSON response
+            const reportData = await response.json();
+            console.log('reportDatareportDatareportDatareportData '+JSON.stringify(reportData))
+            // // Update the UI with the fetched data
+            // totalPurchasesValue.textContent = `$${reportData.totalPurchases.toFixed(2)}`;
+            // totalSalesValue.textContent = `$${reportData.totalSales.toFixed(2)}`;
+
+            // // Hide loading indicator and show the report
+            // loadingIndicator.style.display = 'none';
+            // reportDataContainer.style.display = 'flex'; // Use flex to match Bootstrap's row layout
+
+        } catch (error) {
+            // Handle any errors that occurred during the fetch
+            console.error('Failed to fetch report data:', error);
+            loadingIndicator.style.display = 'none';
+            alert('An error occurred while generating the report. Please check the console for details.');
+        }
+    });
+</script>
+</section>

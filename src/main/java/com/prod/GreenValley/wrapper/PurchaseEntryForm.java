@@ -15,6 +15,7 @@ public class PurchaseEntryForm {
     private String supplierInfo;
     private BigDecimal totalAmount;
     private String billNumber;
+    private Long id;
 
     private List<PurchaseEntryItemForm> items;
 
@@ -68,16 +69,22 @@ public class PurchaseEntryForm {
         this.totalAmount = totalAmount;
     }
 
+    public Long getId() {
+        return id;
+    }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     @Override
     public String toString() {
         return "PurchaseEntryForm [dateOfPurchase=" + dateOfPurchase + ", supplierInfo=" + supplierInfo
-                + ", totalAmount=" + totalAmount + ", items=" + items + ", getDateOfPurchase()=" + getDateOfPurchase()
-                + ", getSupplierInfo()=" + getSupplierInfo() + ", getTotalAmount()=" + getTotalAmount()
-                + ", getItems()=" + getItems() + ", getClass()=" + getClass() + ", hashCode()=" + hashCode()
-                + ", toString()=" + super.toString() + "]";
+                + ", totalAmount=" + totalAmount + ", billNumber=" + billNumber + ", id=" + id + ", items=" + items
+                + "]";
     }
 
+    
+    
     
 }

@@ -1,6 +1,8 @@
 package com.prod.GreenValley.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +24,13 @@ public class SaleService {
         System.out.println("saleDat2  *********************** "+salesForm.getSaleDate());
         sale.setPaymentMethod(salesForm.getPaymentMethod());
         sale.setTotalAmount(salesForm.getTotalAmount());
+        sale.setSaleDate(salesForm.getSaleDate());
         saleRepo.save(sale);
 
         return sale;
     }
 
-    public List<Sale> getSaleDataByDate(String saleDate){
+    public List<Sale> getSaleDataByDate(LocalDate saleDate){
         return saleRepo.findSalesByDateRange(saleDate);
     }
 

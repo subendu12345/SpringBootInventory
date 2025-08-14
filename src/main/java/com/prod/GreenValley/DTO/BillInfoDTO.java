@@ -1,7 +1,9 @@
 package com.prod.GreenValley.DTO;
 
 import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 import com.prod.GreenValley.wrapper.SalesItemForm;
@@ -9,13 +11,13 @@ import com.prod.GreenValley.wrapper.SalesItemForm;
 public class BillInfoDTO {
 
     private Long saleId;
-    private LocalDateTime saleDate;
+    private Date saleDate;
     private BigDecimal totalAmount;
     private List<SalesItemForm> items;
 
     public BillInfoDTO(){};
 
-    public BillInfoDTO(Long saleId, LocalDateTime saleDate, BigDecimal totalAmount, List<SalesItemForm> items){
+    public BillInfoDTO(Long saleId, Date saleDate, BigDecimal totalAmount, List<SalesItemForm> items){
         System.out.println("---------------******** "+ saleId);
         this.saleId = saleId;
         this.saleDate = saleDate;
@@ -44,12 +46,12 @@ public class BillInfoDTO {
     }
 
 
-    public LocalDateTime getSaleDate() {
+    public Date getSaleDate() {
         return saleDate;
     }
 
 
-    public void setSaleDate(LocalDateTime saleDate) {
+    public void setSaleDate(Date saleDate) {
         this.saleDate = saleDate;
     }
 

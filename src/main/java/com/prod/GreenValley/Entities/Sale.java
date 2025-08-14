@@ -17,9 +17,9 @@ public class Sale {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
-    @Column(name = "sale_date", updatable = false)
-    private LocalDateTime saleDate;
+    @Temporal(TemporalType.DATE)
+    @Column(name = "sale_date")
+    private Date saleDate;
 
     @Column(name="sale_date2")
     private String saleDate2;
@@ -35,7 +35,6 @@ public class Sale {
 
     @PrePersist
     protected void onCreate() {
-        this.saleDate = LocalDateTime.now();
         this.saleDate2 = getDateString();
     }
 
