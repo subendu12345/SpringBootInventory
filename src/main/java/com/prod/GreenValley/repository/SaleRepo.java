@@ -59,7 +59,7 @@ public interface SaleRepo extends JpaRepository<Sale, Long>{
             p.name
             
         ORDER BY
-            totalSalePrice DESC;
+            saleDate ASC;
         """;
 
 

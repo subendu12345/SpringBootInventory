@@ -57,7 +57,7 @@ public interface PurchaseEntryRepo extends JpaRepository<PurchaseEntry, Long>{
             p.name
             
         ORDER BY
-            totaPurchasePrice DESC;
+            dateOfPurchase ASC;
         """;
 
 		
