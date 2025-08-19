@@ -53,8 +53,9 @@ public interface PurchaseEntryRepo extends JpaRepository<PurchaseEntry, Long>{
         WHERE
             pe.date_of_purchase >= :startDate AND pe.date_of_purchase <= :endDate
         GROUP BY
-            p.name,
-            pe.date_of_purchase
+            pe.date_of_purchase,
+            p.name
+            
         ORDER BY
             totaPurchasePrice DESC;
         """;

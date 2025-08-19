@@ -55,8 +55,9 @@ public interface SaleRepo extends JpaRepository<Sale, Long>{
         WHERE
             s.sale_date >= :startDate AND s.sale_date <= :endDate
         GROUP BY
-            p.name,
-            s.sale_date
+            s.sale_date,
+            p.name
+            
         ORDER BY
             totalSalePrice DESC;
         """;
