@@ -1,11 +1,12 @@
 package com.prod.GreenValley.repository;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import com.prod.GreenValley.DTO.SaleReportDTO;
 import com.prod.GreenValley.Entities.Sale;
 
 public interface SaleRepo extends JpaRepository<Sale, Long>{
@@ -32,4 +33,46 @@ public interface SaleRepo extends JpaRepository<Sale, Long>{
      */
     @Query("SELECT DISTINCT s FROM Sale s JOIN FETCH s.saleItems si WHERE s.saleDate >= :startDate AND s.saleDate <= :endDate")
     List<Sale> findSaleByTwoDate(LocalDate startDate, LocalDate endDate);
+
+
+
+    // The SQL query provided by the user.
+    // The `:startDate` and `:endDate` are named parameters that will be
+    // bound to the method's arguments.
+    String SALES_REPORT_QUERY = """
+        SELECT
+            p.name as productName,
+            SUM(si.quantity_sold) AS totalQuantity,
+            SUM(si.quantity_sold * si.unit_price_at_sale) AS totalSalePrice,
+            SUM(si.quantity_sold * p.volume_ml) AS totalVolume
+        FROM
+            sale AS s
+        INNER JOIN
+            sale_item AS si ON s.id = si.sale_id
+        INNER JOIN
+            product AS p ON si.product_id = p.id
+        WHERE
+            s.sale_date >= :startDate AND s.sale_date <= :endDate
+        GROUP BY
+            p.name
+        ORDER BY
+            totalSalePrice DESC;
+        """;
+
+
+        /**
+     * Executes the sales report query for a given date range.
+     * The `nativeQuery = true` annotation tells Spring to use raw SQL.
+     * The `ProductSaleSummary.class` in `constructorExpression` maps the
+     * query results to our record.
+     *
+     * @param startDate The start date of the report range.
+     * @param endDate   The end date of the report range.
+     * @return A list of `ProductSaleSummary` objects.
+     */
+    @Query(value = SALES_REPORT_QUERY, nativeQuery = true)
+    List<SaleReportDTO> getProductSaleSummary(LocalDate startDate, LocalDate endDate);
+
+
+
 }

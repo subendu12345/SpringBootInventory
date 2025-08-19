@@ -10,113 +10,172 @@
 </head>
 
 <section>
-
-    <p>Report </p>
-
     <div class="container">
-        <div class="card shadow-lg">
-            <div class="card-header text-center">
-                <h3><i class="fas fa-chart-line"></i> Purchase & Sales Report</h3>
-            </div>
-            <div class="card-body">
-                <!-- Date Range Selection -->
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="startDate">Start Date</label>
-                        <input type="date" class="form-control" id="startDate" required>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="endDate">End Date</label>
-                        <input type="date" class="form-control" id="endDate" required>
-                    </div>
+        <div class="container mt-5">
+            <div class="card shadow-lg">
+                <div class="card-header text-center bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-chart-line"></i> Purchase & Sales Report</h3>
                 </div>
-                <div class="d-flex justify-content-center mt-3">
-                    <button id="generateReportBtn" class="btn btn-primary btn-lg">
-                        <i class="fas fa-file-alt"></i> Generate Report
-                    </button>
-                </div>
+                <div class="card-body">
+                    <!-- Date Range Selection -->
+                    <div class="form-row">
+                                            <div class="form-group col-md-4">
+                        <label for="reportType">Report Type</label>
+                        <select id="reportType" class="form-control">
+                            <option value="sale">Sale</option>
+                            <option value="purchase">Purchase</option>
+                        </select>
+                    </div>
+                        <div class="form-group col-md-4">
+                            <label for="startDate">Start Date</label>
+                            <input type="date" class="form-control" id="startDate" required>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="endDate">End Date</label>
+                            <input type="date" class="form-control" id="endDate" required>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center mt-3">
+                        <button id="generateReportBtn" class="btn btn-primary btn-lg">
+                            <i class="fas fa-file-excel mr-2"></i> Download Report (Excel)
+                        </button>
+                    </div>
 
-                <!-- Report Display Section -->
-                <div id="reportDisplayArea" class="mt-5">
-                    <!-- A loading spinner and text will be shown here during the API call -->
-                    <div id="loadingIndicator" class="text-center" style="display: none;">
+                    <!-- Loading indicator -->
+                    <div id="loadingSpinner" class="text-center mt-4 loading-spinner">
                         <div class="spinner-border text-primary" role="status">
                             <span class="sr-only">Loading...</span>
                         </div>
-                        <p class="mt-2">Generating report...</p>
+                        <p class="mt-2 text-muted">Generating report...</p>
                     </div>
 
-                    <div id="reportDataContainer" class="row text-center">
-                        <div class="col-md-6">
-                            <div class="card bg-success text-white mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">Total Purchases</h5>
-                                    <p class="card-text display-4" id="totalPurchasesValue">N/A</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card bg-info text-white mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">Total Sales</h5>
-                                    <p class="card-text display-4" id="totalSalesValue">N/A</p>
-                                </div>
-                            </div>
+                    <!-- Report Display Section (hidden by default) -->
+                    <div id="reportDisplayArea" class="mt-5" style="display: none;">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th scope="col">Product Name</th>
+                                        <th scope="col" class="text-right">Total Quantity</th>
+                                        <th scope="col" class="text-right">Total Sale Price</th>
+                                        <th scope="col" class="text-right">Total Volume (ml)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sales-table-body">
+                                    <!-- Data will be rendered here if you decide to show it on screen -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <script>
-    document.getElementById('generateReportBtn').addEventListener('click', async function() {
-        // Get the date values from the input fields
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const reportDataContainer = document.getElementById('reportDataContainer');
-        const totalPurchasesValue = document.getElementById('totalPurchasesValue');
-        const totalSalesValue = document.getElementById('totalSalesValue');
 
-        // Basic validation
-        if (!startDate || !endDate) {
-            alert('Please select both a start and end date.');
-            return;
-        }
+        <script>
 
-        // Show loading indicator and hide previous results
-        loadingIndicator.style.display = 'block';
-        reportDataContainer.style.display = 'none';
+            document.addEventListener('DOMContentLoaded', () => {
+                const loadingIndicator = document.getElementById('loadingSpinner');
+                loadingIndicator.style.display = 'none';
+                document.getElementById('generateReportBtn').addEventListener('click', async function () {
+                    // Get the date values from the input fields
+                    const reportType = document.getElementById('reportType').value;
+                    const startDate = document.getElementById('startDate').value;
+                    const endDate = document.getElementById('endDate').value;
+                    const generateButton = document.getElementById('generateReportBtn');
 
-        // Construct the URL with query parameters
-        const apiUrl = `/api/report/details?startDate=${startDate}&endDate=${endDate}`;
 
-        try {
-            // Use the fetch API to make a GET request
-            const response = await fetch(apiUrl);
+                    // Basic validation
+                    if (!startDate || !endDate) {
+                        // IMPORTANT: Use a custom modal instead of alert() in production.
+                        // For this example, we use it for simplicity.
+                        alert('Please select both a start and end date.');
+                        return;
+                    }
 
-            // Check if the request was successful
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+                    // Disable button and show loading spinner
+                    generateButton.disabled = true;
+                    loadingIndicator.style.display = 'block';
 
-            // Parse the JSON response
-            const reportData = await response.json();
-            console.log('reportDatareportDatareportDatareportData '+JSON.stringify(reportData))
-            // // Update the UI with the fetched data
-            // totalPurchasesValue.textContent = `$${reportData.totalPurchases.toFixed(2)}`;
-            // totalSalesValue.textContent = `$${reportData.totalSales.toFixed(2)}`;
+                    // Construct the URL with query parameters
+                    const apiUrl = `/api/report/${reportType=='sale' ? 'sale' : 'purchase'}/details?startDate=${startDate}&endDate=${endDate}`;
 
-            // // Hide loading indicator and show the report
-            // loadingIndicator.style.display = 'none';
-            // reportDataContainer.style.display = 'flex'; // Use flex to match Bootstrap's row layout
+                    try {
+                        // Use the fetch API to make a GET request to your backend endpoint
+                        const response = await fetch(apiUrl);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        const reportData = await response.json();
 
-        } catch (error) {
-            // Handle any errors that occurred during the fetch
-            console.error('Failed to fetch report data:', error);
-            loadingIndicator.style.display = 'none';
-            alert('An error occurred while generating the report. Please check the console for details.');
-        }
-    });
-</script>
+                        // Check if the data is valid
+                        if (!reportData || reportData.length === 0) {
+                            alert('No data found for the selected date range.');
+                            return;
+                        }
+                        console.log('reportdata '+ JSON.stringify(reportData))
+                        if(reportType=='sale'){
+                            buildSaleReport(reportData, startDate, endDate)
+                        }else{
+                            buildPurchaseReport(reportData, startDate, endDate);
+                        }
+                        
+                    } catch (error) {
+                        // Handle any errors that occurred during the fetch or conversion
+                        console.error('Failed to fetch or generate report:', error);
+                        alert('An error occurred while generating the report. Please check the console for details.');
+                    } finally {
+                        // Re-enable the button and hide the loading spinner
+                        generateButton.disabled = false;
+                        loadingIndicator.style.display = 'none';
+                    }
+                });
+
+                function buildSaleReport(reportData, startDate, endDate){
+                    console.log('sale report calling......')
+                // 1. Create a new worksheet from the JSON data.
+                    // The 'header' option ensures the key names become the column headers.
+                    const worksheet = XLSX.utils.json_to_sheet(reportData, {
+                        header: ["productName", "totalQuantity", "totalSalePrice", "totalVolume"]
+                    });
+
+                    // 2. Override the default headers with user-friendly names.
+                    // This is an optional step to make the Excel file more readable.
+                    XLSX.utils.sheet_add_aoa(worksheet, [
+                        ["Product Name", "Total Quantity", "Total Sale Price", "Total Volume (ml)"]
+                    ], { origin: "A1" });
+
+                    // 3. Create a new workbook and add the worksheet to it.
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Report");
+
+                    // 4. Trigger the download using the write function.
+                    const fileName = `sales_report_${startDate}_to_${endDate}.xlsx`;
+                    XLSX.writeFile(workbook, fileName);
+                }
+
+                function buildPurchaseReport(reportData, startDate, endDate){
+                        console.log('purchase report calling......')
+                // 1. Create a new worksheet from the JSON data.
+                    // The 'header' option ensures the key names become the column headers.
+                    const worksheet = XLSX.utils.json_to_sheet(reportData, {
+                        header: ["productName", "totalQuantity", "totaPurchasePrice", "totalVolume"]
+                    });
+
+                    // 2. Override the default headers with user-friendly names.
+                    // This is an optional step to make the Excel file more readable.
+                    XLSX.utils.sheet_add_aoa(worksheet, [
+                        ["Product Name", "Total Quantity", "Total Purchase Price", "Total Volume (ml)"]
+                    ], { origin: "A1" });
+
+                    // 3. Create a new workbook and add the worksheet to it.
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "Purchase Report");
+
+                    // 4. Trigger the download using the write function.
+                    const fileName = `purchase_report_${startDate}_to_${endDate}.xlsx`;
+                    XLSX.writeFile(workbook, fileName);
+                }
+            })
+
+        </script>
 </section>

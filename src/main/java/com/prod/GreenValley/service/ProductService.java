@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.prod.GreenValley.DTO.ProductSearchDTO;
-import com.prod.GreenValley.DTO.ProductStockDTO;
 import com.prod.GreenValley.Entities.Product;
 import com.prod.GreenValley.Entities.PurchaseEntryItem;
 import com.prod.GreenValley.Entities.SaleItem;

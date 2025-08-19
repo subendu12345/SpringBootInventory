@@ -3,22 +3,17 @@ package com.prod.GreenValley.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.prod.GreenValley.DTO.SalePurcahseDTO;
+import com.prod.GreenValley.DTO.PurchaseReportDTO;
 import com.prod.GreenValley.Entities.Product;
 import com.prod.GreenValley.Entities.PurchaseEntry;
 import com.prod.GreenValley.Entities.PurchaseEntryItem;
-import com.prod.GreenValley.Entities.Sale;
-import com.prod.GreenValley.Entities.SaleItem;
+
 import com.prod.GreenValley.repository.ProductRepo;
 import com.prod.GreenValley.repository.PurchaseEntryRepo;
-import com.prod.GreenValley.repository.SaleRepo;
-import com.prod.GreenValley.service.PurchaseEntryService.ProductSummary;
 import com.prod.GreenValley.wrapper.PurchaseEntryForm;
 import com.prod.GreenValley.wrapper.PurchaseEntryItemForm;
 
@@ -32,8 +27,6 @@ public class PurchaseEntryService {
     @Autowired
     private ProductRepo productRepo;
 
-    @Autowired 
-    private SaleRepo saleRepo;
 
     public void insertEntry() {
 
@@ -92,18 +85,7 @@ public class PurchaseEntryService {
         return purchaseEntryRepo.findPurchaseEntryById(id);
     }
 
-    record ProductSummary(int totalQuantity, BigDecimal totalRevenue) {}
-    public SalePurcahseDTO genarateReport(LocalDate starDate, LocalDate endDate){
-        List<PurchaseEntry> purchases = purchaseEntryRepo.findPurchaseEntryByTwoDate(starDate, endDate);
-
-        List<Sale> sales = saleRepo.findSaleByTwoDate(starDate, endDate);
-        System.out.println("----------------*************************8888888 "+ sales);
-        for (Sale sale : sales) {
-            System.out.println("----------------*************************8888888 "+ sale);
-            System.out.println("item size "+ sale.getSaleItems().size());
-        }
-
-        return new SalePurcahseDTO(sales, purchases);
+    public List<PurchaseReportDTO> getPurchaseReportByTimeSpan(LocalDate startDate, LocalDate endDate){
+        return purchaseEntryRepo.getPurchaseReport(startDate, endDate);
     }
-
 }

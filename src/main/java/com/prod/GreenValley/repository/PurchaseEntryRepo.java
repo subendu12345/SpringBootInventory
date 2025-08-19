@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import com.prod.GreenValley.DTO.PurchaseReportDTO;
 import com.prod.GreenValley.Entities.PurchaseEntry;
 
 
@@ -30,5 +31,44 @@ public interface PurchaseEntryRepo extends JpaRepository<PurchaseEntry, Long>{
      */
     @Query("SELECT DISTINCT p FROM PurchaseEntry p JOIN FETCH p.purchaseEntryItems pi WHERE p.dateOfPurchase >= :startDate AND p.dateOfPurchase <= :endDate")
     List<PurchaseEntry> findPurchaseEntryByTwoDate(LocalDate startDate, LocalDate endDate);
+
+
+
+    // The SQL query provided by the user.
+    // The `:startDate` and `:endDate` are named parameters that will be
+    // bound to the method's arguments.
+    String SALES_REPORT_QUERY = """
+        SELECT
+            p.name as productName,
+            SUM(pi.quantity) AS totalQuantity,
+            SUM(pi.quantity * pi.price) AS totaPurchasePrice,
+            SUM(pi.quantity * p.volume_ml) AS totalVolume
+        FROM
+            purchase_entrie AS pe
+        INNER JOIN
+            purchase_entry_item AS pi ON pe.id = pi.purchase_entry_id
+        INNER JOIN
+            product AS p ON pi.product_id = p.id
+        WHERE
+            pe.date_of_purchase >= :startDate AND pe.date_of_purchase <= :endDate
+        GROUP BY
+            p.name
+        ORDER BY
+            totaPurchasePrice DESC;
+        """;
+
+		
+        /**
+     * Executes the sales report query for a given date range.
+     * The `nativeQuery = true` annotation tells Spring to use raw SQL.
+     * The `ProductSaleSummary.class` in `constructorExpression` maps the
+     * query results to our record.
+     *
+     * @param startDate The start date of the report range.
+     * @param endDate   The end date of the report range.
+     * @return A list of `ProductSaleSummary` objects.
+     */
+    @Query(value = SALES_REPORT_QUERY, nativeQuery = true)
+	List<PurchaseReportDTO> getPurchaseReport(LocalDate startDate, LocalDate endDate);
     
 }
