@@ -42,7 +42,8 @@ public interface PurchaseEntryRepo extends JpaRepository<PurchaseEntry, Long>{
             p.name as productName,
             SUM(pi.quantity) AS totalQuantity,
             SUM(pi.quantity * pi.price) AS totaPurchasePrice,
-            SUM(pi.quantity * p.volume_ml) AS totalVolume
+            SUM(pi.quantity * p.volume_ml) AS totalVolume,
+            pe.date_of_purchase AS dateOfPurchase
         FROM
             purchase_entrie AS pe
         INNER JOIN
@@ -52,7 +53,8 @@ public interface PurchaseEntryRepo extends JpaRepository<PurchaseEntry, Long>{
         WHERE
             pe.date_of_purchase >= :startDate AND pe.date_of_purchase <= :endDate
         GROUP BY
-            p.name
+            p.name,
+            pe.date_of_purchase
         ORDER BY
             totaPurchasePrice DESC;
         """;

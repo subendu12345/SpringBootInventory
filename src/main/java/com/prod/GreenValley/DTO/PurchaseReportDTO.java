@@ -1,12 +1,14 @@
 package com.prod.GreenValley.DTO;
 
 import java.math.BigDecimal;
+import java.util.Date;;
 
 public record PurchaseReportDTO (
     String productName,
     BigDecimal totalQuantity,
-    BigDecimal totalSalePrice,
-    BigDecimal totalVolume) {
+    BigDecimal totaPurchasePrice,
+    BigDecimal totalVolume,
+    Date dateOfPurchase) {
 }
 
 
