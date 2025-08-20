@@ -88,11 +88,11 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <!-- <button type="button" id="addItemBtn" class="btn btn-info btn-sm">
+                        <!-- <div class="d-flex justify-content-between align-items-center mb-3">
+                            <button type="button" id="addItemBtn" class="btn btn-info btn-sm">
                                 <i class="fas fa-plus"></i> Add Item
-                            </button> -->
-                        </div>
+                            </button>
+                        </div> -->
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -158,18 +158,20 @@
                 }
 
                 purchases.forEach(purchase => {
+
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${purchase.id}</td>
-                        <td>${purchase.productsInfo}</td>
+                        <td>${(purchase.productsInfo != "" ? purchase.productsInfo : "<p style='color:red;'><b>Please delete this purchase as purchase-item missing</b></p>")}</td>
                         <td>${new Date(purchase.dateOfPurchase).toLocaleDateString()}</td>
                         <td>${purchase.supplierInfo}</td>
                         <td>${purchase.totalAmount.toFixed(2)}</td>
                         <td class="text-center">
-                            <button class="viewBtn btn btn-success btn-sm" data-id="${purchase.id}">
+                            
+                            <button ${purchase.productsInfo != "" ? "" : "disabled"} class="viewBtn btn btn-success btn-sm" data-id="${purchase.id}">
                                 <i class="fas fa-trash"></i> View
                             </button>
-                            <button class="editBtn btn btn-warning btn-sm mr-2" data-id="${purchase.id}">
+                            <button ${purchase.productsInfo != "" ? "" : "disabled"} class="editBtn btn btn-warning btn-sm mr-2" data-id="${purchase.id}">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
                             <button class="deleteBtn btn btn-danger btn-sm" data-id="${purchase.id}">
@@ -194,9 +196,17 @@
                     document.getElementById('purchaseDate').value = new Date(purchase.dateOfPurchase).toISOString().split('T')[0];
                     document.getElementById('purchaseDate').removeAttribute("readonly")
                     document.getElementById('supplierInfo').value = purchase.supplierInfo;
-
-                    purchase.purchaseEntryItems.forEach(item => addPurchaseItemRow(item, false));
-                    updateTotalAmount();
+                    if(purchase.purchaseEntryItems && purchase.purchaseEntryItems.length > 0){
+                        purchase.purchaseEntryItems.forEach(item => addPurchaseItemRow(item, false));
+                        updateTotalAmount();
+                    }else{
+                        const newRow = document.createElement('tr');
+                        let innerHTMLStr = `
+                            <p>Please delete this Purchase as Purchase-Items missing..</p>
+                        `;
+                        newRow.innerHTML = innerHTMLStr;
+                    }
+                    
                 } else {
                     modalTitle.textContent = 'Add New Purchase';
                     document.getElementById('purchaseId').value = '';
@@ -315,7 +325,7 @@
                 }
 
                 try {
-                    const response = await fetch(`/api/purchases/${id}`, { method: 'DELETE' });
+                    const response = await fetch(`/api/purchase/delete/${id}`, { method: 'DELETE' });
                     if (!response.ok) {
                         throw new Error('Failed to delete purchase.');
                     }

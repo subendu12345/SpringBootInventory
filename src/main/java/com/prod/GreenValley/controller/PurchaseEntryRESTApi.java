@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.prod.GreenValley.DTO.PurchaseDTO;
+import com.prod.GreenValley.DTO.PurchaseEntryRecordDTO;
 import com.prod.GreenValley.DTO.PurchaseItemDTO;
 import com.prod.GreenValley.DTO.PurchaseReportDTO;
 import com.prod.GreenValley.DTO.SaleReportDTO;
@@ -57,15 +59,22 @@ public class PurchaseEntryRESTApi {
     public PurchaseDTO getPurchaseById(@PathVariable Long id) {
         PurchaseEntry entry = pEntryService.findPurchaseById(id);
         List<PurchaseItemDTO> itemDTOs = new ArrayList<>();
-        for (PurchaseEntryItem purchaseEntryItem : entry.getPurchaseEntryItems()) {
-            itemDTOs.add(new PurchaseItemDTO(purchaseEntryItem.getId(), purchaseEntryItem.getQuantity(),
+        if (entry != null) {
+            for (PurchaseEntryItem purchaseEntryItem : entry.getPurchaseEntryItems()) {
+                itemDTOs.add(new PurchaseItemDTO(purchaseEntryItem.getId(), purchaseEntryItem.getQuantity(),
                     purchaseEntryItem.getPrice(), purchaseEntryItem.getProduct().getName(),
                     purchaseEntryItem.getProduct().getId()));
-        }
-
-        PurchaseDTO purchaseDTO = new PurchaseDTO(entry.getId(), entry.getDateOfPurchase(), entry.getSupplierInfo(),
+            }
+            PurchaseDTO purchaseDTO = new PurchaseDTO(entry.getId(), entry.getDateOfPurchase(), entry.getSupplierInfo(),
                 itemDTOs);
-        return purchaseDTO;
+            return purchaseDTO;
+        }else{
+            PurchaseEntryRecordDTO purchaseEntryRecordDTO = pEntryService.findSinglePurchaseEntryById(id);
+            PurchaseDTO purchaseDTO = new PurchaseDTO(id, purchaseEntryRecordDTO.dateOfPurchase(), purchaseEntryRecordDTO.supplierInfo(), itemDTOs);
+            return purchaseDTO;
+        }
+        
+
     }
 
     // API endpoint to update an existing purchase.
@@ -82,23 +91,34 @@ public class PurchaseEntryRESTApi {
         }
     }
 
+    @DeleteMapping("/purchase/delete/{id}")
+    public String deletePurchase(@PathVariable Long id) {
+        String messString = "success";
+        try {
+            pEntryService.deletePurchase(id);
+        } catch (Exception e) {
+            messString = e.getMessage();
+        }
+
+        return messString;
+    }
+
     @GetMapping("/report/sale/details")
     public List<SaleReportDTO> getSaleDetailByDate(
-        @RequestParam("startDate") String startDateStr,
-        @RequestParam("endDate") String endDateStr) throws SQLException {
+            @RequestParam("startDate") String startDateStr,
+            @RequestParam("endDate") String endDateStr) throws SQLException {
         // Convert string dates to LocalDate objects for processing.
         LocalDate startDate = LocalDate.parse(startDateStr);
         LocalDate endDate = LocalDate.parse(endDateStr);
         return saleService.getSaleReport(startDate, endDate);
-       
-    }
 
+    }
 
     @GetMapping("/report/purchase/details")
     private List<PurchaseReportDTO> getPurchaseReport(
-        @RequestParam("startDate") String startDateStr,
-        @RequestParam("endDate") String endDateStr){
-         // Convert string dates to LocalDate objects for processing.
+            @RequestParam("startDate") String startDateStr,
+            @RequestParam("endDate") String endDateStr) {
+        // Convert string dates to LocalDate objects for processing.
         LocalDate startDate = LocalDate.parse(startDateStr);
         LocalDate endDate = LocalDate.parse(endDateStr);
         return pEntryService.getPurchaseReportByTimeSpan(startDate, endDate);

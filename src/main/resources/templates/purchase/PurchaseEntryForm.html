@@ -104,7 +104,7 @@
                                 <div class="search-container">
                                     <input type="text" class="form-control product-search-input"
                                         th:field="*{items[__${stat.index}__].productInfo}"
-                                        placeholder="Search by name or code" required />
+                                        placeholder="Search by name or code" required autocomplete="off"/>
                                         <input type="hidden" class="product-id-input-hidden"
                                                        th:field="*{items[__${stat.index}__].productId}" />
                                     <div class="search-results">
@@ -141,7 +141,7 @@
                 <td>
                     <div class="search-container">
                         <input type="text" class="form-control product-search-input"
-                            name="items[INDEX_PLACEHOLDER_X].productInfo" placeholder="Search by name or code" required />
+                            name="items[INDEX_PLACEHOLDER_X].productInfo" placeholder="Search by name or code" required autocomplete="off"/>
                             <input type="hidden" name="items[INDEX_PLACEHOLDER_X].productId" class="product-id-input-hidden" />
                         <div class="search-results">
                             <ul></ul>

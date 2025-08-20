@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import com.prod.GreenValley.DTO.PurchaseEntryRecordDTO;
 import com.prod.GreenValley.DTO.PurchaseReportDTO;
 import com.prod.GreenValley.Entities.PurchaseEntry;
 
@@ -73,5 +74,10 @@ public interface PurchaseEntryRepo extends JpaRepository<PurchaseEntry, Long>{
      */
     @Query(value = SALES_REPORT_QUERY, nativeQuery = true)
 	List<PurchaseReportDTO> getPurchaseReport(LocalDate startDate, LocalDate endDate);
+
+
+    //this method only return purchase
+    @Query(value = "SELECT pe.id, pe.date_of_purchase AS dateOfPurchase, pe.supplier_info AS supplierInfo FROM purchase_entrie AS pe WHERE id = :id;", nativeQuery = true)
+    PurchaseEntryRecordDTO getSinglePurchaseEntry(Long id);
     
 }

@@ -41,7 +41,7 @@
                                             <div class="position-relative">
                                                 <input style="width: 15rem;" type="text" class="form-control product-search-input"
                                                        th:field="*{salesItems[__${stat.index}__].productInfo}"
-                                                       placeholder="Search by name" required />
+                                                       placeholder="Search by name" required autocomplete="off" />
                                                 <input type="hidden" class="product-id-input-hidden"
                                                        th:field="*{salesItems[__${stat.index}__].productId}" />
                                                 <div class="search-results list-group position-absolute w-100 z-1" style="display: none;">
@@ -87,7 +87,7 @@
             <td>
                 <div class="position-relative">
                     <input style="width: 15rem;" type="text" name="salesItems[INDEX_PLACEHOLDER].productInfo" placeholder="Search by name"
-                           class="form-control product-search-input" required>
+                           class="form-control product-search-input" required autocomplete="off" autofocus>
                     <input type="hidden" name="salesItems[INDEX_PLACEHOLDER].productId" class="product-id-input-hidden" />
                     <div class="search-results list-group position-absolute w-100 z-1" style="display: none;">
                         </div>

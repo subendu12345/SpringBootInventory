@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.prod.GreenValley.DTO.PurchaseEntryRecordDTO;
 import com.prod.GreenValley.DTO.PurchaseReportDTO;
 import com.prod.GreenValley.Entities.Product;
 import com.prod.GreenValley.Entities.PurchaseEntry;
@@ -77,6 +78,12 @@ public class PurchaseEntryService {
         return purchaseEntryRepo.save(purchase);
     }
 
+    //this method help to delete the purchase
+
+    public void deletePurchase(Long id){
+        purchaseEntryRepo.deleteById(id);
+    }
+
     public List<PurchaseEntry> getAllPurchases() {
         return purchaseEntryRepo.findAll();
     }
@@ -87,5 +94,9 @@ public class PurchaseEntryService {
 
     public List<PurchaseReportDTO> getPurchaseReportByTimeSpan(LocalDate startDate, LocalDate endDate){
         return purchaseEntryRepo.getPurchaseReport(startDate, endDate);
+    }
+
+    public PurchaseEntryRecordDTO findSinglePurchaseEntryById(Long id){
+        return purchaseEntryRepo.getSinglePurchaseEntry(id);
     }
 }
