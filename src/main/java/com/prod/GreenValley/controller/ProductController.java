@@ -6,9 +6,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.prod.GreenValley.Entities.Product;
+import com.prod.GreenValley.Entities.SubCategory;
+import com.prod.GreenValley.service.CategoryService;
 import com.prod.GreenValley.service.ProductService;
 import com.prod.GreenValley.util.Message;
 import com.prod.GreenValley.wrapper.ProductForm;
@@ -20,6 +23,13 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private CategoryService categoryService;
+
+
+
+
     
     @GetMapping("/products/form")
     public String showProductForm(Model model) {
@@ -41,7 +51,6 @@ public class ProductController {
             prd.setName(prd.getName() + prd.getVolumeMl().toString());
         }
         String message = productService.doInsertProducts(products);
-        System.out.println("---------------------- "+message);
         if(message=="success"){
             session.setAttribute("message", new Message("Product Successfully inserted.. ", "alert-success"));
             return "redirect:/home";
@@ -50,6 +59,25 @@ public class ProductController {
             session.setAttribute("message", new Message(message, "alert-error"));
         }
         return "redirect:/home";
-    }  
+    }
+
+    @GetMapping("/product")
+    public String getProductManager(Model model){
+        model.addAttribute("products", productService.findAllProduct());
+        model.addAttribute("categories", categoryService.findAllCategories());
+        return "product/productManager";
+    }
+
+
+    @GetMapping("/product/edit/{id}")
+    public String showEditForm(@PathVariable("id") Long id, Model model) {
+        Product product = productService.findProductById(id);
+        if (product != null) {
+            model.addAttribute("product", product);
+            //model.addAttribute("subCategories", subCategories);
+            return "product-form";
+        }
+        return "redirect:/products"; // Redirect if product not found.
+    }
 
 }

@@ -19,8 +19,6 @@ public class Product {
 
     private String description;
 
-    private String category;
-
     private String brand;
 
     @Column(name = "country_of_origin")
@@ -37,6 +35,18 @@ public class Product {
 
     @Column(name = "image_url")
     private String imageUrl;
+
+    // New field: A product belongs to one Category.
+    // This creates a foreign key column named 'category_id' in the 'products' table.
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // @JoinColumn(name = "category_id")
+    // private Category category;
+
+    // New field: A product belongs to one SubCategory.
+    // This creates a foreign key column named 'sub_category_id' in the 'products' table.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sub_category_id")
+    private SubCategory subCategory;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

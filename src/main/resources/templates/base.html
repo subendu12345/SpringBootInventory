@@ -11,9 +11,10 @@
     <link rel="stylesheet" th:href="@{/CSS/bootStrapIcon.css}" />
     <title th:text="${title}"></title>
     <style>
-        body{
+        body {
             padding: 6px;
         }
+
         .shadow-box {
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1),
                 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -43,7 +44,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a style="padding-left: 1%;" class="navbar-brand" href="/home">Green Valley
-            <img src="/src/main/resources/static/img/logo.jpeg"/>
+            <img src="/src/main/resources/static/img/logo.jpeg" />
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +54,7 @@
             <!-- The 'ml-auto' class pushes the nav items to the right -->
             <ul class="navbar-nav ml-auto">
                 <!-- All list items start without the 'active' class -->
-                 <li class="nav-item">
+                <li class="nav-item">
                     <a class="nav-link" href="/home">Home</a>
                 </li>
                 <li class="nav-item">
@@ -63,8 +64,14 @@
                     <a class="nav-link" href="/sale/details">Sale Detail</a>
                 </li>
                 <li class="nav-item">
-                <a class="nav-link" href="/report/view">Report</a>
-            </li>
+                    <a class="nav-link" href="/report/view">Report</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/category">Category</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/product">Product</a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/login">Login</a>
                 </li>

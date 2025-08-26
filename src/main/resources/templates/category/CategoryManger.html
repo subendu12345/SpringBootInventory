@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.thymeleaf.org" th:replace="base::layout(~{::section})">
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Category Manager</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+</head>
+
+<section>
+    <div class="container">
+        <h2 class="mb-4 text-center text-primary">Category Management</h2>
+        <hr>
+        <!-- Add Category Button -->
+        <div class="d-flex justify-content-end mb-3">
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addCategoryModal">
+                Add New Category
+            </button>
+        </div>
+
+        <!-- Display Existing Categories Table -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Existing Categories</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Sub-Categories</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="category : ${categories}">
+                            <td th:text="${category.id}">1</td>
+                            <td th:text="${category.name}">Category Name</td>
+                            <td>
+                                <ul class="list-unstyled mb-0">
+                                    <li th:each="subCategory : ${category.subCategories}">
+                                        <span th:text="${subCategory.name}">Sub-category Name</span>
+                                        (<span th:text="${subCategory.code}">CODE</span>)
+                                    </li>
+                                    <li th:if="${#lists.isEmpty(category.subCategories)}">
+                                        No sub-categories
+                                    </li>
+                                </ul>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-info btn-sm view-btn"
+                                    th:data-category-id="${category.id}" data-toggle="modal"
+                                    data-target="#viewCategoryModal">View</button>
+                                <button type="button" class="btn btn-warning btn-sm edit-btn"
+                                    th:data-category-id="${category.id}" data-toggle="modal"
+                                    data-target="#editCategoryModal">Edit</button>
+                                <form th:action="@{/categories/{id}/delete(id=${category.id})}" method="post"
+                                    style="display:inline;"
+                                    onsubmit="return confirm('Are you sure you want to delete this category?');">
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(categories)}">
+                            <td colspan="4" class="text-center">No categories found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add Category Modal -->
+        <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addCategoryModalLabel">Add New Category</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form th:action="@{/category/add}" method="post" th:object="${categoryDto}">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="categoryName">Category Name</label>
+                                <input type="text" class="form-control" id="categoryName" th:field="*{name}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Sub-Categories</label>
+                                <div id="addSubCategoryFields">
+                                    <div class="input-group mb-2">
+                                        <input type="text" class="form-control" name="subCategories[0].name"
+                                            placeholder="Sub-Category Name" required>
+                                        <input type="text" class="form-control" name="subCategories[0].code"
+                                            placeholder="Sub-Category Code" required>
+                                        <div class="input-group-append">
+                                            <button type="button"
+                                                class="btn btn-danger remove-sub-category">Remove</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                    id="addNewSubCategory">Add another sub-category</button>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save Category</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Edit Category Modal -->
+        <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <!-- The form action will be set by the JavaScript -->
+                    <form id="editForm" method="post">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="editCategoryName">Category Name</label>
+                                <input type="text" class="form-control" id="editCategoryName" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Sub-Categories</label>
+                                <div id="editSubCategoryFields">
+                                    <!-- Dynamic sub-category fields will be added here by JS -->
+                                </div>
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                    id="addEditSubCategory">Add another sub-category</button>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- View Category Modal -->
+        <div class="modal fade" id="viewCategoryModal" tabindex="-1" aria-labelledby="viewCategoryModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="viewCategoryModalLabel">View Category Details</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Category Name:</strong> <span id="viewCategoryName"></span></p>
+                        <p><strong>Sub-Categories:</strong></p>
+                        <ul id="viewSubCategoryList"></ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- The single toast element that will be updated -->
+        <div class="toast-container">
+            <div id="dynamicToast" class="toast align-items-center border-0" role="alert" aria-live="assertive"
+                aria-atomic="true">
+                <div class="d-flex">
+                    <div id="toastBody" class="toast-body">
+                        <!-- The text will be inserted here dynamically -->
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Shared functionality for adding/removing sub-category fields ---
+            let subCategoryIndex = 0;
+            let addNewSubCategoryCount = 1;
+
+            function addSubCategoryField(containerId, namePrefix, initialValues = {}) {
+                const container = document.getElementById(containerId);
+                const newField = document.createElement('div');
+                newField.className = 'input-group mb-2';
+                newField.innerHTML = `
+                <input type="text" class="form-control" name="${namePrefix}[${addNewSubCategoryCount}].name" placeholder="Sub-Category Name" value="${initialValues.name || ''}" required>
+                <input type="text" class="form-control" name="${namePrefix}[${addNewSubCategoryCount}].code" placeholder="Sub-Category Code" value="${initialValues.code || ''}" required>
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-danger remove-sub-category">Remove</button>
+                </div>
+            `;
+                container.appendChild(newField);
+                addNewSubCategoryCount++;
+            }
+
+            // Add Category Modal - Dynamic Fields
+            document.getElementById('addNewSubCategory').addEventListener('click', function () {
+                addSubCategoryField('addSubCategoryFields', 'subCategories');
+            });
+
+            // Edit Category Modal - Dynamic Fields
+            document.getElementById('addEditSubCategory').addEventListener('click', function () {
+                addSubCategoryField('editSubCategoryFields', 'subCategories');
+            });
+
+            // Global event listener to remove sub-category fields
+            document.body.addEventListener('click', function (event) {
+                if (event.target.classList.contains('remove-sub-category')) {
+                    const inputGroup = event.target.closest('.input-group');
+                    if (inputGroup) {
+                        addNewSubCategoryCount--;
+                        inputGroup.remove();
+                    }
+                }
+            });
+
+            // --- Handling Edit and View Modals with Data Fetching ---
+            $('#editCategoryModal').on('show.bs.modal', function (event) {
+                const button = $(event.relatedTarget);
+                const categoryId = button.data('category-id');
+                const modal = $(this);
+                const editForm = document.getElementById('editForm');
+                const subCategoryFieldsContainer = document.getElementById('editSubCategoryFields');
+
+                // Set the form action dynamically
+                editForm.action = `/category/${categoryId}/update`;
+
+                // Reset dynamic fields and index
+                subCategoryFieldsContainer.innerHTML = '';
+                subCategoryIndex = 0;
+
+                // Fetch the category data
+                fetch(`/category/${categoryId}`)
+                    .then(response => response.json())
+                    .then(category => {
+                        // Populate category name
+                        modal.find('#editCategoryName').val(category.name);
+                        addNewSubCategoryCount = 0;
+                        // Populate sub-category fields
+                        category.subCategories.forEach(sub => {
+                            addSubCategoryField('editSubCategoryFields', 'subCategories', { name: sub.name, code: sub.code });
+                        });
+                    })
+                    .catch(error => console.error('Error fetching category data:', error));
+            });
+
+            $('#viewCategoryModal').on('show.bs.modal', function (event) {
+                const button = $(event.relatedTarget);
+                const categoryId = button.data('category-id');
+                const modal = $(this);
+                const subCategoryList = modal.find('#viewSubCategoryList');
+
+                // Clear previous data
+                subCategoryList.empty();
+
+                // Fetch the category data
+                fetch(`/category/${categoryId}`)
+                    .then(response => response.json())
+                    .then(category => {
+                        // Populate category name
+                        modal.find('#viewCategoryName').text(category.name);
+                        // Populate sub-categories
+                        category.subCategories.forEach(sub => {
+                            subCategoryList.append(`<li>${sub.name} (${sub.code})</li>`);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching category data:', error));
+            });
+
+
+                        // Define a single function to show the toast
+            function showToast(message, variant) {
+                // First, remove all existing background color classes
+                // We use a predefined list to be safe
+                const variants = ['primary', 'success', 'danger', 'warning', 'info'];
+                variants.forEach(v => {
+                    toastElement.classList.remove(`text-bg-${v}`);
+                    toastElement.classList.remove(`border-${v}`);
+                });
+
+                // Add the new background color class based on the variant
+                toastElement.classList.add(`text-bg-${variant}`);
+                toastElement.classList.add(`border-${variant}`);
+
+                // Update the toast body text
+                toastBody.textContent = message;
+
+                // Create a new Bootstrap Toast instance and show it
+                const toast = new bootstrap.Toast(toastElement);
+                toast.show();
+            }
+        });
+    </script>
+</section>

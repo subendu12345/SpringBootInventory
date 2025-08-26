@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.thymeleaf.org" th:replace="base::layout(~{::section})">
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Category Manager</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+</head>
+
+<section>
+    <div class="container">
+        <!-- Message Box -->
+        <div id="messageBox" class="message-box alert fade show d-none" role="alert"></div>
+        <h2 class="mb-4 text-center text-primary">Product Management</h2>
+        <hr>
+
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Volume/ML</th>
+                    <th>Sub-Category</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="product : ${products}">
+                    <td th:text="${product.id}">1</td>
+                    <td th:text="${product.name}">Example Product</td>
+                    <td th:text="${product.volumeMl}">Brand A</td>
+                    <td th:text="${product.subCategory?.name}">Sub-Category X</td>
+                    <td th:text="${product.pricePerUnit}">10.00</td>
+                    <td>
+                        <!-- <a th:href="@{/products/view/{id}(id=${product.id})}" class="btn btn-info btn-sm">View</a> -->
+                        <button type="button" class="btn btn-warning btn-sm product-edit-btn"
+                            th:attr="data-id=${product.id}" data-bs-toggle="modal" data-bs-target="#productManagerEdit">
+                            Edit
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+
+        <!-- Product Modal for Add/Edit -->
+        <div class="modal fade" id="productManagerEdit" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="false">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitle">Edit Product</h5>
+                        <!-- <div class="text-right">
+                        <label for="totalAmount" class="mb-0">Total Amount</label>
+                        <input type="text" id="totalAmount" name="totalAmount" readonly
+                            class="form-control form-control-sm text-right font-weight-bold" value="0.00">
+                    </div> -->
+                        <button type="button" onclick="productManagerEditClose()" class="close"
+                            data-dismiss="purchaseModal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="productManagerEditForm">
+                            <input type="hidden" id="productId" name="productId">
+
+                            <div class="row">
+                                <div class="col-md-6 form-group">
+                                    <label for="productName">Product Name</label>
+                                    <input type="text" id="productName" name="productName" class="form-control"
+                                        required>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="productVolume">Volume/ML</label>
+                                    <input type="number" id="productVolume" name="productVolume" class="form-control"
+                                        required>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="category" class="form-label">Category</label>
+                                        <select id="category" class="form-select" name="category.id" required>
+                                            <option value="">Select a category</option>
+                                            <!-- Thymeleaf can pre-populate all categories here from the controller -->
+                                            <option th:each="cat : ${categories}" th:value="${cat.id}"
+                                                th:text="${cat.name}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="subCategory" class="form-label">Sub-Category</label>
+                                        <select id="subCategory" class="form-select" name="subCategory.id" required>
+
+                                            <!-- This will be dynamically populated by JavaScript -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- <div class="col-md-6 form-group">
+                                <label for="supplierInfo">Category</label>
+                                <input type="text" id="supplierInfo" name="supplierInfo"
+                                    placeholder="Supplier Name or ID" class="form-control" required>
+                            </div> -->
+                            </div>
+                            <!-- <div class="d-flex justify-content-between align-items-center mb-3">
+                            <button type="button" id="addItemBtn" class="btn btn-info btn-sm">
+                                <i class="fas fa-plus"></i> Add Item
+                            </button>
+                        </div> -->
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" onclick="productManagerEditClose()" class="btn btn-secondary"
+                            data-dismiss="modal">Close</button>
+                        <button type="button" id="saveProductBtn" class="btn btn-primary">Save Product</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const productModal = document.getElementById('productManagerEdit');
+            const form = document.getElementById('productManagerEditForm');
+            const modalTitle = document.getElementById('modalTitle');
+            const categorySelect = document.getElementById('category');
+            const subCategorySelect = document.getElementById('subCategory');
+
+            // Helper function to show a dismissible message box
+            function showMessage(text, isError = false) {
+                messageBox.textContent = text;
+                messageBox.className = 'message-box alert fade show';
+                messageBox.classList.add(isError ? 'alert-danger' : 'alert-success');
+                messageBox.classList.remove('d-none');
+                setTimeout(() => {
+                    messageBox.classList.remove('show');
+                    setTimeout(() => {
+                        messageBox.classList.add('d-none');
+                    }, 300);
+                }, 3000);
+            }
+
+            // Function to fetch and populate sub-categories
+            const populateSubCategories = (categoryId, selectedSubCategoryId = null) => {
+                // Clear existing options
+                subCategorySelect.innerHTML = '<option value="">Select a sub-category</option>';
+                if (!categoryId) {
+                    return;
+                }
+                console.log("*****************88 " + selectedSubCategoryId)
+                fetch('/products/api/get/' + categoryId + '/subcategories')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(subCategories => {
+                        if (subCategories && subCategories.subCategories) {
+                            console.log("------------Sub-category " + JSON.stringify(subCategories))
+                            subCategories.subCategories.forEach(sub => {
+                                const option = document.createElement('option');
+                                option.value = sub.id;
+                                option.textContent = sub.code + "-" + sub.name;
+                                if (selectedSubCategoryId && sub.id === selectedSubCategoryId) {
+                                    option.selected = true;
+                                }
+                                subCategorySelect.appendChild(option);
+                            });
+                        }
+
+                    })
+                    .catch(error => {
+                        console.error('Error fetching sub-categories:', error);
+                    });
+            };
+
+            // Event listener for Category dropdown change
+            categorySelect.addEventListener('change', (event) => {
+                const selectedCategoryId = event.target.value;
+                populateSubCategories(selectedCategoryId);
+            });
+
+            
+            // Function to close the modal
+            window.productManagerEditClose = function() {
+                const modal = bootstrap.Modal.getInstance(productModal);
+                if(modal){
+                    modal.hide();
+                }
+            }
+
+            
+            // Listen for the modal to be shown (the correct Bootstrap event)
+            productModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const productId = button.getAttribute('data-id');
+
+                // Clear the form and set a new title for "Add" action
+                form.reset();
+                modalTitle.textContent = "Add New Product";
+
+                if (productId) {
+                    // It's an Edit action
+                    modalTitle.textContent = "Edit Product";
+
+                    // Fetch product data from the server using the new API endpoint
+                    fetch(`/products/api/get/${productId}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(product => {
+                            // Populate the form fields with the product data
+                            console.log('product   ' + JSON.stringify(product))
+                            document.getElementById('productId').value = product.id;
+                            document.getElementById('productName').value = product.name;
+                            document.getElementById('productVolume').value = product.volumeMl;
+                            document.getElementById('productCategory').value = product.categoryId != null ? product.categoryId : '';
+
+                            // Select the correct sub-category in the dropdown
+                            if (product.subCategory && product.subCategory.id) {
+                                subCategorySelect.value = product.subCategory.id;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('There was a problem fetching the product data:', error);
+                            // You can display an error message here
+                        });
+                }
+            });
+
+            document.getElementById('saveProductBtn').addEventListener('click', async () => {
+                // Get a reference to the select element by its ID
+                const subCategorySelect = document.getElementById('subCategory');
+                const id = document.getElementById('productId').value;
+                // Get the value of the currently selected option
+                const categoryId = subCategorySelect.value;
+                const name = document.getElementById('productName').value;
+                const volumeMl = document.getElementById('productVolume').value;
+                // You can now use the value, for example, to log it to the console
+                console.log('Selected Sub-category ID:', categoryId);
+
+                const productDTO = {
+                    name,
+                    categoryId,
+                    volumeMl,
+                    id
+                };
+                console.log(JSON.stringify(productDTO)  +'-------------- '+id)
+                try {
+                    const response = await fetch(`/products/api/update/${id}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(productDTO)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Failed to save purchase.');
+                    }
+
+                    showMessage('Product saved successfully!');
+                } catch (error) {
+                    console.error('Error saving purchase:', error);
+                    showMessage(error.message, true);
+                } finally {
+
+                }
+            });
+        })
+    </script>
+</section>

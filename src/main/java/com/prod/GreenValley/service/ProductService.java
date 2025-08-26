@@ -3,15 +3,19 @@ package com.prod.GreenValley.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.prod.GreenValley.DTO.ProductDTO;
 import com.prod.GreenValley.DTO.ProductSearchDTO;
 import com.prod.GreenValley.Entities.Product;
 import com.prod.GreenValley.Entities.PurchaseEntryItem;
 import com.prod.GreenValley.Entities.SaleItem;
+import com.prod.GreenValley.Entities.SubCategory;
 import com.prod.GreenValley.repository.ProductRepo;
 import com.prod.GreenValley.repository.PurchaseEntryItemRepo;
 import com.prod.GreenValley.repository.SalesItemRepo;
+import com.prod.GreenValley.repository.SubCategoryRepo;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +30,18 @@ public class ProductService {
     @Autowired
     private SalesItemRepo salesItemRepo;
 
+    @Autowired
+    private SubCategoryRepo subCategoryRepo;
+
+
+    public List<Product> findAllProduct(){
+        return productRepo.findAll();
+    }
+
+    public Product findProductById(Long id){
+        return productRepo.findById(id).orElse(null);
+    }
+
     public String doInsertProducts(List<Product> products){
         String message = "success";
         try {
@@ -37,9 +53,21 @@ public class ProductService {
         return message;
     }
 
+    
+    public void updateProduct(Long id, ProductDTO productDTO){
+        Product prod = productRepo.findById(id).orElse(null);
+        if(prod != null && prod.getId() != null){
+            if(productDTO.getCategoryId() != null){
+                SubCategory subCategory =  subCategoryRepo.findById(productDTO.getCategoryId()).orElse(null);
+                prod.setSubCategory(subCategory);
+            }
+            
+            prod.setName(productDTO.getName());
+            prod.setVolumeMl(productDTO.getVolumeMl());
 
-
-
+            productRepo.save(prod);
+        }
+    }
 
     public List<ProductSearchDTO> searchProducts(String query) {
         // Assuming your repository has a method to find products by name

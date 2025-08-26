@@ -163,7 +163,7 @@
                     row.innerHTML = `
                         <td>${purchase.id}</td>
                         <td>${(purchase.productsInfo != "" ? purchase.productsInfo : "<p style='color:red;'><b>Please delete this purchase as purchase-item missing</b></p>")}</td>
-                        <td>${new Date(purchase.dateOfPurchase).toLocaleDateString()}</td>
+                        <td>${new Date(purchase.dateOfPurchase).toISOString().split('T')[0]}</td>
                         <td>${purchase.supplierInfo}</td>
                         <td>${purchase.totalAmount.toFixed(2)}</td>
                         <td class="text-center">
