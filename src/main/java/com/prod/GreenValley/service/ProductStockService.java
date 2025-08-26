@@ -49,7 +49,7 @@ public class ProductStockService {
                 .sum();
 
             // Create and return a DTO with the stock data
-            return new ProductStockDTO(product.getId(), product.getName(), totalPurchased, totalSold);
+            return new ProductStockDTO(product.getId(), product.getName(), totalPurchased, totalSold, product.getPricePerUnit());
         }).collect(Collectors.toList());
     }
 }

@@ -1,17 +1,21 @@
 package com.prod.GreenValley.DTO;
 
+import java.math.BigDecimal;
+
 public class ProductStockDTO {
     
     private Long id;
     private String name;
     private long purchaseQuantity;
     private long saleQuantity;
+    private BigDecimal pricePerUnit;
 
-    public ProductStockDTO(Long id, String name, long purchaseQuantity, long saleQuantity) {
+    public ProductStockDTO(Long id, String name, long purchaseQuantity, long saleQuantity, BigDecimal pricePerUnit) {
         this.id = id;
         this.name = name;
         this.purchaseQuantity = purchaseQuantity;
         this.saleQuantity = saleQuantity;
+        this.pricePerUnit = pricePerUnit;
     }
 
     public Long getId() {
@@ -45,6 +49,16 @@ public class ProductStockDTO {
     public void setSaleQuantity(long saleQuantity) {
         this.saleQuantity = saleQuantity;
     }
+
+    public BigDecimal getPricePerUnit() {
+        return pricePerUnit;
+    }
+
+    public void setPricePerUnit(BigDecimal pricePerUnit) {
+        this.pricePerUnit = pricePerUnit;
+    }
+
+    
 
     //*****************Gater Seter****************** */
 
