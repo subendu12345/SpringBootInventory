@@ -11,10 +11,7 @@
     <link rel="stylesheet" th:href="@{/CSS/bootStrapIcon.css}" />
     <title th:text="${title}"></title>
     <style>
-        body {
-            padding: 6px;
-        }
-
+       
         .shadow-box {
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1),
                 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -42,9 +39,9 @@
 
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a style="padding-left: 1%;" class="navbar-brand" href="/home">Green Valley
-            <img src="/src/main/resources/static/img/logo.jpeg" />
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="padding-right: 2%;">
+        <a style="padding-left: 1%;" class="navbar-brand" href="/home">
+            <img th:src="@{/img/logo.jpeg}" style="width: 69px; border-radius: 34px 34px;" />
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +70,8 @@
                     <a class="nav-link" href="/product">Product</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/login">Login</a>
+
+                    <button  id="logoutButton" onclick="window.location.href='/logout'" class="btn btn-primary">Logout</button>
                 </li>
             </ul>
         </div>

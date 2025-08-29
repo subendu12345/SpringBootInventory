@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.thymeleaf.org" th:fragment="layout(content)">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #4e54c8, #8f94fb);
+        }
+
+        .login-container {
+            background: #fff;
+            padding: 40px 35px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 26px;
+            color: #4e54c8;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            outline: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .input-group input:focus {
+            border-color: #4e54c8;
+            box-shadow: 0 0 6px rgba(78, 84, 200, 0.4);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #4e54c8, #8f94fb);
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .extra-links {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .extra-links a {
+            text-decoration: none;
+            font-size: 13px;
+            color: #4e54c8;
+            transition: color 0.3s ease;
+        }
+
+        .extra-links a:hover {
+            color: #6c70f2;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <img th:src="@{/img/logo.jpeg}" style="width: 69px; border-radius: 34px 34px;" />
+        <h2>Login</h2>
+        <form id="login-form" class="form"  method="post" th:action="@{/signin}">
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter username" required autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" autocomplete="off" id="password" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="login-btn">Login</button>
+            <!-- <div class="extra-links">
+                <a href="#">Forgot Password?</a> | <a href="#">Sign Up</a>
+            </div> -->
+        </form>
+    </div>
+</body>
+
+</html>

@@ -1,6 +1,5 @@
 package com.prod.GreenValley.Entities;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -12,13 +11,18 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private ERole name;
+    @Column(length = 20, unique = true)
+    private String name;
 
-    public Role() {}
-
-    public Role(ERole name) {
+    public Role(String name) {
         this.name = name;
     }
+
+    public Role() {
+    }
+
+    
+
+    
+
 }

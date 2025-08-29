@@ -36,5 +36,30 @@ public class SaleService {
         return saleRepo.getProductSaleSummary(startDate, endDate);
     }
 
+    public void deleteSaleById(Long id) {
+        saleRepo.deleteById(id);
+    }
+
+    public void deleteSaleItem(Long saleId, Long itemId) throws Exception {
+        // Find the sale by its ID. If not found, throw a custom exception.
+        Sale sale = saleRepo.findById(saleId).orElse(null);
+
+        // Find the specific item to delete within the sale's list of items.
+        boolean removed = sale.getSaleItems().removeIf(item -> item.getId().equals(itemId));
+
+        // If no item was removed, it means the item ID didn't match.
+        if (!removed) {
+            throw new Exception("Sale item not found with ID: " + itemId);
+        }
+
+        // Save the updated sale object, which will also update the items list.
+        if(sale.getSaleItems().isEmpty()){
+            saleRepo.deleteById(sale.getId());
+        }else{
+            saleRepo.save(sale);
+        }
+        
+    }
+
     
 }

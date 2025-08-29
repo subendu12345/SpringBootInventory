@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.prod.GreenValley.Entities.Product;
 import com.prod.GreenValley.wrapper.ProductForm;
@@ -37,6 +38,11 @@ public class HomeController {
         model.addAttribute("salesForm", salesForm);
         model.addAttribute("saleToDisplayInModal", null);
         return "home";
+    }
+
+    @RequestMapping("/signin")
+    public String getSigninPage(){
+        return "/signin";
     }
 
     
