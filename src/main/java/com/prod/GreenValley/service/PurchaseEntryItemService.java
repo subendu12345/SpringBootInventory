@@ -1,16 +1,19 @@
 package com.prod.GreenValley.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 import com.prod.GreenValley.Entities.Product;
 import com.prod.GreenValley.Entities.PurchaseEntry;
 import com.prod.GreenValley.Entities.PurchaseEntryItem;
 import com.prod.GreenValley.repository.ProductRepo;
 import com.prod.GreenValley.repository.PurchaseEntryItemRepo;
+import com.prod.GreenValley.util.PurchaseItemRecord;
 import com.prod.GreenValley.wrapper.PurchaseEntryForm;
 import com.prod.GreenValley.wrapper.PurchaseEntryItemForm;
 
@@ -24,6 +27,7 @@ public class PurchaseEntryItemService {
 
 	@Autowired
 	private ProductRepo productRepo;
+
 
     public void insertPurchesItems(List<PurchaseEntryItem> items){
         entryItemRepo.saveAll(items);
@@ -40,9 +44,14 @@ public class PurchaseEntryItemService {
 			pi.setProduct(prod);
 			pi.setQuantity(pif.getQuantity());
 			pi.setPurchaseEntry(entry);
+			pi.setBarcode(pif.getBarcode());
 			piList.add(pi);
 		}
 
 		entryItemRepo.saveAll(piList);
     }
+
+	public PurchaseItemRecord getTotalPurchesAmount(){
+		return entryItemRepo.getTotalPurchaseAmount();
+	}
 }

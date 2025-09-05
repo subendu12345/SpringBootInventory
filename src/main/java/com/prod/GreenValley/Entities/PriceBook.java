@@ -1,6 +1,7 @@
 package com.prod.GreenValley.Entities;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -34,7 +35,6 @@ public class PriceBook {
     @JoinColumn(name = "product_id")
     private Product product;
 
-
     @PrePersist
     protected void onCreate() {
         this.createdDate = LocalDate.now();
@@ -45,4 +45,5 @@ public class PriceBook {
     protected void onUpdate() {
         this.modifiedDate = LocalDate.now();
     }
+
 }

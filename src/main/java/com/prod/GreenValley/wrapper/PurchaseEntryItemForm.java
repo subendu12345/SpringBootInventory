@@ -8,6 +8,7 @@ public class PurchaseEntryItemForm {
     private int quantity;
     private BigDecimal price;
     private Long productId;
+    private String barcode;
 
     //Getter and setter
     public String getProductInfo() {
@@ -33,6 +34,12 @@ public class PurchaseEntryItemForm {
     }
     public void setProductId(Long productId) {
         this.productId = productId;
+    }
+    public String getBarcode() {
+        return barcode;
+    }
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
     }
 
     

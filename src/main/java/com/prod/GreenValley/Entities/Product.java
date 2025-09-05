@@ -60,7 +60,6 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<PurchaseEntryItem> purchaseEntryItems;
 
-
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

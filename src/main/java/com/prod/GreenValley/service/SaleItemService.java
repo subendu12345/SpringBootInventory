@@ -11,6 +11,7 @@ import com.prod.GreenValley.Entities.Sale;
 import com.prod.GreenValley.Entities.SaleItem;
 import com.prod.GreenValley.repository.ProductRepo;
 import com.prod.GreenValley.repository.SalesItemRepo;
+import com.prod.GreenValley.util.SaleItemRecord;
 import com.prod.GreenValley.wrapper.SalesForm;
 import com.prod.GreenValley.wrapper.SalesItemForm;
 
@@ -36,6 +37,11 @@ public class SaleItemService {
             salesItems.add(item);
         }
         salesItemRepo.saveAll(salesItems);
+    }
+
+
+    public SaleItemRecord getTotalSaleAmount(){
+        return salesItemRepo.getTotalSaleAmount();
     }
     
 }

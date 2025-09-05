@@ -1,13 +1,22 @@
 package com.prod.GreenValley.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.prod.GreenValley.DTO.ProductSearchDTO;
 import com.prod.GreenValley.DTO.SaleReportDTO;
+import com.prod.GreenValley.Entities.PriceBook;
+import com.prod.GreenValley.Entities.Product;
 import com.prod.GreenValley.Entities.Sale;
+import com.prod.GreenValley.Entities.SaleItem;
+import com.prod.GreenValley.repository.PriceBookRepo;
+import com.prod.GreenValley.repository.ProductRepo;
 import com.prod.GreenValley.repository.SaleRepo;
 import com.prod.GreenValley.wrapper.SalesForm;
 
@@ -17,9 +26,20 @@ public class SaleService {
     @Autowired
     private SaleRepo saleRepo;
 
+    @Autowired
+    private PriceBookRepo priceBookRepo;
+
+    
+    @Autowired
+    private ProductService productService;
+    
+
+    @Autowired
+    private ProductRepo productRepo;
+    
+
     public Sale saveSaleItem(SalesForm salesForm){
         Sale sale = new Sale();
-        System.out.println("saleDat2  *********************** "+salesForm.getSaleDate());
         sale.setPaymentMethod(salesForm.getPaymentMethod());
         sale.setTotalAmount(salesForm.getTotalAmount());
         sale.setSaleDate(salesForm.getSaleDate());
@@ -59,6 +79,38 @@ public class SaleService {
             saleRepo.save(sale);
         }
         
+    }
+
+    public String saveSaleItemByBarcode(String barcode, Date saleDate){
+
+        PriceBook pb = priceBookRepo.findByProductBarCode(barcode);
+        if(pb == null){
+           return "Price Book not created with this barcode "+barcode;
+        }else{
+            List<ProductSearchDTO> productSearchDTOs = productService.searchProducts(pb.getProduct().getName());
+            if(productSearchDTOs != null && productSearchDTOs.get(0).getStockOnHeand() > 0){
+                // insert sale;
+
+                Product myProduct = productRepo.findById(pb.getProduct().getId()).orElse(null);
+                Sale newSale = new Sale();
+                newSale.setTotalAmount(BigDecimal.valueOf(pb.getProductPrice()));
+                newSale.setSaleDate(saleDate);
+                SaleItem newSaleItem  = new SaleItem();
+                newSaleItem.setProduct(myProduct);
+                newSaleItem.setQuantitySold(1);
+                newSaleItem.setSale(newSale);
+                newSaleItem.setUnitPriceAtSale(BigDecimal.valueOf(pb.getProductPrice()));
+                newSale.getSaleItems().add(newSaleItem);
+                newSaleItem.setBarcode(barcode);
+                saleRepo.save(newSale);
+
+            }else{
+                return "Stock not available";
+            }
+            
+        }
+        return "success";
+
     }
 
     

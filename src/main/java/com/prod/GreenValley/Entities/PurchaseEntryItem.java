@@ -16,6 +16,9 @@ public class PurchaseEntryItem {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @Column(name = "barcode")
+    private String barcode;
+
     @Column(name = "quantity")
     private int quantity;
 
@@ -68,7 +71,11 @@ public class PurchaseEntryItem {
         this.product = product;
     }
 
+    public String getBarcode() {
+        return barcode;
+    }
 
-
-    
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
+    } 
 }

@@ -11,6 +11,7 @@
 
 <body>
     <section>
+        <div th:replace="/utill/MessageShow.html :: toast"></div>
         <div class="row">
             <div class="col-sm-6">
                 <div class="">
@@ -21,7 +22,7 @@
                 </div>
                 <div th:replace="/product/ProductStock.html :: productStockDashBoard"></div>
             </div>
-            <div class="col-sm-6">
+            <div th:if="${session.sessionObj.role == 'ADMIN'}"  class="col-sm-6">
                 <div class="shadow-box">
                     <div th:replace="/sale/NewSalesEntryForm.html :: saleEntryForm"></div>
                 </div>
@@ -67,5 +68,3 @@
     </section>
 
 </body>
-
-</html>

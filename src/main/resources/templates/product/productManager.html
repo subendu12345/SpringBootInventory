@@ -11,6 +11,7 @@
 
 <section>
     <div class="container">
+        <div th:replace="/utill/MessageShow.html :: toast"></div>
         <!-- Message Box -->
         <div id="messageBox" class="message-box alert fade show d-none" role="alert"></div>
         <h2 class="mb-4 text-center text-primary">Product Management</h2>
@@ -32,7 +33,7 @@
                     <td th:text="${product.id}">1</td>
                     <td th:text="${product.name}">Example Product</td>
                     <td th:text="${product.volumeMl}">Brand A</td>
-                    <td th:text="${product.subCategory?.name}">Sub-Category X</td>
+                    <td th:text="${product.subCategory?.name ?: 'Category Missing add it'}">Sub-Category X</td>
                     <td th:text="${product.pricePerUnit}">10.00</td>
                     <td>
                         <!-- <a th:href="@{/products/view/{id}(id=${product.id})}" class="btn btn-info btn-sm">View</a> -->
@@ -40,6 +41,13 @@
                             th:attr="data-id=${product.id}" data-bs-toggle="modal" data-bs-target="#productManagerEdit">
                             Edit
                         </button>
+
+                        <button type="button" class="btn btn-info btn-sm ms-2"
+                            th:attr="data-id=${product.id}, data-name=${product.name}" data-bs-toggle="modal"
+                            data-bs-target="#priceBookModal">
+                            Add/View Price Book
+                        </button>
+
                     </td>
                 </tr>
             </tbody>
@@ -116,15 +124,78 @@
                 </div>
             </div>
         </div>
+
+        <!-- Price Book Modal -->
+        <div class="modal fade" id="priceBookModal" tabindex="-1" aria-labelledby="priceBookModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <form id="priceBookForm">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="priceBookModalLabel">Price Book Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="barcodeNumber" class="form-label">Barcode Number</label>
+                                    <input type="text" class="form-control" id="barcodeNumber" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="productPrice" class="form-label">Product Price</label>
+                                    <input class="form-control" id="productPrice" type="number" step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end mb-3">
+                                <button type="button" class="btn btn-primary" id="savePriceBookBtn">Save Price
+                                    Book</button>
+                            </div>
+                            <h6 id="priceBookTableTitle">Existing Price Books</h6>
+                            <table class="table table-striped" id="priceBookTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Barcode</th>
+                                        <th>Price</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Price book details will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="liveToast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive"
+            aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <p id="toatMessgeText"></p>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const productModal = document.getElementById('productManagerEdit');
             const form = document.getElementById('productManagerEditForm');
+            const priceBookForm = document.getElementById('priceBookForm');
+            const priceBookTableBody = document.getElementById('priceBookTable').querySelector('tbody');
+            const priceBookModal_Data = document.getElementById('priceBookModal')
             const modalTitle = document.getElementById('modalTitle');
             const categorySelect = document.getElementById('category');
             const subCategorySelect = document.getElementById('subCategory');
-
+            const savePriceBookBtn_L = document.getElementById('savePriceBookBtn');
             // Helper function to show a dismissible message box
             function showMessage(text, isError = false) {
                 messageBox.textContent = text;
@@ -180,16 +251,16 @@
                 populateSubCategories(selectedCategoryId);
             });
 
-            
+
             // Function to close the modal
-            window.productManagerEditClose = function() {
+            window.productManagerEditClose = function () {
                 const modal = bootstrap.Modal.getInstance(productModal);
-                if(modal){
+                if (modal) {
                     modal.hide();
                 }
             }
 
-            
+
             // Listen for the modal to be shown (the correct Bootstrap event)
             productModal.addEventListener('show.bs.modal', function (event) {
                 const button = event.relatedTarget;
@@ -231,6 +302,90 @@
                 }
             });
 
+
+            priceBookModal_Data.addEventListener('show.bs.modal', function (event) {
+                console.log("price book modal")
+                const button = event.relatedTarget;
+                const productId = button.getAttribute('data-id');
+                const productName =  button.getAttribute('data-name');
+                fetch(`/products/api/pricebook/${productId}`, { method: 'GET' })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(priceBooks => {
+                        priceBookForm.reset();
+                        priceBookTableBody.innerHTML = ''; // Clear table
+
+                        document.getElementById('barcodeNumber').focus();
+                        document.getElementById('priceBookModalLabel').innerHTML = `Price Books for <strong>${productName}</strong>`;
+                        document.getElementById('productId').value = productId;
+                        renderPriceBooks(productId, priceBooks)
+                    })
+                    .catch(error => {
+                        console.error('There was a problem fetching the product data:', error);
+                        // You can display an error message here
+                    });
+
+            })
+
+            function renderPriceBooks(productId, priceBooks) {
+                priceBookTableBody.innerHTML = '';
+                if (priceBooks.length === 0) {
+                    priceBookTableBody.innerHTML = '<tr><td colspan="3" class="text-center">No price books found.</td></tr>';
+                }
+                priceBooks.forEach(pb => {
+                    const row = document.createElement('tr');
+                    row.dataset.id = pb.id;
+                    row.innerHTML = `
+                        <td class="editable-cell" data-field="barcode" contenteditable="true">${pb.productBarCode}</td>
+                        <td class="editable-cell" data-field="price" contenteditable="true">${pb.productPrice.toFixed(2)}</td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-sm delete-pricebook-btn" disabled data-id="${pb.id}">Delete</button>
+                        </td>
+                    `;
+                    priceBookTableBody.appendChild(row);
+                });
+            }
+
+            savePriceBookBtn_L.addEventListener('click', (event) => {
+
+                const PriceBookDTO = {
+                    id: null,
+                    productBarCode: document.getElementById('barcodeNumber').value,
+                    productPrice: document.getElementById('productPrice').value,
+                    productId: document.getElementById('productId').value,
+                }
+                if (!PriceBookDTO.productPrice || !PriceBookDTO.productBarCode) return;
+
+                console.log('hello iam from save button ' + JSON.stringify(PriceBookDTO));
+                fetch("/products/api/save/pricebook", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(PriceBookDTO)
+                }).then(res => {
+                    console.log('pricebook ' + JSON.stringify(res))
+                    return res.json();
+
+                }).then(res => {
+                    if (res && res.message == 'success') {
+
+                        //document.getElementById('priceBookModalCloseBtn').click()
+                        showToast('Success', 'Price Book successfully save!', 'success')
+                    } else {
+                        showToast('Error save Pricebook', JSON.stringify(res.message), 'error')
+
+                    }
+                })
+                    .catch(err => {
+                        showToast('Error save Pricebook', JSON.stringify(err), 'error')
+                    })
+
+            })
+
+
             document.getElementById('saveProductBtn').addEventListener('click', async () => {
                 // Get a reference to the select element by its ID
                 const subCategorySelect = document.getElementById('subCategory');
@@ -248,7 +403,7 @@
                     volumeMl,
                     id
                 };
-                console.log(JSON.stringify(productDTO)  +'-------------- '+id)
+                console.log(JSON.stringify(productDTO) + '-------------- ' + id)
                 try {
                     const response = await fetch(`/products/api/update/${id}`, {
                         method: 'POST',
@@ -261,14 +416,34 @@
                         throw new Error(errorData.message || 'Failed to save purchase.');
                     }
 
-                    showMessage('Product saved successfully!');
+                    showToast('Success!', 'Product successfully saved!', 'success');
                 } catch (error) {
                     console.error('Error saving purchase:', error);
-                    showMessage(error.message, true);
+                    showToast('Error', error.message, 'error');
                 } finally {
 
                 }
             });
+
+
+            function showToast(title, message, type = "primary") {
+                // Get toast elements
+                const toastEl = document.getElementById("basicToast");
+                const toastTitle = document.getElementById("myToastTitle");
+                const toastMessage = document.getElementById("myToastMessage");
+                const header = toastEl.querySelector(".toast-header");
+
+                // Set values
+                toastTitle.textContent = title;
+                toastMessage.textContent = message;
+
+                // Update color (Bootstrap contextual classes)
+                header.className = `toast-header bg-${type} text-light`;
+
+                // Show toast
+                const toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            }
         })
     </script>
 </section>

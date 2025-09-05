@@ -11,7 +11,6 @@
     <link rel="stylesheet" th:href="@{/CSS/bootStrapIcon.css}" />
     <title th:text="${title}"></title>
     <style>
-       
         .shadow-box {
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1),
                 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -41,7 +40,20 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="padding-right: 2%;">
         <a style="padding-left: 1%;" class="navbar-brand" href="/home">
-            <img th:src="@{/img/logo.jpeg}" style="width: 69px; border-radius: 34px 34px;" />
+            <div class="row">
+                <div class="col">
+                  <img th:src="@{/img/logo.jpeg}" style="width: 69px; border-radius: 34px 34px;" />
+                </div>
+                <div class="col">
+                   <h3 style="padding-top: 9%; color: #10ff10;">Green Valley</h3>
+                </div>
+                <!-- <div class="col">
+                    Column
+                </div> -->
+            </div>
+            
+           
+
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,7 +83,8 @@
                 </li>
                 <li class="nav-item">
 
-                    <button  id="logoutButton" onclick="window.location.href='/logout'" class="btn btn-primary">Logout</button>
+                    <button id="logoutButton" onclick="window.location.href='/logout'"
+                        class="btn btn-primary">Logout</button>
                 </li>
             </ul>
         </div>
@@ -105,6 +118,7 @@
     <script th:src="@{/javaScript/bootstrap.min.js}"></script>
     <script th:src="@{/javaScript/bootStarpIconJs.js}"></script>
     <script th:src="@{/javaScript/sheetJS.js}"></script>
+    <script th:src="@{/javaScript/chartJS.js}"></script>
 
     <script th:src="@{/javaScript/ProductSearchandFormLogic.js}" defer></script>
 </body>

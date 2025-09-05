@@ -24,6 +24,9 @@ public class SaleItem {
     @Column(name = "unit_price_at_sale", precision = 10, scale = 2)
     private BigDecimal unitPriceAtSale;
 
+    @Column(name = "barcode")
+    private String barcode ;
+
     public Long getId() {
         return id;
     }
@@ -64,6 +67,16 @@ public class SaleItem {
         this.unitPriceAtSale = unitPriceAtSale;
     }
 
+    public String getBarcode() {
+        return barcode;
+    }
+
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
+    }
+
+    
+    
 
 
 }

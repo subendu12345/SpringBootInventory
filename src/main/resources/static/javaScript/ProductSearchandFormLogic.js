@@ -1,5 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^ callingnnnnnn')
     const tableBody = document.querySelector('#purchaseItemTable tbody');
+    const barcodeSearchInput = document.getElementById('barcodeSearchInput');
+    const scannedBarcodes = new Set();
+    // --- DEBOUNCE FUNCTION ---
+    function debounce(func, delay) {
+        let timeout;
+        return function (...args) {
+            const context = this;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), delay);
+        };
+    }
+
 
     let purchaseItemTable;
     if (document.getElementById('purchaseItemTable')) {
@@ -28,60 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     };
 
-    // Generic function to initialize search functionality on an input
-    function initializeSearch(input) {
-        const searchResults = input.parentNode.querySelector('.search-results');
-        const resultList = searchResults.querySelector('ul');
-        const productIdInput = input.closest('tr').querySelector('.product-id-input-hidden');
 
-        // Function to fetch and display search results
-        input.addEventListener('input', async (e) => {
-            const query = e.target.value;
-            if (query.length < 2) {
-                searchResults.style.display = 'none';
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/product/search?query=${query}`);
-                const products = await response.json();
-
-                resultList.innerHTML = '';
-                if (products.length > 0) {
-                    products.forEach(product => {
-                        const li = document.createElement('li');
-                        li.textContent = `${product.name}`;
-                        li.addEventListener('click', () => {
-                            input.value = product.name;
-                            searchResults.style.display = 'none';
-                            if (productIdInput) {
-                                productIdInput.value = product.id;
-                            }
-                        });
-                        resultList.appendChild(li);
-                    });
-                    searchResults.style.display = 'block';
-                } else {
-                    searchResults.style.display = 'none';
-                }
-            } catch (error) {
-                console.error('Error fetching products:', error);
-                searchResults.style.display = 'none';
-            }
-        });
-
-        // Hide search results when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!input.contains(e.target) && !searchResults.contains(e.target)) {
-                searchResults.style.display = 'none';
-            }
-        });
-    }
-
-    /**
-     * The fix for the TypeError is here:
-     * The template element is now fetched inside the function to ensure it always exists when called.
-     */
     window.addPurchesItemRow = function () {
         const template = document.getElementById('purchase-item-row-template');
         if (!template) {
@@ -90,23 +50,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const newRow = template.content.cloneNode(true).querySelector('tr');
         const newIndex = tableBody.children.length;
-
+        newRow.id = `row-${newIndex}`;
+        console.log('newIndex '+ newIndex);
+        
+        // Set the correct name attributes for the new row inputs
         newRow.querySelectorAll('input').forEach(input => {
             input.name = input.name.replace('INDEX_PLACEHOLDER_X', newIndex);
         });
-        newRow.id = 'row-' + newIndex;
 
+        // Attach event listener to the new row's barcode input
+        const newBarcodeInput = newRow.querySelector('.barcode-input');
+        newBarcodeInput.addEventListener('keyup', handleBarcodeInput);
+
+        // Attach event listener to the remove button
         const removeButton = newRow.querySelector('.remove-button');
-        removeButton.onclick = () => window.removeRow(newIndex);
+        removeButton.onclick = () => removeRow(newIndex);
+        if (newIndex === 0) {
+            removeButton.style.display = 'none';
+        }
 
         tableBody.appendChild(newRow);
-
-        // Initialize search on the new input
-        updateTotalAmount()
-        const newInput = newRow.querySelector('.product-search-input');
-        if (newInput) {
-            initializeSearch(newInput);
-        }
+        updateTotalAmount();
     }
 
     // Function to remove a row from the table
@@ -166,14 +130,93 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }
 
+
+
     // Initial re-indexing and search setup for existing rows
     reindexRows();
     // Initial calculation on page load
     updateTotalAmount();
-    if(tableBody){
-        tableBody.querySelectorAll('.product-search-input').forEach(input => {
-        initializeSearch(input);
-    });
+
+    if (tableBody) {
+        tableBody.addEventListener('keyup', (event) => {
+            if (event.target.classList.contains('barcode-input')) {
+                handleBarcodeInput(event);
+            }
+        });
     }
-    
+
+
+    // --- New Logic: Search by Price Book Barcode ---
+    const handleBarcodeInput = debounce((event) => {
+        event.preventDefault();
+        const barcode = event.target.value.trim();
+        const currentRow = event.target.closest('tr');
+
+        if (scannedBarcodes.has(barcode)) {
+            showToast('Duplicate Found', 'This product has already been added.', 'warning');
+            event.target.value = '';
+            return;
+        }
+        console.log('barcode --> ' + barcode)
+        fetch(`/sale/api/getproduct/barcode/${barcode}`, { method: 'GET' }).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        }).then(product => {
+            console.log('res ' + JSON.stringify(product))
+            if (product && product.id == null) {
+                showToast('Product not Found. ', `Product is not found with this Barcode-${barcode}, Please add pricebook with is barcode`, 'warning')
+            } else {
+                renderProductInfoToCurrentSec(product, currentRow);
+                scannedBarcodes.add(barcode);
+                updateTotalAmount();
+                document.getElementById('purchaseAddRowButton').click()
+                showMessageBox('Success', 'Product successfully Fund!', 'success');
+            }
+
+        }).catch(err => {
+            console.log('err ')
+            showToast('Error ', JSON.stringify(err), 'error')
+        })
+
+    }, 500);
+
+
+
+    function renderProductInfoToCurrentSec(foundProduct, currentRow) {
+        const productNameInput = currentRow.querySelector('.product-search-input');
+        const productIdInput = currentRow.querySelector('.product-id-input-hidden');
+        const priceInput = currentRow.querySelector('.price-input');
+
+        productNameInput.value = foundProduct.productName;
+        productIdInput.value = foundProduct.productId;
+        priceInput.value = foundProduct.productPrice.toFixed(2);
+    }
+
+    document.getElementById("purchaseForm").addEventListener("keydown", function (event) {
+        if (event.key === "Enter" && event.target.tagName !== "TEXTAREA") {
+            event.preventDefault();
+        }
+    });
+
+    function showToast(title, message, type = "primary") {
+        // Get toast elements
+        const toastEl = document.getElementById("basicToast");
+        const toastTitle = document.getElementById("myToastTitle");
+        const toastMessage = document.getElementById("myToastMessage");
+        const header = toastEl.querySelector(".toast-header");
+
+        // Set values
+        toastTitle.textContent = title;
+        toastMessage.textContent = message;
+
+        // Update color (Bootstrap contextual classes)
+        header.className = `toast-header bg-${type} text-light`;
+
+        // Show toast
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    }
+
 });

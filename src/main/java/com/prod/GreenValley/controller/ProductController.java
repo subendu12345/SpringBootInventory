@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import com.prod.GreenValley.DTO.PriceBookDTO;
 import com.prod.GreenValley.Entities.Product;
 import com.prod.GreenValley.Entities.SubCategory;
 import com.prod.GreenValley.service.CategoryService;
@@ -65,8 +66,10 @@ public class ProductController {
     public String getProductManager(Model model){
         model.addAttribute("products", productService.findAllProduct());
         model.addAttribute("categories", categoryService.findAllCategories());
+        model.addAttribute("priceBookForm", new PriceBookDTO());
         return "product/productManager";
     }
+
 
 
     @GetMapping("/product/edit/{id}")

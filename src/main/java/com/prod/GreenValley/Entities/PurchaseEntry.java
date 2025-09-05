@@ -79,14 +79,6 @@ public class PurchaseEntry {
     public void setPurchaseEntryItems(List<PurchaseEntryItem> purchaseEntryItems) {
         this.purchaseEntryItems = purchaseEntryItems;
     }
-
-    @Override
-    public String toString() {
-        return "PurchaseEntry [id=" + id + ", dateOfPurchase=" + dateOfPurchase + ", supplierInfo=" + supplierInfo
-                + ", billNumber=" + billNumber + ", totalAmount=" + totalAmount + ", purchaseEntryItems="
-                + purchaseEntryItems + "]";
-    }
-
-    
+   
     
 }

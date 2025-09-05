@@ -11,11 +11,27 @@
 </head>
 
 <section>
+    <audio id="errorSound" th:src="@{/mp3/Pricebook_not_found.mp3}" preload="auto"></audio>
+    <div th:replace="/utill/MessageShow.html :: toast"></div>
+    <button style="visibility: hidden;" type="button" id="openBarcodeScannerModal" class="btn btn-primary rounded-lg"
+        data-bs-toggle="modal" data-bs-target="#barcodeScannerModal">
+
+    </button>
+
+
     <div class="container-fluid mt-5">
-         <p id="resultMessage" class="mt-4 font-medium text-center"></p>
+
+        <p id="resultMessage" class="mt-4 font-medium text-center"></p>
         <div class="card shadow rounded-lg w-100 mx-auto">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <label for="barcodeSearchInput" class="form-label"><strong>Scan Barcode for Sale.</strong></label>
+                    <input type="text" id="barcodeSearchInput" name="barcodeSearchInput"
+                        placeholder="Scan barcode for Sale Item." class="form-control" autofocus>
+                </div>
+            </div>
             <div class="card-header">
-                <h3 class="mb-0">Sales Detail Report</h3>
+                <h3 class="mb-0">Sales Detail</h3>
             </div>
             <div class="card-body">
                 <p class="text-muted">View sales data filtered by month or date.</p>
@@ -79,6 +95,11 @@
                     </div>
                 </div>
 
+                <div style="visibility: hidden;">
+
+                    <input type="date" id="currentSaleDate" name="currentSaleDate" class="form-control" required>
+                </div>
+
                 <!-- Loading Indicator -->
                 <div id="loadingIndicator" class="text-center py-5 text-muted d-none">
                     <p>Loading sales data...</p>
@@ -91,6 +112,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             //const monthFilter = document.getElementById('monthFilter');
+           
             const dateFilter = document.getElementById('dateFilter');
             const salesTableBody = document.getElementById('salesTableBody');
             const loadingIndicator = document.getElementById('loadingIndicator');
@@ -100,6 +122,13 @@
             const confirmActionBtn = document.getElementById('confirmActionBtn');
             const showModalBtn = document.getElementById('showModalBtn');
             const resultMessageEl = document.getElementById('resultMessage');
+            const barcodeSearchInput = document.getElementById('barcodeSearchInput');
+            // New modal and input elements for the barcode scanner
+            document.addEventListener("click", () => {
+                barcodeSearchInput.focus()
+            });
+
+
             dateFilter.value = new Date();
             let saleId;
             let saleItemId;
@@ -107,7 +136,15 @@
             const hasActionColumn = document.querySelector('th[scope="col"]:last-child') &&
                 document.querySelector('th[scope="col"]:last-child').textContent.trim() === 'Action';
 
-
+            // --- DEBOUNCE FUNCTION ---
+            function debounce(func, delay) {
+                let timeout;
+                return function (...args) {
+                    const context = this;
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(context, args), delay);
+                };
+            }
             // This function simulates fetching data from a backend API
             async function fetchSalesData(month, date) {
                 // In a real application, you would make a fetch call here:
@@ -167,7 +204,7 @@
 
                 //const monthValue = monthFilter.value;
                 const dateValue = dateFilter.value;
-
+                console.log('dateValue value is  ' + dateValue)
                 try {
                     fetchSalesData(null, dateValue);
                     //renderSalesData(filteredSales);
@@ -178,6 +215,7 @@
                     loadingIndicator.classList.add('d-none');
                 }
             }
+
 
 
             window.deleteSaleItem = function (id, itemId) {
@@ -224,8 +262,6 @@
                     });
 
                     if (response.ok) {
-                        // alert("Sale deleted successfully!");
-                        // Re-fetch data to update the table
                         resultMessageEl.textContent = "Action Confirmed: Sale-Item has been deleted.";
                         resultMessageEl.className = "mt-4 font-semibold text-green-600";
                         const dateFilter = document.getElementById('dateFilter');
@@ -241,18 +277,78 @@
 
             }
 
-            // monthFilter.addEventListener('change', () => {
-            //     dateFilter.value = ''; // Clear date filter when month changes
-            //     filterSalesData();
-            // });
-
             dateFilter.addEventListener('change', () => {
                 console.log("---------------------------------")
                 // monthFilter.value = ''; // Clear month filter when date changes
                 filterSalesData();
             });
-            // Initial render
-            // filterSalesData();
+
+
+            // --- New Logic: Search by Price Book Barcode ---
+            const handleBarcodeSearch = async () => {
+                const barcode = barcodeSearchInput.value.trim();
+                const currentDate = document.getElementById('currentSaleDate').value;
+                if (barcode.length > 0) {
+                    console.log('barcode ---> ' + barcode + ' currentDate ' + currentDate)
+                    try {
+                        const response = await fetch(`/sale/api/save/barcode/${barcode}/saledate/${currentDate}`, { method: 'POST' });
+                        if (response.ok) {
+                            const responseJSON = await response.json();
+                            if (responseJSON != null && responseJSON.message == 'success') {
+                                showToast('Success', 'Sale successfully save.', 'success')
+                                filterSalesData();
+                                barcodeSearchInput.value = ''; // Clear the barcode input
+                                barcodeSearchInput.focus(); // Keep focus on the barcode input for the next item
+                            } else {
+                                document.getElementById("errorSound").play();
+                                showToast('Pricebook not found', responseJSON.message, 'warning');
+                                barcodeSearchInput.value = ''; // Clear the barcode input
+                                barcodeSearchInput.focus();
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Network error:', error);
+                    }
+                }
+            };
+
+            // Use the debounced function for the 'input' event (typing)
+            const debouncedBarcodeSearch = debounce(handleBarcodeSearch, 500);
+
+            barcodeSearchInput.addEventListener('input', debouncedBarcodeSearch);
+            // ------------------------------------------------------------------
+            // New Logic: Set the date filter to today's date and load data on page load
+            // ------------------------------------------------------------------
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const formattedDate = `${year}-${month}-${day}`;
+
+            // Set the date input value to today's date
+            dateFilter.value = formattedDate;
+            document.getElementById('currentSaleDate').value = formattedDate;
+            filterSalesData();
         });
+
+
+        function showToast(title, message, type = "primary") {
+            // Get toast elements
+            const toastEl = document.getElementById("basicToast");
+            const toastTitle = document.getElementById("myToastTitle");
+            const toastMessage = document.getElementById("myToastMessage");
+            const header = toastEl.querySelector(".toast-header");
+
+            // Set values
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+
+            // Update color (Bootstrap contextual classes)
+            header.className = `toast-header bg-${type} text-light`;
+
+            // Show toast
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
     </script>
 </section>
