@@ -45,7 +45,8 @@ public interface SaleRepo extends JpaRepository<Sale, Long>{
             SUM(si.quantity_sold) AS totalQuantity,
             SUM(si.quantity_sold * si.unit_price_at_sale) AS totalSalePrice,
             SUM(si.quantity_sold * p.volume_ml) AS totalVolume,
-            s.sale_date AS saleDate
+            s.sale_date AS saleDate,
+            si.unit_price_at_sale AS unitPrice
         FROM
             sale AS s
         INNER JOIN
@@ -56,8 +57,8 @@ public interface SaleRepo extends JpaRepository<Sale, Long>{
             s.sale_date >= :startDate AND s.sale_date <= :endDate
         GROUP BY
             s.sale_date,
-            p.name
-            
+            p.name,
+            si.unit_price_at_sale
         ORDER BY
             saleDate ASC;
         """;

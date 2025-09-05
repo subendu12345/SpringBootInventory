@@ -135,13 +135,13 @@
                 // 1. Create a new worksheet from the JSON data.
                     // The 'header' option ensures the key names become the column headers.
                     const worksheet = XLSX.utils.json_to_sheet(reportData, {
-                        header: ["saleDate","productName", "totalQuantity", "totalSalePrice", "totalVolume"]
+                        header: ["saleDate","productName", "unitPrice", "totalQuantity", "totalSalePrice", "totalVolume"]
                     });
 
                     // 2. Override the default headers with user-friendly names.
                     // This is an optional step to make the Excel file more readable.
                     XLSX.utils.sheet_add_aoa(worksheet, [
-                        ["Date of Sale","Product Name", "Total Quantity", "Total Sale Price", "Total Volume (ml)"]
+                        ["Date of Sale","Product Name", "Unit Price","Total Quantity", "Total Sale Price", "Total Volume (ml)"]
                     ], { origin: "A1" });
 
                     // 3. Create a new workbook and add the worksheet to it.

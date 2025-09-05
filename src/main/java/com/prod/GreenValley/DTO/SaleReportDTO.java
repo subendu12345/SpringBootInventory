@@ -8,5 +8,6 @@ public record SaleReportDTO (
     BigDecimal totalQuantity,
     BigDecimal totalSalePrice,
     BigDecimal totalVolume,
-    Date saleDate) {
+    Date saleDate,
+    BigDecimal unitPrice) {
 }
