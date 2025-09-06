@@ -51,8 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const newRow = template.content.cloneNode(true).querySelector('tr');
         const newIndex = tableBody.children.length;
         newRow.id = `row-${newIndex}`;
-        console.log('newIndex '+ newIndex);
-        
+        console.log('newIndex ' + newIndex);
+
         // Set the correct name attributes for the new row inputs
         newRow.querySelectorAll('input').forEach(input => {
             input.name = input.name.replace('INDEX_PLACEHOLDER_X', newIndex);
@@ -151,36 +151,39 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         const barcode = event.target.value.trim();
         const currentRow = event.target.closest('tr');
+        if (barcode != '' && barcode.length >= 4) {
+            if (scannedBarcodes.has(barcode)) {
+                showToast('Duplicate Found', 'This product has already been added.', 'warning');
+                event.target.value = '';
+                return;
+            }
+            console.log('barcode --> ' + barcode)
+            fetch(`/sale/api/getproduct/barcode/${barcode}`, { method: 'GET' }).then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            }).then(product => {
+                console.log('res ' + JSON.stringify(product))
+                if (product && product.id == null) {
+                    showToast('Product not Found. ', `Product is not found with this Barcode-${barcode}, Please add pricebook with is barcode`, 'warning')
+                } else {
+                    renderProductInfoToCurrentSec(product, currentRow);
+                    scannedBarcodes.add(barcode);
+                    updateTotalAmount();
+                    document.getElementById('purchaseAddRowButton').click()
+                    showMessageBox('Success', 'Product successfully Fund!', 'success');
+                }
 
-        if (scannedBarcodes.has(barcode)) {
-            showToast('Duplicate Found', 'This product has already been added.', 'warning');
-            event.target.value = '';
-            return;
+            }).catch(err => {
+                console.log('err ')
+                showToast('Error ', JSON.stringify(err), 'error')
+            })
+
         }
-        console.log('barcode --> ' + barcode)
-        fetch(`/sale/api/getproduct/barcode/${barcode}`, { method: 'GET' }).then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        }).then(product => {
-            console.log('res ' + JSON.stringify(product))
-            if (product && product.id == null) {
-                showToast('Product not Found. ', `Product is not found with this Barcode-${barcode}, Please add pricebook with is barcode`, 'warning')
-            } else {
-                renderProductInfoToCurrentSec(product, currentRow);
-                scannedBarcodes.add(barcode);
-                updateTotalAmount();
-                document.getElementById('purchaseAddRowButton').click()
-                showMessageBox('Success', 'Product successfully Fund!', 'success');
-            }
 
-        }).catch(err => {
-            console.log('err ')
-            showToast('Error ', JSON.stringify(err), 'error')
-        })
 
-    }, 500);
+    }, 800);
 
 
 

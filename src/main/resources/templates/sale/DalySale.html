@@ -43,8 +43,17 @@
                             <input type="month" class="form-control" id="monthFilter">
                         </div> -->
                     <div class="col-md-2 mb-3">
-                        <label for="dateFilter" class="form-label font-weight-bold">Filter by Date</label>
+                        <label for="dateFilter" class="form-label font-weight-bold">Start Date</label>
                         <input type="date" class="form-control" id="dateFilter">
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+                        <label for="dateFilter" class="form-label font-weight-bold">End Date</label>
+                        <input type="date" class="form-control" id="endDateFilter">
+                    </div>
+                    <div style="padding-top: 31px;" class="col-md-2 mb-3">
+                        <label for="dateFilter" class="form-label font-weight-bold"></label>
+                        <button   class="btn btn-primary" id="getSaleDetail">Get Details</button>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="TotalSaleAmount" class="form-label font-weight-bold">Total Sale Amount</label>
@@ -112,7 +121,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             //const monthFilter = document.getElementById('monthFilter');
-           
+
             const dateFilter = document.getElementById('dateFilter');
             const salesTableBody = document.getElementById('salesTableBody');
             const loadingIndicator = document.getElementById('loadingIndicator');
@@ -123,6 +132,7 @@
             const showModalBtn = document.getElementById('showModalBtn');
             const resultMessageEl = document.getElementById('resultMessage');
             const barcodeSearchInput = document.getElementById('barcodeSearchInput');
+            const endDateInput = document.getElementById('endDateFilter');
             // New modal and input elements for the barcode scanner
             document.addEventListener("click", () => {
                 barcodeSearchInput.focus()
@@ -156,7 +166,7 @@
                     let dayNumber = parseInt(dateParts[2]);
                     const filterDate = dateParts[0] + "-" + monthNumber + "-" + dayNumber;
 
-                    const response = await fetch(`/sale/details/date?date=${date}`)
+                    const response = await fetch(`/sale/details/date?date=${date}&endDate=${endDateInput.value||''}`)
                     const data_x = await response.json();
                     renderSalesData(data_x);
                     //console.log('data_xdata_xdata_x'+ JSON.stringify(data_x))
@@ -216,7 +226,16 @@
                 }
             }
 
-
+            document.getElementById("getSaleDetail").addEventListener('click', async ()=>{
+                console.log('endDateInput '+ endDateInput.value)
+                if(dateFilter.value && endDateInput.value){
+                    const response = await fetch(`/sale/details/date?date=${dateFilter.value}&endDate=${endDateInput.value}`)
+                    const data_x = await response.json();
+                    renderSalesData(data_x);
+                }else{
+                    showToast("Start/End Date missing..","Please select start date and End date for search.","warning")
+                }
+            })
 
             window.deleteSaleItem = function (id, itemId) {
                 saleId = id;
@@ -288,7 +307,7 @@
             const handleBarcodeSearch = async () => {
                 const barcode = barcodeSearchInput.value.trim();
                 const currentDate = document.getElementById('currentSaleDate').value;
-                if (barcode.length > 0) {
+                if (barcode.length >= 4) {
                     console.log('barcode ---> ' + barcode + ' currentDate ' + currentDate)
                     try {
                         const response = await fetch(`/sale/api/save/barcode/${barcode}/saledate/${currentDate}`, { method: 'POST' });
@@ -327,6 +346,7 @@
 
             // Set the date input value to today's date
             dateFilter.value = formattedDate;
+            endDateInput.value = formattedDate;
             document.getElementById('currentSaleDate').value = formattedDate;
             filterSalesData();
         });

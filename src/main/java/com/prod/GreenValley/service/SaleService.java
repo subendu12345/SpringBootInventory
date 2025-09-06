@@ -48,12 +48,18 @@ public class SaleService {
         return sale;
     }
 
-    public List<Sale> getSaleDataByDate(LocalDate saleDate){
-        return saleRepo.findSalesByDateRange(saleDate);
+    public List<Sale> getSaleDataByDate(LocalDate saleDate, LocalDate endDate){
+        if(endDate==null){
+             return saleRepo.findSalesByDateRange(saleDate);
+        }
+        return saleRepo.findSalesByDateRange(saleDate, endDate);
     }
 
-    public List<SaleReportDTO> getSaleReport(LocalDate startDate, LocalDate endDate){
-        return saleRepo.getProductSaleSummary(startDate, endDate);
+    public List<SaleReportDTO> getSaleReport(LocalDate startDate, LocalDate endDate, Long catId){
+        if(catId == null){
+             return saleRepo.getProductSaleSummary(startDate, endDate);
+        }
+        return saleRepo.getProductSaleSummaryByCategoryId(startDate, endDate, catId);
     }
 
     public void deleteSaleById(Long id) {

@@ -35,7 +35,7 @@
                                 <thead>
                                     <tr>
                                         <th>Product Name</th>
-                                        <th>Price</th>
+                                        <!-- <th>Price</th> -->
                                         <th>Volume/ML</th>
                                         <th class="text-center">Actions</th>
                                     </tr>
@@ -48,11 +48,11 @@
                                                 th:field="*{products[__${stat.index}__].name}"
                                                 placeholder="Product Name" required />
                                         </td>
-                                        <td>
+                                        <!-- <td>
                                             <input type="number" class="form-control"
                                                 th:field="*{products[__${stat.index}__].pricePerUnit}"
                                                 placeholder="Price Per Unit" step="0.01" min="0" required />
-                                        </td>
+                                        </td> -->
                                         <td>
                                             <input type="number" class="form-control"
                                                 th:field="*{products[__${stat.index}__].volumeMl}"
@@ -85,10 +85,10 @@
                     <input type="text" class="form-control" name="products[INDEX_PLACEHOLDER].name"
                         placeholder="Product Name" required />
                 </td>
-                <td>
+                <!-- <td>
                     <input type="number" class="form-control" name="products[INDEX_PLACEHOLDER].pricePerUnit"
                         placeholder="Price Per Unit" step="0.01" min="0" required />
-                </td>
+                </td> -->
                 <td>
                     <input type="number" class="form-control" name="products[INDEX_PLACEHOLDER].volumeMl"
                         placeholder="Volume/ML" min="0" required />

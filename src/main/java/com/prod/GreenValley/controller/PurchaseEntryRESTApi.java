@@ -106,22 +106,33 @@ public class PurchaseEntryRESTApi {
     @GetMapping("/report/sale/details")
     public List<SaleReportDTO> getSaleDetailByDate(
             @RequestParam("startDate") String startDateStr,
-            @RequestParam("endDate") String endDateStr) throws SQLException {
+            @RequestParam("endDate") String endDateStr,
+            @RequestParam("categoryId") String categoryId) throws SQLException {
         // Convert string dates to LocalDate objects for processing.
         LocalDate startDate = LocalDate.parse(startDateStr);
         LocalDate endDate = LocalDate.parse(endDateStr);
-        return saleService.getSaleReport(startDate, endDate);
+        Long ctIt = null;
+        if(categoryId != null && categoryId !=""){
+          ctIt = Long.valueOf(categoryId);
+        }
+        
+        return saleService.getSaleReport(startDate, endDate, ctIt);
 
     }
 
     @GetMapping("/report/purchase/details")
     private List<PurchaseReportDTO> getPurchaseReport(
             @RequestParam("startDate") String startDateStr,
-            @RequestParam("endDate") String endDateStr) {
+            @RequestParam("endDate") String endDateStr,
+            @RequestParam("categoryId") String categoryId) {
         // Convert string dates to LocalDate objects for processing.
         LocalDate startDate = LocalDate.parse(startDateStr);
         LocalDate endDate = LocalDate.parse(endDateStr);
-        return pEntryService.getPurchaseReportByTimeSpan(startDate, endDate);
+        Long ctIt = null;
+        if(categoryId != null && categoryId !=""){
+          ctIt = Long.valueOf(categoryId);
+        }
+        return pEntryService.getPurchaseReportByTimeSpan(startDate, endDate, ctIt);
 
     }
 

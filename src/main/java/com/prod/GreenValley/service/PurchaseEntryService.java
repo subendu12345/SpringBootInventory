@@ -92,8 +92,12 @@ public class PurchaseEntryService {
         return purchaseEntryRepo.findPurchaseEntryById(id);
     }
 
-    public List<PurchaseReportDTO> getPurchaseReportByTimeSpan(LocalDate startDate, LocalDate endDate){
-        return purchaseEntryRepo.getPurchaseReport(startDate, endDate);
+    public List<PurchaseReportDTO> getPurchaseReportByTimeSpan(LocalDate startDate, LocalDate endDate, Long catId){
+        System.out.println("catId--------------->  "+ catId);
+        if(catId == null){
+             return purchaseEntryRepo.getPurchaseReport(startDate, endDate);
+        }
+       return purchaseEntryRepo.getPurchaseReportByCategory(startDate, endDate, catId);
     }
 
     public PurchaseEntryRecordDTO findSinglePurchaseEntryById(Long id){

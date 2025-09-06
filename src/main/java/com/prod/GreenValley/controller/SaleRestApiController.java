@@ -40,9 +40,11 @@ public class SaleRestApiController {
     private PricaeBookService bookService;
 
     @GetMapping("/details/date")
-    public List<SaleInfoDTO> getSaleDetailByDate(@RequestParam("date") LocalDate date) {
-        System.out.println("dateString ============================================== " + date);
-        List<Sale> saleList = saleService.getSaleDataByDate(date);
+    public List<SaleInfoDTO> getSaleDetailByDate(
+        @RequestParam("date") LocalDate date,
+        @RequestParam("endDate") LocalDate endDate) {
+        System.out.println("dateString ============================================== " + endDate);
+        List<Sale> saleList = saleService.getSaleDataByDate(date, endDate);
         List<SaleInfoDTO> saleDto = new ArrayList<>();
         for (Sale sl : saleList) {
             List<SaleItemDTO> saleItemDTOList = new ArrayList<>();

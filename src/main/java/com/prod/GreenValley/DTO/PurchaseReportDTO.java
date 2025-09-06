@@ -8,7 +8,9 @@ public record PurchaseReportDTO (
     BigDecimal totalQuantity,
     BigDecimal totaPurchasePrice,
     BigDecimal totalVolume,
-    Date dateOfPurchase) {
+    Date dateOfPurchase,
+    BigDecimal unitPrice,
+    String categoryName) {
 }
 
 

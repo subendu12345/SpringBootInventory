@@ -9,5 +9,6 @@ public record SaleReportDTO (
     BigDecimal totalSalePrice,
     BigDecimal totalVolume,
     Date saleDate,
-    BigDecimal unitPrice) {
+    BigDecimal unitPrice,
+    String categoryName) {
 }
