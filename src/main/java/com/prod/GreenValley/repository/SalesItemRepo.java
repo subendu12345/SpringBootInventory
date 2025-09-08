@@ -9,7 +9,7 @@ import com.prod.GreenValley.util.SaleItemRecord;
 public interface SalesItemRepo extends JpaRepository<SaleItem, Long>{
 
 
-    @Query(value = "SELECT SUM(unit_price_at_sale) AS TotalSaleAmount FROM sale_item;", nativeQuery = true)
+    @Query(value = "SELECT SUM(quantity_sold * unit_price_at_sale) AS TotalSaleAmount FROM sale_item;", nativeQuery = true)
     SaleItemRecord getTotalSaleAmount();
     
 }
