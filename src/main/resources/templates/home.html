@@ -28,12 +28,6 @@
     <section>
         </div>
         <div th:replace="/utill/MessageShow.html :: toast"></div>
-        <div id="loadingSpinner" class="d-none mt-6">
-            <div class="spinner-border text-blue-600" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="text-sm text-gray-500 mt-2">Backup in progress...</p>
-        </div>
         <div class="row">
             <div class="col-sm-6">
                 <div class="">
@@ -41,8 +35,6 @@
                         Products</button>
                     <button type="button" class="btn btn-info" data-toggle="modal"
                         data-target="#purchaseEntryFormModal">Purchase Entry</button>
-
-                    <button type="button" id="sendBackupBtn" class="btn btn-info">Send Backup</button>
                 </div>
                 <div th:replace="/product/ProductStock.html :: productStockDashBoard"></div>
             </div>
