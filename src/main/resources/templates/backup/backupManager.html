@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.thymeleaf.org" th:replace="base::layout(~{::section})">
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Backup</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <style>
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f3f4f6;
+            margin: 7rem;
+        }
+    </style>
+
+</head>
+
+<section>
+
+    <div class="main-container">
+        <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md mx-auto text-center" style="height: 300px;">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Database Backup</h1>
+            <p class="text-gray-600 mb-8">Click the button below to perform a full database backup and send it to the
+                admin via email.</p>
+
+            <!-- The button to trigger the backup -->
+            <button id="backupButton"
+                class="btn btn-primary btn-sm ">
+                Start Backup
+            </button>
+
+            <!-- The Bootstrap spinner, initially hidden -->
+            <div id="loadingSpinner" class="d-none mt-6">
+                <div class="spinner-border text-blue-600" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="text-sm text-gray-500 mt-2">Backup in progress don't close tab...</p>
+            </div>
+
+            <!-- The status message area -->
+            <div id="statusMessage"  class="mt-6 text-lg font-medium"></div>
+        </div>
+    </div>
+
+    <script>
+        const backupButton = document.getElementById('backupButton');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const statusMessage = document.getElementById('statusMessage');
+
+        backupButton.addEventListener('click', async () => {
+            // Show the spinner and hide the button and message
+            loadingSpinner.classList.remove('d-none');
+            backupButton.disabled = true;
+            statusMessage.textContent = '';
+
+            try {
+                // Perform the API call to the backend
+                const response = await fetch("/backup");
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('satttt ' + JSON.stringify(result))
+                    if (result.status == 'success') {
+                        statusMessage.textContent = `Success: ${result.message}`;
+                        statusMessage.className = 'mt-6 text-lg font-medium text-green-600';
+                        statusMessage.style="padding: 17px; color: green; font-weight: 900; font-size: 17px;"
+                    }
+                    else {
+                        statusMessage.textContent = `Error: ${result.message}`;
+                        statusMessage.className = 'mt-6 text-lg font-medium text-red-600';
+                    }
+
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                statusMessage.textContent = `An error occurred: ${error.message}`;
+                statusMessage.className = 'mt-6 text-lg font-medium text-red-600';
+            } finally {
+                // Hide the spinner and re-enable the button
+                loadingSpinner.classList.add('d-none');
+                backupButton.disabled = false;
+            }
+        });
+    </script>
+</section>

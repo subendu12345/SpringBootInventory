@@ -5,10 +5,12 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import java.io.File;
 
 import com.prod.GreenValley.DTO.ProductStockDTO;
 
@@ -47,5 +49,23 @@ public class EmailService {
         helper.addAttachment("product_stock.xlsx", new ByteArrayResource(excelData));
 
         mailSender.send(message);
+        
     }
+
+
+    public void sendBackUpFileTOAdmin(String to, String subject, String body, String backupFilePath) throws MessagingException{
+        System.out.println("sendBackUpFileTOAdmin calling..................");
+         MimeMessage message = mailSender.createMimeMessage();
+         MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom("surya.bakra@gmail.com");
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(body, true); // true indicates HTML format
+
+            // Attach the file to the email
+            FileSystemResource file = new FileSystemResource(new File(backupFilePath));
+            helper.addAttachment(file.getFilename(), file);
+            mailSender.send(message);
+    }
+
 }

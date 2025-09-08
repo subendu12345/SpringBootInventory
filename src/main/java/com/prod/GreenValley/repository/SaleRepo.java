@@ -20,10 +20,10 @@ public interface SaleRepo extends JpaRepository<Sale, Long>{
      * @param endOfDay   The end of the date (e.g., 'YYYY-MM-DDT23:59:59')
      * @return A list of Sale objects that occurred on the specified day.
      */
-    @Query("SELECT DISTINCT s FROM Sale s JOIN FETCH s.saleItems si WHERE s.saleDate = :saleDate2")
+    @Query("SELECT DISTINCT s FROM Sale s JOIN FETCH s.saleItems si WHERE s.saleDate = :saleDate2 ORDER BY si.id DESC")
     List<Sale> findSalesByDateRange(LocalDate saleDate2);
 
-    @Query("SELECT DISTINCT s FROM Sale s JOIN FETCH s.saleItems si WHERE s.saleDate >= :starDate AND s.saleDate <= :endDate")
+    @Query("SELECT DISTINCT s FROM Sale s JOIN FETCH s.saleItems si WHERE s.saleDate >= :starDate AND s.saleDate <= :endDate ORDER BY si.id DESC")
     List<Sale> findSalesByDateRange(LocalDate starDate, LocalDate endDate);
 
     /**

@@ -6,12 +6,34 @@
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
 
-
+    <style>
+        #page-overlay {
+            position: fixed;
+            /* Fixes the overlay to the viewport */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            /* Semi-transparent white background */
+            z-index: 9999;
+            /* Ensures it's on top of other content */
+            display: none;
+            /* Hidden by default, show with JavaScript */
+        }
+    </style>
 </head>
 
 <body>
     <section>
+        </div>
         <div th:replace="/utill/MessageShow.html :: toast"></div>
+        <div id="loadingSpinner" class="d-none mt-6">
+            <div class="spinner-border text-blue-600" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-sm text-gray-500 mt-2">Backup in progress...</p>
+        </div>
         <div class="row">
             <div class="col-sm-6">
                 <div class="">
@@ -19,10 +41,12 @@
                         Products</button>
                     <button type="button" class="btn btn-info" data-toggle="modal"
                         data-target="#purchaseEntryFormModal">Purchase Entry</button>
+
+                    <button type="button" id="sendBackupBtn" class="btn btn-info">Send Backup</button>
                 </div>
                 <div th:replace="/product/ProductStock.html :: productStockDashBoard"></div>
             </div>
-            <div th:if="${session.sessionObj.role == 'ADMIN'}"  class="col-sm-6">
+            <div th:if="${session.sessionObj.role == 'ADMIN'}" class="col-sm-6">
                 <div class="shadow-box">
                     <div th:replace="/sale/NewSalesEntryForm.html :: saleEntryForm"></div>
                 </div>
@@ -65,6 +89,19 @@
             </div>
         </div>
 
+
+        <script>
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const loadingSpinner = document.getElementById('loadingSpinner');
+                loadingSpinner.classList.remove('d-none');
+                console.log('frm home page calling  ')
+            })
+        </script>
     </section>
+
+    <!-- sendBackupBtn -->
+
+
 
 </body>
