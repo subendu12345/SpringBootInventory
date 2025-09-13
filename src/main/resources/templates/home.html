@@ -29,7 +29,7 @@
         </div>
         <div th:replace="/utill/MessageShow.html :: toast"></div>
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 <div class="">
                     <button type="button" class="btn btn-info" data-toggle="modal" data-target="#productModal">Add
                         Products</button>
@@ -38,11 +38,11 @@
                 </div>
                 <div th:replace="/product/ProductStock.html :: productStockDashBoard"></div>
             </div>
-            <div th:if="${session.sessionObj.role == 'ADMIN'}" class="col-sm-6">
+            <!-- <div th:if="${session.sessionObj.role == 'ADMIN'}" class="col-sm-6">
                 <div class="shadow-box">
                     <div th:replace="/sale/NewSalesEntryForm.html :: saleEntryForm"></div>
                 </div>
-            </div>
+            </div> -->
         </div>
 
         <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productModalLabel"

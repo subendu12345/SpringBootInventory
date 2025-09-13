@@ -90,28 +90,31 @@
                         class="btn btn-primary">Logout</button>
                 </li>
             </ul>
+
         </div>
-        <script>
-            // This script will run once the page is fully loaded.
-            window.onload = function () {
-                // Get the current path from the URL, e.g., "/purchase/purchase-detail"
-                const currentPath = window.location.pathname;
 
-                // Find all the navigation links
-                const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
-
-                // Loop through each link
-                navLinks.forEach(link => {
-                    // Check if the link's href matches the current URL path
-                    if (link.getAttribute('href') === currentPath) {
-                        // If it's a match, add the 'active' class to its parent list item
-                        link.parentElement.classList.add('active');
-                    }
-                });
-            }
-        </script>
 
     </nav>
+
+    <script>
+        // This script will run once the page is fully loaded.
+        window.onload = function () {
+            // Get the current path from the URL, e.g., "/purchase/purchase-detail"
+            const currentPath = window.location.pathname;
+
+            // Find all the navigation links
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+
+            // Loop through each link
+            navLinks.forEach(link => {
+                // Check if the link's href matches the current URL path
+                if (link.getAttribute('href') === currentPath) {
+                    // If it's a match, add the 'active' class to its parent list item
+                    link.parentElement.classList.add('active');
+                }
+            });
+        }
+    </script>
     <div th:replace="${content}"></div>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -122,6 +125,8 @@
     <script th:src="@{/javaScript/bootStarpIconJs.js}"></script>
     <script th:src="@{/javaScript/sheetJS.js}"></script>
     <script th:src="@{/javaScript/chartJS.js}"></script>
+    <!-- tailwindsCSS -->
+    <!-- <script th:src="@{/javaScript/tailwindsCSS.js}"></script> -->
 
     <script th:src="@{/javaScript/ProductSearchandFormLogic.js}" defer></script>
 </body>
