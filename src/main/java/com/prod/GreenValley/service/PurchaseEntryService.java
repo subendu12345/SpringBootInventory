@@ -47,7 +47,6 @@ public class PurchaseEntryService {
     }
 
     public PurchaseEntry savePurchase(PurchaseEntryForm purchaseForm) {
-        System.out.println("save method calll ");
         PurchaseEntry purchase = new PurchaseEntry();
         if (purchaseForm.getId() != null) {
             purchase = purchaseEntryRepo.findById(purchaseForm.getId()).orElse(purchase);
@@ -61,7 +60,6 @@ public class PurchaseEntryService {
 
         BigDecimal totalAmount = BigDecimal.ZERO;
         for (PurchaseEntryItemForm itemForm : purchaseForm.getItems()) {
-            System.out.println("++++++++++++++++++++++++++++++++++++++++++ " + itemForm.getProductId());
             PurchaseEntryItem item = new PurchaseEntryItem();
             Product prod = productRepo.findById(itemForm.getProductId()).orElseThrow(
                     () -> new EntityNotFoundException("Product not found with Name : " + itemForm.getProductInfo()));
@@ -93,7 +91,6 @@ public class PurchaseEntryService {
     }
 
     public List<PurchaseReportDTO> getPurchaseReportByTimeSpan(LocalDate startDate, LocalDate endDate, Long catId){
-        System.out.println("catId--------------->  "+ catId);
         if(catId == null){
              return purchaseEntryRepo.getPurchaseReport(startDate, endDate);
         }

@@ -23,13 +23,12 @@ public class AuthController {
     // Login service
     @PostMapping("/signin")
     public User login(@ModelAttribute("login") UserDTO userDTO) {
-        System.out.println("hello I am from login----------");
         return authService.login(userDTO.getEmail(), userDTO.getPassword());
     }
 
     public boolean isAuthenticated(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("====> "+authentication.getName());
+        
         return authentication != null && authentication.isAuthenticated();
     }
 

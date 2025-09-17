@@ -217,7 +217,6 @@
                 if (!categoryId) {
                     return;
                 }
-                console.log("*****************88 " + selectedSubCategoryId)
                 fetch('/products/api/get/' + categoryId + '/subcategories')
                     .then(response => {
                         if (!response.ok) {
@@ -227,7 +226,6 @@
                     })
                     .then(subCategories => {
                         if (subCategories && subCategories.subCategories) {
-                            console.log("------------Sub-category " + JSON.stringify(subCategories))
                             subCategories.subCategories.forEach(sub => {
                                 const option = document.createElement('option');
                                 option.value = sub.id;
@@ -284,7 +282,6 @@
                         })
                         .then(product => {
                             // Populate the form fields with the product data
-                            console.log('product   ' + JSON.stringify(product))
                             document.getElementById('productId').value = product.id;
                             document.getElementById('productName').value = product.name;
                             document.getElementById('productVolume').value = product.volumeMl;
@@ -304,7 +301,6 @@
 
 
             priceBookModal_Data.addEventListener('show.bs.modal', function (event) {
-                console.log("price book modal")
                 const button = event.relatedTarget;
                 const productId = button.getAttribute('data-id');
                 const productName =  button.getAttribute('data-name');
@@ -359,14 +355,11 @@
                     productId: document.getElementById('productId').value,
                 }
                 if (!PriceBookDTO.productPrice || !PriceBookDTO.productBarCode) return;
-
-                console.log('hello iam from save button ' + JSON.stringify(PriceBookDTO));
                 fetch("/products/api/save/pricebook", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(PriceBookDTO)
                 }).then(res => {
-                    console.log('pricebook ' + JSON.stringify(res))
                     return res.json();
 
                 }).then(res => {
@@ -395,7 +388,6 @@
                 const name = document.getElementById('productName').value;
                 const volumeMl = document.getElementById('productVolume').value;
                 // You can now use the value, for example, to log it to the console
-                console.log('Selected Sub-category ID:', categoryId);
 
                 const productDTO = {
                     name,
@@ -403,7 +395,6 @@
                     volumeMl,
                     id
                 };
-                console.log(JSON.stringify(productDTO) + '-------------- ' + id)
                 try {
                     const response = await fetch(`/products/api/update/${id}`, {
                         method: 'POST',

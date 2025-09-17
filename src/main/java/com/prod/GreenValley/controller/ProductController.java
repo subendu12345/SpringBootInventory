@@ -47,7 +47,6 @@ public class ProductController {
         model.addAttribute("savedProducts", productForm.getProducts());
 
         List<Product> products = productForm.getProducts();
-        System.out.println("product list "+ products);
         for(Product prd : products){
             prd.setName(prd.getName() + prd.getVolumeMl().toString());
         }

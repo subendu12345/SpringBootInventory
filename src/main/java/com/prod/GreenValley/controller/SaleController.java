@@ -42,8 +42,6 @@ public class SaleController {
             // TODO: handle exception
 
         }
-        
-        System.out.println("################");
         return "redirect:/home";
     }
 

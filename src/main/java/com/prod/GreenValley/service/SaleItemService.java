@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.prod.GreenValley.DTO.SaleItemDTO;
 import com.prod.GreenValley.Entities.Product;
 import com.prod.GreenValley.Entities.Sale;
 import com.prod.GreenValley.Entities.SaleItem;
@@ -42,6 +43,16 @@ public class SaleItemService {
 
     public SaleItemRecord getTotalSaleAmount(){
         return salesItemRepo.getTotalSaleAmount();
+    }
+
+    public void updateSaleItem(SaleItemDTO saleItemDTO) {
+        SaleItem si  = salesItemRepo.findById(saleItemDTO.getSaleItemId()).orElse(null);
+        if (saleItemDTO.getQuantitySold() != null) {
+            si.setQuantitySold(saleItemDTO.getQuantitySold());
+        } else if (saleItemDTO.getUnitPriceAtSale() != null) {
+            si.setUnitPriceAtSale(saleItemDTO.getUnitPriceAtSale());
+        }
+        salesItemRepo.save(si);
     }
     
 }

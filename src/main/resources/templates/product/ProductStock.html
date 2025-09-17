@@ -81,8 +81,6 @@
                             stockOnHand_1.push(stockOnHand);
                             backgroundColors.push(getRandomRgbColor());
                         });
-                        console.log('---> ' + productNames.length)
-                        console.log('stockOnHand_1 ' + stockOnHand_1.length);
                         document.getElementById("totalBottoleCount").textContent = 'Total Bottole Count.(' + totalBottoleCount + ')';
                         renderStockChart()
 
@@ -104,9 +102,7 @@
                 const response = await fetch("/api/stock/amount")
                 const amountData = await response.json();
                 const totalStockAmount = amountData.PurchaseAmount - amountData.SaleAmount;
-                console.log('totalStockAmount  ' + totalStockAmount)
                 document.getElementById("totalStockAmount").textContent = 'Total Stock Amt.(' + totalStockAmount + ')';
-                console.log('amt ' + JSON.stringify(amountData))
             }
 
 

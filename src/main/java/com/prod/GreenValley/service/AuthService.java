@@ -20,7 +20,6 @@ public class AuthService {
 
     //login service
     public User login(String username, String password) {
-        System.out.println("=========================login callingg.... "+ username);
         User user = userRepo.findByUsername(username).orElseThrow();
         if (passwordEncoder.matches(password, user.getPassword())) {
             return user;

@@ -64,7 +64,6 @@
 
                 if (response.ok) {
                     const result = await response.json();
-                    console.log('satttt ' + JSON.stringify(result))
                     if (result.status == 'success') {
                         statusMessage.textContent = `Success: ${result.message}`;
                         statusMessage.className = 'mt-6 text-lg font-medium text-green-600';

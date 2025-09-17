@@ -25,12 +25,6 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws IOException, ServletException {
         // Custom logic on successful authentication
-        System.out.println(
-                "---------------------------------***********************************----------------------------------------");
-        System.out.println("request " + request);
-        System.out.println("response " + response);
-        System.out.println("authentication " + authentication.getAuthorities());
-
         HttpSession session = request.getSession();
 
         // Get the username directly from the authentication object

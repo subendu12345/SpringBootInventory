@@ -16,7 +16,6 @@ public class BillInfoDTO {
     public BillInfoDTO(){};
 
     public BillInfoDTO(Long saleId, Date saleDate, BigDecimal totalAmount, List<SalesItemForm> items){
-        System.out.println("---------------******** "+ saleId);
         this.saleId = saleId;
         this.saleDate = saleDate;
         this.totalAmount = totalAmount;

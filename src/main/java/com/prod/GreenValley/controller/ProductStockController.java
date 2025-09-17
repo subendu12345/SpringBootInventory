@@ -53,7 +53,6 @@ public class ProductStockController {
     public List<ProductStockDTO> getStockData() throws MessagingException, IOException {
         List<ProductStockDTO> productStocks= stockService.getProductStock();
         //emailService.sendProductStockReport(productStocks, "surya.bakra@gmail.com");
-        System.out.println("-----------------------------------------------------------------------");
         return productStocks;
     }
 

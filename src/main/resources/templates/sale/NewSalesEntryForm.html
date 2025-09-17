@@ -160,10 +160,8 @@
                     }
 
                     try {
-                        console.log('query '+ query)
                         const response = await fetch(`/api/product/search?query=${query}`);
                         const products = await response.json();
-                        console.log('products '+ JSON.stringify(products))
                         resultList.innerHTML = '';
                         if (products.length > 0) {
                             products.forEach(product => {

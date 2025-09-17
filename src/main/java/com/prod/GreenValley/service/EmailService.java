@@ -32,8 +32,6 @@ public class EmailService {
         message.setText(body);
 
         mailSender.send(message);
-
-        System.out.println("Email sent successfully to " + toEmail);
     }
 
     public void sendProductStockReport(List<ProductStockDTO> products, String toEmail)
@@ -54,7 +52,6 @@ public class EmailService {
 
 
     public void sendBackUpFileTOAdmin(String to, String subject, String body, String backupFilePath) throws MessagingException{
-        System.out.println("sendBackUpFileTOAdmin calling..................");
          MimeMessage message = mailSender.createMimeMessage();
          MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setFrom("surya.bakra@gmail.com");

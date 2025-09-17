@@ -123,7 +123,6 @@
                             alert('No data found for the selected date range.');
                             return;
                         }
-                        console.log('reportdata ' + JSON.stringify(reportData))
                         if (reportType == 'sale') {
                             buildSaleReport(reportData, startDate, endDate)
                         } else {
@@ -146,12 +145,10 @@
                 // Event listener for Category dropdown change
                 categorySelect.addEventListener('change', (event) => {
                     categoryValue = event.target.value;
-                    console.log('categoryValue '+ categoryValue)
                 });
 
 
                 function buildSaleReport(reportData, startDate, endDate) {
-                    console.log('sale report calling...... ' + JSON.stringify(reportData))
                     // 1. Create a new worksheet from the JSON data.
                     // The 'header' option ensures the key names become the column headers.
                     const worksheet = XLSX.utils.json_to_sheet(reportData, {

@@ -104,7 +104,6 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('calll')
             const purchaseTableBody = document.getElementById('purchaseTableBody');
             const purchaseModal = $('#purchaseModal'); // Use jQuery for Bootstrap modal functions
             const purchaseForm = document.getElementById('purchaseForm');
@@ -140,7 +139,6 @@
                         throw new Error('Failed to fetch purchases.');
                     }
                     const purchases = await response.json();
-                    console.log('response ' + JSON.stringify(purchases))
                     renderPurchases(purchases);
                 } catch (error) {
                     console.error('Error fetching purchases:', error);
@@ -223,7 +221,6 @@
             // Function to add a new row to the purchase item table
             function addPurchaseItemRow(item = null, isReadOnly) {
                 const newRow = document.createElement('tr');
-                console.log('isReadOnly  '+ isReadOnly)
                 let innerHTMLStr = `
                     <td>
                         <input type="text" name="productInfo" value="${item ? item.productName : ''}" placeholder="Product name" class="form-control form-control-sm" readonly required>
@@ -341,10 +338,8 @@
             async function viewPurchase(id) {
                 try {
                     const response = await fetch(`/api/purchases/${id}`);
-                    console.log('responseresponseresponseresponseresponse  ' + JSON.stringify(response))
                     // if (!response.ok) throw new Error('Purchase not found.');
                     const purchase = await response.json();
-                    console.log('purchaseItesm   ' + JSON.stringify(purchase))
                     openModalForView(purchase);
                 } catch (error) {
                     console.error('Error fetching purchase details:', error);
@@ -396,10 +391,8 @@
                         const id = e.target.dataset.id;
                         try {
                             const response = await fetch(`/api/purchases/${id}`);
-                            console.log('responseresponseresponseresponseresponse  ' + JSON.stringify(response))
                             // if (!response.ok) throw new Error('Purchase not found.');
                             const purchase = await response.json();
-                            console.log('purchaseItesm   ' + JSON.stringify(purchase))
                             openModal(purchase);
                         } catch (error) {
                             console.error('Error fetching purchase details:', error);

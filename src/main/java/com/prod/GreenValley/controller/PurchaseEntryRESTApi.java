@@ -87,7 +87,6 @@ public class PurchaseEntryRESTApi {
             pEntryService.savePurchase(purchaseForm);
 
         } catch (Exception e) {
-            System.out.println("exception " + e.getMessage());
         }
     }
 

@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^ callingnnnnnn')
     const tableBody = document.querySelector('#purchaseItemTable tbody');
     const barcodeSearchInput = document.getElementById('barcodeSearchInput');
     const scannedBarcodes = new Set();
@@ -21,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalAmountInput = document.getElementById('purchaseTotalAmount');
     //add logic to update Total Amount automatic
     const updateTotalAmount = () => {
-        console.log('update sum calling.....')
         let total = 0;
         // Get all rows in the table body
         if (purchaseItemTable && purchaseItemTable.querySelectorAll('tr')) {
@@ -35,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 total += quantity * price;
             });
-            console.log('total  ------> ' + total)
             totalAmountInput.value = total;
         }
 
@@ -51,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const newRow = template.content.cloneNode(true).querySelector('tr');
         const newIndex = tableBody.children.length;
         newRow.id = `row-${newIndex}`;
-        console.log('newIndex ' + newIndex);
 
         // Set the correct name attributes for the new row inputs
         newRow.querySelectorAll('input').forEach(input => {
@@ -157,14 +153,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 event.target.value = '';
                 return;
             }
-            console.log('barcode --> ' + barcode)
+            
             fetch(`/sale/api/getproduct/barcode/${barcode}`, { method: 'GET' }).then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 return response.json();
             }).then(product => {
-                console.log('res ' + JSON.stringify(product))
+                
                 if (product && product.id == null) {
                     showToast('Product not Found. ', `Product is not found with this Barcode-${barcode}, Please add pricebook with is barcode`, 'warning')
                 } else {

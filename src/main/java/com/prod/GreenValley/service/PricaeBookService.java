@@ -44,7 +44,6 @@ public class PricaeBookService {
                 message="product not found";
             }
         } catch (Exception e) {
-            System.out.println("into exception ");
             // TODO: handle exception
             message = e.getMessage();
         }
@@ -54,9 +53,7 @@ public class PricaeBookService {
     public PriceBookDTO getProductInfoByBarcode(String barcode){  
          
         PriceBookDTO pbObj = new PriceBookDTO();
-        System.out.println("*******************************8888888  "+barcode); 
         PriceBookRecordDTO pb = priceBookRepo.getPriceBookByBarcode(barcode);
-        System.out.println("get$$$$$$$$$$$$$$$4 "+ pb);
         if(pb != null && pb.productId() != null){
             pbObj.setProductId(pb.productId());
             pbObj.setProductName(pb.productName());
@@ -69,7 +66,6 @@ public class PricaeBookService {
 
     public List<PriceBookDTO> getPriceBooksByProductId(Long productId){
         List<PriceBook> priceBooks = priceBookRepo.findByProduct_Id(productId);
-        System.out.println("size of pricee book "+priceBooks.size());
         List<PriceBookDTO> priceBookDTOs = new ArrayList<>();
         for (PriceBook pb : priceBooks) {
             PriceBookDTO bookDTO = new PriceBookDTO();
@@ -80,7 +76,6 @@ public class PricaeBookService {
             priceBookDTOs.add(bookDTO);
             
         }
-        System.out.println("----> product Name "+priceBookDTOs.size());
         return priceBookDTOs;
     }
 }

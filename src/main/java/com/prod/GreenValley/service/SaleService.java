@@ -29,16 +29,13 @@ public class SaleService {
     @Autowired
     private PriceBookRepo priceBookRepo;
 
-    
     @Autowired
     private ProductService productService;
-    
 
     @Autowired
     private ProductRepo productRepo;
-    
 
-    public Sale saveSaleItem(SalesForm salesForm){
+    public Sale saveSaleItem(SalesForm salesForm) {
         Sale sale = new Sale();
         sale.setPaymentMethod(salesForm.getPaymentMethod());
         sale.setTotalAmount(salesForm.getTotalAmount());
@@ -48,16 +45,16 @@ public class SaleService {
         return sale;
     }
 
-    public List<Sale> getSaleDataByDate(LocalDate saleDate, LocalDate endDate){
-        if(endDate==null){
-             return saleRepo.findSalesByDateRange(saleDate);
+    public List<Sale> getSaleDataByDate(LocalDate saleDate, LocalDate endDate) {
+        if (endDate == null) {
+            return saleRepo.findSalesByDateRange(saleDate);
         }
         return saleRepo.findSalesByDateRange(saleDate, endDate);
     }
 
-    public List<SaleReportDTO> getSaleReport(LocalDate startDate, LocalDate endDate, Long catId){
-        if(catId == null){
-             return saleRepo.getProductSaleSummary(startDate, endDate);
+    public List<SaleReportDTO> getSaleReport(LocalDate startDate, LocalDate endDate, Long catId) {
+        if (catId == null) {
+            return saleRepo.getProductSaleSummary(startDate, endDate);
         }
         return saleRepo.getProductSaleSummaryByCategoryId(startDate, endDate, catId);
     }
@@ -79,29 +76,29 @@ public class SaleService {
         }
 
         // Save the updated sale object, which will also update the items list.
-        if(sale.getSaleItems().isEmpty()){
+        if (sale.getSaleItems().isEmpty()) {
             saleRepo.deleteById(sale.getId());
-        }else{
+        } else {
             saleRepo.save(sale);
         }
-        
+
     }
 
-    public String saveSaleItemByBarcode(String barcode, Date saleDate){
+    public String saveSaleItemByBarcode(String barcode, Date saleDate) {
 
         PriceBook pb = priceBookRepo.findByProductBarCode(barcode);
-        if(pb == null){
-           return "Price Book not created with this barcode "+barcode;
-        }else{
+        if (pb == null) {
+            return "Price Book not created with this barcode " + barcode;
+        } else {
             List<ProductSearchDTO> productSearchDTOs = productService.searchProducts(pb.getProduct().getName());
-            if(productSearchDTOs != null && productSearchDTOs.get(0).getStockOnHeand() > 0){
+            if (productSearchDTOs != null && productSearchDTOs.get(0).getStockOnHeand() > 0) {
                 // insert sale;
 
                 Product myProduct = productRepo.findById(pb.getProduct().getId()).orElse(null);
                 Sale newSale = new Sale();
                 newSale.setTotalAmount(BigDecimal.valueOf(pb.getProductPrice()));
                 newSale.setSaleDate(saleDate);
-                SaleItem newSaleItem  = new SaleItem();
+                SaleItem newSaleItem = new SaleItem();
                 newSaleItem.setProduct(myProduct);
                 newSaleItem.setQuantitySold(1);
                 newSaleItem.setSale(newSale);
@@ -110,14 +107,15 @@ public class SaleService {
                 newSaleItem.setBarcode(barcode);
                 saleRepo.save(newSale);
 
-            }else{
+            } else {
                 return "Stock not available";
             }
-            
+
         }
         return "success";
 
     }
 
     
+
 }

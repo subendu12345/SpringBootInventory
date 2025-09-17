@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +27,7 @@ import com.prod.GreenValley.DTO.SaleItemDTO;
 import com.prod.GreenValley.Entities.Sale;
 import com.prod.GreenValley.Entities.SaleItem;
 import com.prod.GreenValley.service.PricaeBookService;
+import com.prod.GreenValley.service.SaleItemService;
 import com.prod.GreenValley.service.SaleService;
 
 @RestController
@@ -37,13 +40,15 @@ public class SaleRestApiController {
     private SaleService saleService;
 
     @Autowired
+    private SaleItemService itemService;
+
+    @Autowired
     private PricaeBookService bookService;
 
     @GetMapping("/details/date")
     public List<SaleInfoDTO> getSaleDetailByDate(
         @RequestParam("date") LocalDate date,
         @RequestParam("endDate") LocalDate endDate) {
-        System.out.println("dateString ============================================== " + endDate);
         List<Sale> saleList = saleService.getSaleDataByDate(date, endDate);
         List<SaleInfoDTO> saleDto = new ArrayList<>();
         for (Sale sl : saleList) {
@@ -60,7 +65,6 @@ public class SaleRestApiController {
                     saleItemDTOList);
             saleDto.add(saleInfoDTO);
         }
-        System.out.println("saleDto   " + saleDto);
         return saleDto;
 
     }
@@ -85,17 +89,13 @@ public class SaleRestApiController {
     public ResponseEntity<String> deleteSaleItem(
             @PathVariable Long saleId,
             @PathVariable Long itemId) throws Exception {
-        System.out.println("valllllll");
         saleService.deleteSaleItem(saleId, itemId);
         return ResponseEntity.ok("Sale item deleted successfully.");
     }
 
     @PostMapping("/api/save/barcode/{barcode}/saledate/{saleDate}")
     public ResponseEntity<Map<String, String>> insertSaleByBarcode(@PathVariable String barcode, @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date  saleDate) {
-        System.out.println("barcode " + saleDate);
-        String serviceResponse = saleService.saveSaleItemByBarcode(barcode, saleDate);
-        System.out.println("serviceResponse "+ serviceResponse);
-        
+        String serviceResponse = saleService.saveSaleItemByBarcode(barcode, saleDate);  
         
         //Create a Map to hold your key-value pairs for the JSON response
         Map<String, String> jsonResponse = Map.of("message", serviceResponse);
@@ -106,9 +106,18 @@ public class SaleRestApiController {
 
     @GetMapping("/api/getproduct/barcode/{barcode}")
     public PriceBookDTO getProductInfoByBarcode(@PathVariable String barcode){
-        System.out.println("barcode--------------------------->  "+ barcode);
         return bookService.getProductInfoByBarcode(barcode);
 
+    }
+
+    @PutMapping("/update/item")
+    public String updateSaleItem(@RequestBody SaleItemDTO saleItemDTO){
+        try {
+            itemService.updateSaleItem(saleItemDTO);
+            return "success";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
 
 }

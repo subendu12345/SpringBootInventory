@@ -58,7 +58,6 @@ public class ProductRESTApi {
     @PostMapping("/update/{id}")
     public String updateProduct(@PathVariable Long id, @RequestBody ProductDTO productDTO){
         String message = "success";
-        System.out.println("productDTO "+ productDTO.getName()+ "       "+ productDTO.getVolumeMl());
         try {
             productService.updateProduct(id, productDTO);
         } catch (Exception e) {
@@ -70,8 +69,6 @@ public class ProductRESTApi {
 
     @PostMapping("/save/pricebook")
     public ResponseEntity<Map<String, String>> savePriceBook(@RequestBody PriceBookDTO priceBookDTO){
-        
-        System.out.println("OOOOOOOOOOOOO "+ priceBookDTO.getProductBarCode());
         String message =pricaeBookService.savePriceBook(priceBookDTO);
         Map<String, String> jsonResponse = Map.of("message", message);
         return new ResponseEntity<>(jsonResponse, HttpStatus.CREATED);

@@ -18,7 +18,7 @@ public class SaleItem {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Column(name = "quantity_sold", updatable = false)
+    @Column(name = "quantity_sold")
     private Integer quantitySold ;
 
     @Column(name = "unit_price_at_sale", precision = 10, scale = 2)

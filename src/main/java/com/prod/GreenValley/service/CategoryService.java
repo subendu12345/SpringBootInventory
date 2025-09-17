@@ -114,7 +114,6 @@ public class CategoryService {
             for (SubCategoryDto subCatType : categoryDto.getSubCategories()) {
                 if(subCatType != null && subCatType.getName() != null && subCatType.getCode() !=null){
                     SubCategory subCategory = new SubCategory();
-                    System.out.println("----------------&&&&&&&&&&&&&&&&&&&&&77777 "+ subCatType.getCode());
                     subCategory.setName(subCatType.getName().trim());
                     subCategory.setCode(subCatType.getCode() != null ? subCatType.getCode().trim() : null);
                     subCategory.setCategory(existingCategory);

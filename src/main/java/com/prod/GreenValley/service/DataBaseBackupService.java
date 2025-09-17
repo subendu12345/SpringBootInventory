@@ -70,8 +70,6 @@ public class DataBaseBackupService {
 
         // Redirect the output to the backup file
         processBuilder.redirectOutput(backupFilePath.toFile());
-
-        System.out.println("Starting database backup for " + dbName + "...");
         Process process = processBuilder.start();
 
         // Wait for the process to complete (with a timeout)
@@ -80,8 +78,6 @@ public class DataBaseBackupService {
         if (!finished || process.exitValue() != 0) {
             throw new RuntimeException("Database backup failed or timed out.");
         }
-
-        System.out.println("Database backup successful! File saved to: " + backupFilePath.toAbsolutePath());
         return backupFilePath.toAbsolutePath().toString();
     }
 }
