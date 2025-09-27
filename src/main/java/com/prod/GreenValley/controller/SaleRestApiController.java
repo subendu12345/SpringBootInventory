@@ -56,6 +56,11 @@ public class SaleRestApiController {
             for (SaleItem saleItem : sl.getSaleItems()) {
                 SaleItemDTO dto = new SaleItemDTO();
                 dto.setSaleItemId(saleItem.getId());
+                if(saleItem.getProduct().getSubCategory() != null){
+                    dto.setProductType(saleItem.getProduct().getSubCategory().getCategory().getName());
+                }
+                dto.setVolumeMl(saleItem.getProduct().getVolumeMl());
+                
                 dto.setQuantitySold(saleItem.getQuantitySold());
                 dto.setUnitPriceAtSale(saleItem.getUnitPriceAtSale());
                 dto.setProductInfo(saleItem.getProduct().getName());

@@ -7,6 +7,10 @@ public class SaleItemDTO {
     private Integer quantitySold ;
     private BigDecimal unitPriceAtSale;
     private String productInfo;
+    private String productType;
+    private Integer volumeMl;
+
+
     public Long getSaleItemId() {
         return saleItemId;
     }
@@ -31,6 +35,21 @@ public class SaleItemDTO {
     public void setProductInfo(String productInfo) {
         this.productInfo = productInfo;
     }
+    public String getProductType() {
+        return productType;
+    }
+    public void setProductType(String productType) {
+        this.productType = productType;
+    }
+    public Integer getVolumeMl() {
+        return volumeMl;
+    }
+    public void setVolumeMl(Integer volumeMl) {
+        this.volumeMl = volumeMl;
+    }
+
+
+    
 
     
 }
