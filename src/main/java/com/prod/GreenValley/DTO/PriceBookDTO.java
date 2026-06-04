@@ -6,6 +6,7 @@ public class PriceBookDTO {
     private double productPrice;
     private Long productId;
     private String productName;
+    private long availableStock;
 
     public Long getId() {
         return id;
@@ -45,6 +46,14 @@ public class PriceBookDTO {
 
     public void setProductName(String productName) {
         this.productName = productName;
+    }
+
+    public long getAvailableStock() {
+        return availableStock;
+    }
+
+    public void setAvailableStock(long availableStock) {
+        this.availableStock = availableStock;
     }
 
 }

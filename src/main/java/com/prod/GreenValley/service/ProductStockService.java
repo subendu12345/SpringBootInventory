@@ -8,8 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.prod.GreenValley.DTO.ProductStockDTO;
 import com.prod.GreenValley.Entities.Product;
-import com.prod.GreenValley.Entities.PurchaseEntryItem;
-import com.prod.GreenValley.Entities.SaleItem;
 import com.prod.GreenValley.repository.ProductRepo;
 import com.prod.GreenValley.repository.PurchaseEntryItemRepo;
 import com.prod.GreenValley.repository.SalesItemRepo;
@@ -58,5 +56,15 @@ public class ProductStockService {
             // Create and return a DTO with the stock data
             return new ProductStockDTO(product.getId(), product.getName(), totalPurchased, totalSold, product.getPricePerUnit());
         }).collect(Collectors.toList());
+    }
+
+    public long getAvailableStockByProductId(Long productId) {
+        List<Object[]> purchasedData = purchaseEntryItemRepo.getTotalQuantityByProductIds(List.of(productId));
+        long totalPurchased = purchasedData.isEmpty() ? 0L : ((Number) purchasedData.get(0)[0]).longValue();
+
+        List<Object[]> soldData = salesItemRepo.getTotalQuantitySoldByProductIds(List.of(productId));
+        long totalSold = soldData.isEmpty() ? 0L : ((Number) soldData.get(0)[0]).longValue();
+
+        return totalPurchased - totalSold;
     }
 }

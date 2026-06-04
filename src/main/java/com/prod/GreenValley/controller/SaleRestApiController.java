@@ -119,20 +119,46 @@ public class SaleRestApiController {
     public ResponseEntity<List<Map<String, String>>> bulkInsertSaleByBarcode(
             @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date saleDate,
             @RequestBody List<Map<String, Object>> bulkData) {
-        
+
         List<Map<String, String>> results = new ArrayList<>();
-        
+
         for (Map<String, Object> item : bulkData) {
             String barcode = (String) item.get("barcode");
             Integer quantity = (Integer) item.get("quantity");
-            
-            String serviceResponse = saleService.saveSaleItemByBarcodeAndQuantity(barcode, saleDate, quantity);
-            
-            Map<String, String> result = Map.of(
-                "barcode", barcode,
-                "status", serviceResponse.equals("success") ? "success" : "error",
-                "message", serviceResponse
-            );
+
+            Long saleItemId = null;
+            if (item.get("id") != null) {
+                if (item.get("id") instanceof Integer) {
+                    saleItemId = ((Integer) item.get("id")).longValue();
+                } else if (item.get("id") instanceof Long) {
+                    saleItemId = (Long) item.get("id");
+                } else if (item.get("id") instanceof String && !((String)item.get("id")).isEmpty()) {
+                    saleItemId = Long.parseLong((String) item.get("id"));
+                }
+            }
+
+            String serviceResponse = saleService.upsertSaleItemByBarcodeAndQuantity(saleItemId, barcode, saleDate, quantity);
+
+            String status = "error";
+            String message = serviceResponse;
+            String savedId = null;
+
+            if (serviceResponse.startsWith("success")) {
+                status = "success";
+                String[] parts = serviceResponse.split(":");
+                if (parts.length > 1) {
+                    savedId = parts[1];
+                }
+                message = "success";
+            }
+
+            Map<String, String> result = new java.util.HashMap<>();
+            result.put("barcode", barcode);
+            result.put("status", status);
+            result.put("message", message);
+            if (savedId != null) {
+                result.put("id", savedId);
+            }
             results.add(result);
         }
 

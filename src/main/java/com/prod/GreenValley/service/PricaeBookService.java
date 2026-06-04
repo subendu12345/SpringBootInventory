@@ -2,6 +2,8 @@ package com.prod.GreenValley.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,11 @@ public class PricaeBookService {
     @Autowired
     private ProductRepo productRepo;
 
+    @Autowired
+    private ProductStockService stockService;
+
+    private final Map<String, PriceBookDTO> barcodeCache = new ConcurrentHashMap<>();
+
     public String savePriceBook(PriceBookDTO priceBookDTO) {
         String message = "success";
         
@@ -40,6 +47,7 @@ public class PricaeBookService {
                 pb.setProduct(product);
 
                 priceBookRepo.save(pb);
+                barcodeCache.remove(priceBookDTO.getProductBarCode()); // Invalidate cache on save
             }else{
                 message="product not found";
             }
@@ -51,6 +59,15 @@ public class PricaeBookService {
     }
 
     public PriceBookDTO getProductInfoByBarcode(String barcode){  
+        if (barcodeCache.containsKey(barcode)) {
+            PriceBookDTO cachedPb = barcodeCache.get(barcode);
+            // Stock might have changed, so we should ideally update it or not cache it for too long.
+            // For now, let's refresh stock even if cached, or just accept cached stock.
+            // User requested "use cache technique for less db call", so I'll keep it simple.
+            // However, stock is dynamic. Let's refresh stock from DB but keep other info.
+            cachedPb.setAvailableStock(stockService.getAvailableStockByProductId(cachedPb.getProductId()));
+            return cachedPb;
+        }
          
         PriceBookDTO pbObj = new PriceBookDTO();
         PriceBookRecordDTO pb = priceBookRepo.getPriceBookByBarcode(barcode);
@@ -59,6 +76,8 @@ public class PricaeBookService {
             pbObj.setProductName(pb.productName());
             pbObj.setProductPrice(pb.productPrice());
             pbObj.setId(pb.id());
+            pbObj.setAvailableStock(stockService.getAvailableStockByProductId(pb.productId()));
+            barcodeCache.put(barcode, pbObj);
         }
         return pbObj;
     }
