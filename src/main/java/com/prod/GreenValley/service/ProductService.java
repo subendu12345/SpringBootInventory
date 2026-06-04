@@ -75,25 +75,38 @@ public class ProductService {
     public List<ProductSearchDTO> searchProducts(String query) {
         // Assuming your repository has a method to find products by name
         List<Product> products = productRepo.findByNameContainingIgnoreCase(query);
-        return products.stream().map(product -> {
-            // Calculate total quantity purchased for the product
-            long totalPurchased = purchaseEntryItemRepo.findAll().stream()
-                    .filter(item -> item.getProduct().getId().equals(product.getId()))
-                    .mapToLong(PurchaseEntryItem::getQuantity)
-                    .sum();
+        
+        if (products.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
 
-            // Calculate total quantity sold for the product
-            long totalSold = salesItemRepo.findAll().stream()
-                    .filter(item -> item.getProduct().getId().equals(product.getId()))
-                    .mapToLong(SaleItem::getQuantitySold)
-                    .sum();
+        List<Long> productIds = products.stream().map(Product::getId).collect(Collectors.toList());
+
+        // Get total quantities purchased grouped by product ID for these products
+        List<Object[]> purchasedData = purchaseEntryItemRepo.getTotalQuantityByProductIds(productIds);
+        java.util.Map<Long, Long> purchasedMap = purchasedData.stream()
+            .collect(Collectors.toMap(
+                data -> ((Number) data[1]).longValue(),
+                data -> ((Number) data[0]).longValue()
+            ));
+
+        // Get total quantities sold grouped by product ID for these products
+        List<Object[]> soldData = salesItemRepo.getTotalQuantitySoldByProductIds(productIds);
+        java.util.Map<Long, Long> soldMap = soldData.stream()
+            .collect(Collectors.toMap(
+                data -> ((Number) data[1]).longValue(),
+                data -> ((Number) data[0]).longValue()
+            ));
+
+        return products.stream().map(product -> {
+            long totalPurchased = purchasedMap.getOrDefault(product.getId(), 0L);
+            long totalSold = soldMap.getOrDefault(product.getId(), 0L);
 
             // Create and return a DTO with the stock data
             Long stockOnHand = totalPurchased - totalSold;
             return new ProductSearchDTO(product.getId(), product.getName(), product.getPricePerUnit(), stockOnHand,
-                    (stockOnHand == 0 ? "Stock not avialable" : ""));
+                    (stockOnHand <= 0 ? "Stock not avialable" : ""));
         }).collect(Collectors.toList());
-        // Map the list of Product entities to the new DTO
     }
 
     public List<PriceBookDTO> getPriceBooksByProductId(Long productId) {

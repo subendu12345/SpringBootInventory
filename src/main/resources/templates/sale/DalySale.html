@@ -24,12 +24,54 @@
 		<p id="resultMessage" class="mt-4 font-medium text-center"></p>
 		<div class="card shadow rounded-lg w-100 mx-auto">
 			<div class="row mb-4">
-				<div class="col-12">
+				<div class="col-md-9">
 					<label for="barcodeSearchInput" class="form-label"><strong>Scan Barcode for Sale.</strong></label>
 					<input type="text" id="barcodeSearchInput" name="barcodeSearchInput"
 						placeholder="Scan barcode for Sale Item." class="form-control" autofocus>
 				</div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#bulkEntryModal">
+                        Bulk Entry
+                    </button>
+                </div>
 			</div>
+
+            <!-- Bulk Entry Modal -->
+            <div class="modal fade" id="bulkEntryModal" tabindex="-1" aria-labelledby="bulkEntryModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="bulkEntryModalLabel">Bulk Sales Entry</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="bulkEntryTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Barcode</th>
+                                            <th>Quantity</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bulkEntryTableBody">
+                                        <tr>
+                                            <td><input type="text" class="form-control bulk-barcode" placeholder="Barcode"></td>
+                                            <td><input type="number" class="form-control bulk-quantity" value="1" min="1"></td>
+                                            <td><button type="button" class="btn btn-danger btn-sm remove-bulk-row">Remove</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button type="button" class="btn btn-success btn-sm" id="addBulkRowBtn">Add Row</button>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="saveBulkEntryBtn">Save Bulk Entry</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 			<div class="card-header">
 				<h3 class="mb-0">Sales Detail</h3>
 			</div>
@@ -133,8 +175,11 @@
 			const barcodeSearchInput = document.getElementById('barcodeSearchInput');
 			const endDateInput = document.getElementById('endDateFilter');
 			// New modal and input elements for the barcode scanner
-			document.addEventListener("click", () => {
-				barcodeSearchInput.focus()
+			document.addEventListener("click", (e) => {
+                const isInsideModal = e.target.closest('.modal');
+                if (!isInsideModal && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+				    barcodeSearchInput.focus()
+                }
 			});
 
 
@@ -451,6 +496,100 @@
 			document.getElementById('currentSaleDate').value = formattedDate;
 
 			filterSalesData();
+
+            // --- Bulk Entry Modal Logic ---
+            const bulkEntryTableBody = document.getElementById('bulkEntryTableBody');
+            const addBulkRowBtn = document.getElementById('addBulkRowBtn');
+            const saveBulkEntryBtn = document.getElementById('saveBulkEntryBtn');
+            const bulkEntryModalEl = document.getElementById('bulkEntryModal');
+            const bulkEntryModal = new bootstrap.Modal(bulkEntryModalEl);
+
+            addBulkRowBtn.addEventListener('click', () => {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td><input type="text" class="form-control bulk-barcode" placeholder="Barcode"></td>
+                    <td><input type="number" class="form-control bulk-quantity" value="1" min="1"></td>
+                    <td><button type="button" class="btn btn-danger btn-sm remove-bulk-row">Remove</button></td>
+                `;
+                bulkEntryTableBody.appendChild(newRow);
+                newRow.querySelector('.bulk-barcode').focus();
+            });
+
+            bulkEntryTableBody.addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-bulk-row')) {
+                    const rows = bulkEntryTableBody.querySelectorAll('tr');
+                    if (rows.length > 1) {
+                        e.target.closest('tr').remove();
+                    } else {
+                        showToast('Warning', 'At least one row is required.', 'warning');
+                    }
+                }
+            });
+
+            saveBulkEntryBtn.addEventListener('click', async () => {
+                const rows = bulkEntryTableBody.querySelectorAll('tr');
+                const bulkData = [];
+                const saleDate = document.getElementById('currentSaleDate').value;
+
+                rows.forEach(row => {
+                    const barcode = row.querySelector('.bulk-barcode').value.trim();
+                    const quantity = parseInt(row.querySelector('.bulk-quantity').value);
+                    if (barcode && quantity > 0) {
+                        bulkData.push({ barcode, quantity });
+                    }
+                });
+
+                if (bulkData.length === 0) {
+                    showToast('Warning', 'No valid data to save.', 'warning');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/sale/api/bulk-save/saledate/${saleDate}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(bulkData)
+                    });
+
+                    if (response.ok) {
+                        const results = await response.json();
+                        let successCount = 0;
+                        let failureMessages = [];
+
+                        results.forEach(res => {
+                            if (res.status === 'success') {
+                                successCount++;
+                            } else {
+                                failureMessages.push(`${res.barcode}: ${res.message}`);
+                            }
+                        });
+
+                        if (successCount > 0) {
+                            showToast('Success', `Successfully saved ${successCount} items.`, 'success');
+                            filterSalesData();
+                        }
+
+                        if (failureMessages.length > 0) {
+                            showToast('Partial Success/Error', `Failed items:\n${failureMessages.join('\n')}`, 'warning');
+                        } else {
+                            bulkEntryModal.hide();
+                            // Reset modal table
+                            bulkEntryTableBody.innerHTML = `
+                                <tr>
+                                    <td><input type="text" class="form-control bulk-barcode" placeholder="Barcode"></td>
+                                    <td><input type="number" class="form-control bulk-quantity" value="1" min="1"></td>
+                                    <td><button type="button" class="btn btn-danger btn-sm remove-bulk-row">Remove</button></td>
+                                </tr>
+                            `;
+                        }
+                    } else {
+                        showToast('Error', 'Failed to save bulk entry.', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Error saving bulk entry:', error);
+                    showToast('Error', 'An unexpected error occurred.', 'danger');
+                }
+            });
 		});
 
 

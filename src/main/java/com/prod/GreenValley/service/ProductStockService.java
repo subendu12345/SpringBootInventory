@@ -35,18 +35,25 @@ public class ProductStockService {
         // Get all products
         List<Product> products = productRepo.findAll();
 
+        // Get total quantities purchased grouped by product ID
+        List<Object[]> purchasedData = purchaseEntryItemRepo.getTotalQuantityByProduct();
+        java.util.Map<Long, Long> purchasedMap = purchasedData.stream()
+            .collect(Collectors.toMap(
+                data -> ((Number) data[1]).longValue(),
+                data -> ((Number) data[0]).longValue()
+            ));
+
+        // Get total quantities sold grouped by product ID
+        List<Object[]> soldData = salesItemRepo.getTotalQuantitySoldByProduct();
+        java.util.Map<Long, Long> soldMap = soldData.stream()
+            .collect(Collectors.toMap(
+                data -> ((Number) data[1]).longValue(),
+                data -> ((Number) data[0]).longValue()
+            ));
+
         return products.stream().map(product -> {
-            // Calculate total quantity purchased for the product
-            long totalPurchased = purchaseEntryItemRepo.findAll().stream()
-                .filter(item -> item.getProduct().getId().equals(product.getId()))
-                .mapToLong(PurchaseEntryItem::getQuantity)
-                .sum();
-            
-            // Calculate total quantity sold for the product
-            long totalSold = salesItemRepo.findAll().stream()
-                .filter(item -> item.getProduct().getId().equals(product.getId()))
-                .mapToLong(SaleItem::getQuantitySold)
-                .sum();
+            long totalPurchased = purchasedMap.getOrDefault(product.getId(), 0L);
+            long totalSold = soldMap.getOrDefault(product.getId(), 0L);
 
             // Create and return a DTO with the stock data
             return new ProductStockDTO(product.getId(), product.getName(), totalPurchased, totalSold, product.getPricePerUnit());

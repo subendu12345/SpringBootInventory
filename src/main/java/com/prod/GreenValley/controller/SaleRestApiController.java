@@ -115,6 +115,30 @@ public class SaleRestApiController {
 
     }
 
+    @PostMapping("/api/bulk-save/saledate/{saleDate}")
+    public ResponseEntity<List<Map<String, String>>> bulkInsertSaleByBarcode(
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date saleDate,
+            @RequestBody List<Map<String, Object>> bulkData) {
+        
+        List<Map<String, String>> results = new ArrayList<>();
+        
+        for (Map<String, Object> item : bulkData) {
+            String barcode = (String) item.get("barcode");
+            Integer quantity = (Integer) item.get("quantity");
+            
+            String serviceResponse = saleService.saveSaleItemByBarcodeAndQuantity(barcode, saleDate, quantity);
+            
+            Map<String, String> result = Map.of(
+                "barcode", barcode,
+                "status", serviceResponse.equals("success") ? "success" : "error",
+                "message", serviceResponse
+            );
+            results.add(result);
+        }
+
+        return new ResponseEntity<>(results, HttpStatus.OK);
+    }
+
     @PutMapping("/update/item")
     public String updateSaleItem(@RequestBody SaleItemDTO saleItemDTO){
         try {

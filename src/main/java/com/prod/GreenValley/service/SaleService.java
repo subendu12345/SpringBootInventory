@@ -85,22 +85,26 @@ public class SaleService {
     }
 
     public String saveSaleItemByBarcode(String barcode, Date saleDate) {
+        return saveSaleItemByBarcodeAndQuantity(barcode, saleDate, 1);
+    }
+
+    public String saveSaleItemByBarcodeAndQuantity(String barcode, Date saleDate, int quantity) {
 
         PriceBook pb = priceBookRepo.findByProductBarCode(barcode);
         if (pb == null) {
             return "Price Book not created with this barcode " + barcode;
         } else {
             List<ProductSearchDTO> productSearchDTOs = productService.searchProducts(pb.getProduct().getName());
-            if (productSearchDTOs != null && productSearchDTOs.get(0).getStockOnHeand() > 0) {
+            if (productSearchDTOs != null && productSearchDTOs.get(0).getStockOnHeand() >= quantity) {
                 // insert sale;
 
                 Product myProduct = productRepo.findById(pb.getProduct().getId()).orElse(null);
                 Sale newSale = new Sale();
-                newSale.setTotalAmount(BigDecimal.valueOf(pb.getProductPrice()));
+                newSale.setTotalAmount(BigDecimal.valueOf(pb.getProductPrice() * quantity));
                 newSale.setSaleDate(saleDate);
                 SaleItem newSaleItem = new SaleItem();
                 newSaleItem.setProduct(myProduct);
-                newSaleItem.setQuantitySold(1);
+                newSaleItem.setQuantitySold(quantity);
                 newSaleItem.setSale(newSale);
                 newSaleItem.setUnitPriceAtSale(BigDecimal.valueOf(pb.getProductPrice()));
                 newSale.getSaleItems().add(newSaleItem);
