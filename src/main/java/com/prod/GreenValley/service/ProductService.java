@@ -10,6 +10,7 @@ import com.prod.GreenValley.Entities.Product;
 import com.prod.GreenValley.Entities.PurchaseEntryItem;
 import com.prod.GreenValley.Entities.SaleItem;
 import com.prod.GreenValley.Entities.SubCategory;
+import com.prod.GreenValley.repository.InventoryRepo;
 import com.prod.GreenValley.repository.PriceBookRepo;
 import com.prod.GreenValley.repository.ProductRepo;
 import com.prod.GreenValley.repository.PurchaseEntryItemRepo;
@@ -17,6 +18,7 @@ import com.prod.GreenValley.repository.SalesItemRepo;
 import com.prod.GreenValley.repository.SubCategoryRepo;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -38,12 +40,27 @@ public class ProductService {
     @Autowired
     private SubCategoryRepo subCategoryRepo;
 
+    @Autowired
+    private InventoryRepo inventoryRepo;
+
     public List<Product> findAllProduct() {
         return productRepo.findAll();
     }
 
     public Product findProductById(Long id) {
         return productRepo.findById(id).orElse(null);
+    }
+
+    public Map<Long, Long> findQuantityOnHandByProduct() {
+        return inventoryRepo.getQuantityOnHandByProduct().stream()
+            .collect(Collectors.toMap(
+                row -> ((Number) row[0]).longValue(),
+                row -> ((Number) row[1]).longValue()
+            ));
+    }
+
+    public Map<Long, Double> findLatestPriceByProduct() {
+        return bookService.findLatestPriceByProduct();
     }
 
     public String doInsertProducts(List<Product> products) {
@@ -60,8 +77,11 @@ public class ProductService {
     public void updateProduct(Long id, ProductDTO productDTO) {
         Product prod = productRepo.findById(id).orElse(null);
         if (prod != null && prod.getId() != null) {
-            if (productDTO.getCategoryId() != null) {
-                SubCategory subCategory = subCategoryRepo.findById(productDTO.getCategoryId()).orElse(null);
+            Long subCategoryId = productDTO.getSubCategoryId() != null
+                ? productDTO.getSubCategoryId()
+                : productDTO.getCategoryId();
+            if (subCategoryId != null) {
+                SubCategory subCategory = subCategoryRepo.findById(subCategoryId).orElse(null);
                 prod.setSubCategory(subCategory);
             }
 

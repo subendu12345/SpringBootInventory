@@ -3,6 +3,7 @@ package com.prod.GreenValley.DTO;
 public class ProductDTO {
     private String name;
     private Long categoryId;
+    private Long subCategoryId;
     private Integer volumeMl;
     private Long id;
 
@@ -28,6 +29,14 @@ public class ProductDTO {
 
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public Long getSubCategoryId() {
+        return subCategoryId;
+    }
+
+    public void setSubCategoryId(Long subCategoryId) {
+        this.subCategoryId = subCategoryId;
     }
 
     public Integer getVolumeMl() {

@@ -34,9 +34,10 @@ public class DataLoader implements CommandLineRunner {
 
         // Create an ADMIN user if they don't exist
         userService.findOrCreateUser("surya@greenvalley.admin", "sumansuriti@2025_admin", Set.of(adminRole, staffRole));
+        userService.findOrCreateUser("das@susanta.admin", "8670116323", Set.of(adminRole, staffRole));
 
         // Create a STAFF user if they don't exist
-        userService.findOrCreateUser("biswajit@greenvalley.staff", "biswajit@2025", Set.of(staffRole));
+        // userService.findOrCreateUser("biswajit@greenvalley.staff", "biswajit@2025", Set.of(staffRole));
     }
 
 

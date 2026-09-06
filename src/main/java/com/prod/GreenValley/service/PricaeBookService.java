@@ -29,6 +29,22 @@ public class PricaeBookService {
 
     private final Map<String, PriceBookDTO> barcodeCache = new ConcurrentHashMap<>();
 
+    public String generateUniqueBarcode() {
+        long candidate = System.currentTimeMillis();
+        while (priceBookRepo.existsByProductBarCode(String.valueOf(candidate))) {
+            candidate++;
+        }
+        return String.valueOf(candidate);
+    }
+
+    public Map<Long, Double> findLatestPriceByProduct() {
+        Map<Long, Double> latestPrices = new java.util.HashMap<>();
+        for (PriceBook priceBook : priceBookRepo.findAllByOrderByModifiedDateDescIdDesc()) {
+            latestPrices.putIfAbsent(priceBook.getProduct().getId(), priceBook.getProductPrice());
+        }
+        return latestPrices;
+    }
+
     public String savePriceBook(PriceBookDTO priceBookDTO) {
         String message = "success";
         

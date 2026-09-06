@@ -69,6 +69,20 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTotalAmount();
     }
 
+    window.resetPurchaseEntryForm = function () {
+        const purchaseForm = document.getElementById('purchaseForm');
+        if (purchaseForm) {
+            purchaseForm.reset();
+        }
+
+        scannedBarcodes.clear();
+        if (tableBody) {
+            tableBody.innerHTML = '';
+            window.addPurchesItemRow();
+        }
+        updateTotalAmount();
+    };
+
     // Function to remove a row from the table
     window.removeRow = function (indexToRemove) {
         const row = document.getElementById('row-' + indexToRemove);
@@ -168,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     scannedBarcodes.add(barcode);
                     updateTotalAmount();
                     document.getElementById('purchaseAddRowButton').click()
-                    showMessageBox('Success', 'Product successfully Fund!', 'success');
+                    showToast('Success', 'Product found successfully!', 'success');
                 }
 
             }).catch(err => {

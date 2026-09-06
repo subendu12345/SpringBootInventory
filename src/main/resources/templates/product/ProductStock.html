@@ -1,16 +1,14 @@
 <div th:fragment="productStockDashBoard">
-    <div class="bg-light d-flex align-items-center justify-content-center  p-2">
+    <div class="stock-dashboard">
 
         <!-- Main Content Container -->
-        <div class="card shadow rounded w-100">
-            <div class="card-body p-2">
-                <p class="text-muted">Monitor the current stock levels of all products.</p>
-                <span class="badge badge-primary" id="totalBottoleCount"></span>
-                <span class="badge badge-success" id="totalStockAmount"></span>
+        <div class="w-100">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Product Stock Chart</h1>
             </div>
 
             <!-- Stock Table -->
-            <div class="p-2">
+            <div class="dashboard-body">
 
                 <!-- Loading Indicator -->
                 <div id="loadingIndicator" class="text-center py-5 text-muted d-none">
@@ -24,12 +22,11 @@
                 </div>
 
 
-                <div class="bg-white shadow-lg text-center">
-                    <h1 class="fs-3 fw-bold text-dark mb-4">Product Stock Chart</h1>
+                <div class="dashboard-chart text-center">
                     <p class="text-secondary mb-2">
                         This chart help to find current stock.
                     </p>
-                    <div class="bg-light rounded border" style="height: 540px;">
+                    <div class="stock-chart-area">
                         <canvas id="stockChart" class="w-100 chart-container"></canvas>
                     </div>
                 </div>
@@ -81,12 +78,11 @@
                             stockOnHand_1.push(stockOnHand);
                             backgroundColors.push(getRandomRgbColor());
                         });
-                        document.getElementById("totalBottoleCount").textContent = 'Total Bottole Count.(' + totalBottoleCount + ')';
+                        document.getElementById("totalBottoleCount").innerHTML = '<span>Total Product Count</span><strong>' + totalBottoleCount + '</strong>';
                         renderStockChart()
 
                     } else {
-                        // Display a message if no products are found
-                        
+                         document.getElementById("totalBottoleCount").innerHTML = '<span>Total Product Count</span><strong>' + 0 + '</strong>';
                     }
 
                 } catch (error) {
@@ -101,8 +97,10 @@
 
                 const response = await fetch("/api/stock/amount")
                 const amountData = await response.json();
-                const totalStockAmount = amountData.PurchaseAmount - amountData.SaleAmount;
-                document.getElementById("totalStockAmount").textContent = 'Total Stock Amt.(' + totalStockAmount + ')';
+                const purchaseAmount = Number(amountData.PurchaseAmount) || 0;
+                const saleAmount = Number(amountData.SaleAmount) || 0;
+                const totalStockAmount = purchaseAmount - saleAmount;
+                document.getElementById("totalStockAmount").innerHTML = '<span>Total Stock Amt.</span><strong>' + totalStockAmount.toFixed(2) + '</strong>';
             }
 
 

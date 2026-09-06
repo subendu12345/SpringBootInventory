@@ -4,25 +4,86 @@
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Category Manager</title>
+    <title>Product Manager</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
 
 </head>
 
 <section>
+    <style>
+        .barcode-print-label {
+            width: 58mm;
+            min-height: 24mm;
+            margin: 0 auto 3px;
+            padding: 2mm;
+            overflow: hidden;
+            background: #fff;
+            color: #000;
+            text-align: center;
+        }
+
+        .barcode-print-label svg {
+            display: block;
+            width: 100%;
+            height: 15mm;
+        }
+
+        #barcodePrintModal,
+        #barcodePreviewModal {
+            z-index: 1070;
+        }
+
+        #barcodePrintModal .modal-content,
+        #barcodePreviewModal .modal-content {
+            border: 1px solid #e2b66d;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+        }
+
+        #barcodePreviewModal .modal-body {
+            max-height: 65vh;
+            overflow-y: auto;
+            border-top: 1px solid rgba(226, 182, 109, 0.35);
+            border-bottom: 1px solid rgba(226, 182, 109, 0.35);
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #barcodePrintLabels,
+            #barcodePrintLabels * {
+                visibility: visible;
+            }
+
+            #barcodePrintLabels {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 58mm;
+            }
+
+            .barcode-print-label {
+                break-inside: avoid;
+                margin: 0;
+            }
+        }
+    </style>
     <div class="container">
         <div th:replace="/utill/MessageShow.html :: toast"></div>
         <!-- Message Box -->
         <div id="messageBox" class="message-box alert fade show d-none" role="alert"></div>
-        <h2 class="mb-4 text-center text-primary">Product Management</h2>
-        <hr>
+        <div class="page-heading-toolbar">
+            <h2>Product Management</h2>
+        </div>
 
         <table class="table table-bordered table-striped table-hover">
             <thead class="table-dark">
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
-                    <th>Volume/ML</th>
+                    <th>Volume/Qty.</th>
+                    <th>Category</th>
                     <th>Sub-Category</th>
                     <th>Price</th>
                     <th>Actions</th>
@@ -32,9 +93,10 @@
                 <tr th:each="product : ${products}">
                     <td th:text="${product.id}">1</td>
                     <td th:text="${product.name}">Example Product</td>
-                    <td th:text="${product.volumeMl}">Brand A</td>
+                    <td th:text="${inventoryQuantities[product.id] ?: 0}">0</td>
+                    <td th:text="${product.subCategory?.category?.name ?: 'Category Missing'}">Category</td>
                     <td th:text="${product.subCategory?.name ?: 'Category Missing add it'}">Sub-Category X</td>
-                    <td th:text="${product.pricePerUnit}">10.00</td>
+                    <td th:text="${latestPrices[product.id] ?: 0}">0</td>
                     <td>
                         <!-- <a th:href="@{/products/view/{id}(id=${product.id})}" class="btn btn-info btn-sm">View</a> -->
                         <button type="button" class="btn btn-warning btn-sm product-edit-btn"
@@ -80,11 +142,11 @@
                                     <input type="text" id="productName" name="productName" class="form-control"
                                         required>
                                 </div>
-                                <div class="col-md-6 form-group">
-                                    <label for="productVolume">Volume/ML</label>
+                                <!-- <div class="col-md-6 form-group">
+                                    <label for="productVolume">Volume/Qty.</label>
                                     <input type="number" id="productVolume" name="productVolume" class="form-control"
                                         required>
-                                </div>
+                                </div> -->
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="category" class="form-label">Category</label>
@@ -119,7 +181,7 @@
                     <div class="modal-footer">
                         <button type="button" onclick="productManagerEditClose()" class="btn btn-secondary"
                             data-dismiss="modal">Close</button>
-                        <button type="button" id="saveProductBtn" class="btn btn-primary">Save Product</button>
+                        <button type="button" id="saveProductBtn" class="btn btn-primary">Update Product</button>
                     </div>
                 </div>
             </div>
@@ -139,7 +201,7 @@
                             <div class="row mb-4">
                                 <div class="col-md-6">
                                     <label for="barcodeNumber" class="form-label">Barcode Number</label>
-                                    <input type="text" class="form-control" id="barcodeNumber" required>
+                                    <input type="text" class="form-control" id="barcodeNumber" readonly required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="productPrice" class="form-label">Product Price</label>
@@ -172,6 +234,52 @@
             </div>
         </div>
 
+        <div class="modal fade" id="barcodePrintModal" tabindex="-1" aria-labelledby="barcodePrintModalLabel"
+            aria-hidden="true" data-bs-backdrop="false">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="barcodePrintModalLabel">Print Barcode</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div id="printProductName" class="fw-bold mb-3"></div>
+                        <label for="printBarcodeCount" class="form-label">Number of labels</label>
+                        <input type="number" class="form-control mb-3" id="printBarcodeCount" min="1" step="1"
+                            value="1" required>
+                        <div class="border rounded p-3">
+                            <div class="small text-muted">Barcode number</div>
+                            <strong id="printBarcodeNumber" class="d-block fs-4"></strong>
+                            <div class="small text-muted mt-2">Price: <span id="printProductPrice"></span></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="prepareBarcodePrintBtn">Continue</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="barcodePreviewModal" tabindex="-1" aria-labelledby="barcodePreviewModalLabel"
+            aria-hidden="true" data-bs-backdrop="false">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="barcodePreviewModalLabel">Barcode Preview</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-2">
+                        <div id="barcodePrintLabels"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="printBarcodeLabelsBtn">Print</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <div id="liveToast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive"
             aria-atomic="true">
@@ -185,6 +293,7 @@
         </div>
 
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const productModal = document.getElementById('productManagerEdit');
@@ -215,9 +324,9 @@
                 // Clear existing options
                 subCategorySelect.innerHTML = '<option value="">Select a sub-category</option>';
                 if (!categoryId) {
-                    return;
+                    return Promise.resolve();
                 }
-                fetch('/products/api/get/' + categoryId + '/subcategories')
+                return fetch('/products/api/get/' + categoryId + '/subcategories')
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
@@ -230,7 +339,7 @@
                                 const option = document.createElement('option');
                                 option.value = sub.id;
                                 option.textContent = sub.code + "-" + sub.name;
-                                if (selectedSubCategoryId && sub.id === selectedSubCategoryId) {
+                                if (selectedSubCategoryId && String(sub.id) === String(selectedSubCategoryId)) {
                                     option.selected = true;
                                 }
                                 subCategorySelect.appendChild(option);
@@ -284,13 +393,9 @@
                             // Populate the form fields with the product data
                             document.getElementById('productId').value = product.id;
                             document.getElementById('productName').value = product.name;
-                            document.getElementById('productVolume').value = product.volumeMl;
-                            document.getElementById('productCategory').value = product.categoryId != null ? product.categoryId : '';
-
-                            // Select the correct sub-category in the dropdown
-                            if (product.subCategory && product.subCategory.id) {
-                                subCategorySelect.value = product.subCategory.id;
-                            }
+                            // document.getElementById('productVolume').value = product.volumeMl;
+                            categorySelect.value = product.categoryId != null ? product.categoryId : '';
+                            populateSubCategories(product.categoryId, product.subCategoryId);
                         })
                         .catch(error => {
                             console.error('There was a problem fetching the product data:', error);
@@ -303,8 +408,14 @@
             priceBookModal_Data.addEventListener('show.bs.modal', function (event) {
                 const button = event.relatedTarget;
                 const productId = button.getAttribute('data-id');
-                const productName =  button.getAttribute('data-name');
-                fetch(`/products/api/pricebook/${productId}`, { method: 'GET' })
+                const productName = button.getAttribute('data-name');
+                priceBookModal_Data.dataset.productId = productId;
+                priceBookModal_Data.dataset.productName = productName;
+                priceBookForm.reset();
+                priceBookTableBody.innerHTML = '';
+                document.getElementById('priceBookModalLabel').innerHTML = `Price Books for <strong>${productName}</strong>`;
+
+                fetch(`/products/api/pricebook/${productId}`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
@@ -312,18 +423,17 @@
                         return response.json();
                     })
                     .then(priceBooks => {
-                        priceBookForm.reset();
-                        priceBookTableBody.innerHTML = ''; // Clear table
-
-                        document.getElementById('barcodeNumber').focus();
-                        document.getElementById('priceBookModalLabel').innerHTML = `Price Books for <strong>${productName}</strong>`;
-                        document.getElementById('productId').value = productId;
-                        renderPriceBooks(productId, priceBooks)
+                        renderPriceBooks(productId, priceBooks);
                     })
                     .catch(error => {
                         console.error('There was a problem fetching the product data:', error);
                         // You can display an error message here
                     });
+
+                generateBarcode().catch(error => {
+                    document.getElementById('barcodeNumber').placeholder = 'Barcode generation failed';
+                    console.error(error);
+                });
 
             })
 
@@ -340,10 +450,86 @@
                         <td class="editable-cell" data-field="price" contenteditable="true">${pb.productPrice.toFixed(2)}</td>
                         <td>
                             <button type="button" class="btn btn-danger btn-sm delete-pricebook-btn" disabled data-id="${pb.id}">Delete</button>
+                            <button type="button" class="btn btn-secondary btn-sm print-pricebook-btn ms-1"
+                                data-barcode="${pb.productBarCode}" data-price="${pb.productPrice.toFixed(2)}">
+                                Print
+                            </button>
                         </td>
                     `;
                     priceBookTableBody.appendChild(row);
                 });
+            }
+
+            document.getElementById('priceBookTable').addEventListener('click', event => {
+                const printButton = event.target.closest('.print-pricebook-btn');
+                if (!printButton) return;
+
+                document.getElementById('printBarcodeNumber').textContent = printButton.dataset.barcode;
+                document.getElementById('printProductPrice').textContent = printButton.dataset.price;
+                document.getElementById('printProductName').textContent = priceBookModal_Data.dataset.productName || '';
+                document.getElementById('printBarcodeCount').value = 1;
+                new bootstrap.Modal(document.getElementById('barcodePrintModal')).show();
+            });
+
+            document.getElementById('prepareBarcodePrintBtn').addEventListener('click', () => {
+                const barcode = document.getElementById('printBarcodeNumber').textContent;
+                const count = Number.parseInt(document.getElementById('printBarcodeCount').value, 10);
+                if (!barcode || !Number.isInteger(count) || count < 1) return;
+
+                const labels = document.getElementById('barcodePrintLabels');
+                labels.innerHTML = '';
+                for (let index = 0; index < count; index += 1) {
+                    const label = document.createElement('div');
+                    label.className = 'barcode-print-label';
+                    label.innerHTML = '<svg class="barcode-svg"></svg>';
+                    labels.appendChild(label);
+                    JsBarcode(label.querySelector('.barcode-svg'), barcode, {
+                        format: 'CODE128',
+                        displayValue: true,
+                        fontSize: 11,
+                        height: 42,
+                        margin: 0,
+                        textMargin: 1
+                    });
+                }
+
+                bootstrap.Modal.getInstance(document.getElementById('barcodePrintModal')).hide();
+                new bootstrap.Modal(document.getElementById('barcodePreviewModal')).show();
+            });
+
+            document.getElementById('printBarcodeLabelsBtn').addEventListener('click', () => {
+                window.print();
+            });
+
+            function refreshPriceBooks(productId) {
+                return fetch(`/products/api/pricebook/${productId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Unable to reload price books');
+                        }
+                        return response.json();
+                    })
+                    .then(priceBooks => renderPriceBooks(productId, priceBooks));
+            }
+
+            function generateBarcode() {
+                const barcodeInput = document.getElementById('barcodeNumber');
+                barcodeInput.value = '';
+                barcodeInput.placeholder = 'Generating barcode...';
+                savePriceBookBtn_L.disabled = true;
+
+                return fetch('/products/api/pricebook/barcode')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Unable to generate a unique barcode');
+                        }
+                        return response.text();
+                    })
+                    .then(barcode => {
+                        barcodeInput.value = barcode;
+                        barcodeInput.placeholder = '';
+                        savePriceBookBtn_L.disabled = false;
+                    });
             }
 
             savePriceBookBtn_L.addEventListener('click', (event) => {
@@ -352,9 +538,10 @@
                     id: null,
                     productBarCode: document.getElementById('barcodeNumber').value,
                     productPrice: document.getElementById('productPrice').value,
-                    productId: document.getElementById('productId').value,
+                    productId: priceBookModal_Data.dataset.productId,
                 }
-                if (!PriceBookDTO.productPrice || !PriceBookDTO.productBarCode) return;
+                if (!PriceBookDTO.productPrice || !PriceBookDTO.productBarCode || !PriceBookDTO.productId) return;
+                savePriceBookBtn_L.disabled = true;
                 fetch("/products/api/save/pricebook", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -365,14 +552,22 @@
                 }).then(res => {
                     if (res && res.message == 'success') {
 
-                        //document.getElementById('priceBookModalCloseBtn').click()
-                        showToast('Success', 'Price Book successfully save!', 'success')
+                        showToast('Success', 'Price Book successfully save!', 'success');
+                        document.getElementById('productPrice').value = '';
+                        refreshPriceBooks(PriceBookDTO.productId)
+                            .then(() => generateBarcode())
+                            .catch(error => {
+                                savePriceBookBtn_L.disabled = false;
+                                console.error(error);
+                            });
                     } else {
+                        savePriceBookBtn_L.disabled = false;
                         showToast('Error save Pricebook', JSON.stringify(res.message), 'error')
 
                     }
                 })
                     .catch(err => {
+                        savePriceBookBtn_L.disabled = false;
                         showToast('Error save Pricebook', JSON.stringify(err), 'error')
                     })
 
@@ -384,15 +579,17 @@
                 const subCategorySelect = document.getElementById('subCategory');
                 const id = document.getElementById('productId').value;
                 // Get the value of the currently selected option
-                const categoryId = subCategorySelect.value;
+                const subCategoryId = subCategorySelect.value;
+                const categoryId = categorySelect.value;
                 const name = document.getElementById('productName').value;
-                const volumeMl = document.getElementById('productVolume').value;
+                // const volumeMl = document.getElementById('productVolume').value;
                 // You can now use the value, for example, to log it to the console
 
                 const productDTO = {
                     name,
                     categoryId,
-                    volumeMl,
+                    subCategoryId,
+                    // volumeMl,
                     id
                 };
                 try {
@@ -408,6 +605,7 @@
                     }
 
                     showToast('Success!', 'Product successfully saved!', 'success');
+                    window.location.reload();
                 } catch (error) {
                     console.error('Error saving purchase:', error);
                     showToast('Error', error.message, 'error');

@@ -42,7 +42,8 @@ public class ProductRESTApi {
         ProductDTO  dto = new ProductDTO();
         dto.setName(pro.getName());
         if(pro.getSubCategory() != null && pro.getSubCategory().getId() != null){
-            dto.setCategoryId(pro.getSubCategory().getId());
+            dto.setCategoryId(pro.getSubCategory().getCategory().getId());
+            dto.setSubCategoryId(pro.getSubCategory().getId());
         }
         dto.setVolumeMl(pro.getVolumeMl());
         dto.setId(pro.getId());
@@ -72,6 +73,11 @@ public class ProductRESTApi {
         String message =pricaeBookService.savePriceBook(priceBookDTO);
         Map<String, String> jsonResponse = Map.of("message", message);
         return new ResponseEntity<>(jsonResponse, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/pricebook/barcode")
+    public String generatePriceBookBarcode(){
+        return pricaeBookService.generateUniqueBarcode();
     }
 
     @GetMapping("/pricebook/{id}")

@@ -25,16 +25,28 @@
 </head>
 
 <body>
-    <section>
-        </div>
+    <section class="home-page">
         <div th:replace="/utill/MessageShow.html :: toast"></div>
         <div class="row">
             <div class="col-sm-12">
-                <div class="">
+                <div class="home-actions">
                     <button type="button" class="btn btn-info" data-toggle="modal" data-target="#productModal">Add
                         Products</button>
                     <button type="button" class="btn btn-info" data-toggle="modal"
                         data-target="#purchaseEntryFormModal">Purchase Entry</button>
+                    <span class="badge badge-primary" id="totalBottoleCount"></span>
+                    <span class="badge badge-success" id="totalStockAmount"></span>
+                    <div class="home-status">
+                        <span class="home-status-item">
+                            <img class="home-user-icon" th:src="@{/img/user_icon.png}" alt="User">
+                            <strong th:text="${loggedInUser}">User</strong>
+                        </span>
+                        <span class="home-status-divider"></span>
+                        <span class="home-status-item">
+                            <span class="home-status-label">Time</span>
+                            <strong id="currentTime">--:--:--</strong>
+                        </span>
+                    </div>
                 </div>
                 <div th:replace="/product/ProductStock.html :: productStockDashBoard"></div>
             </div>
@@ -86,7 +98,24 @@
 
             document.addEventListener('DOMContentLoaded', () => {
                 const loadingSpinner = document.getElementById('loadingSpinner');
-                loadingSpinner.classList.remove('d-none');
+                if (loadingSpinner) {
+                    loadingSpinner.classList.remove('d-none');
+                }
+                const currentTime = document.getElementById('currentTime');
+                const updateClock = () => {
+                    currentTime.textContent = new Intl.DateTimeFormat(undefined, {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    }).format(new Date());
+                };
+                updateClock();
+                window.setInterval(updateClock, 1000);
+                $('#purchaseEntryFormModal').on('show.bs.modal', () => {
+                    if (window.resetPurchaseEntryForm) {
+                        window.resetPurchaseEntryForm();
+                    }
+                });
                 console.log('frm home page calling  ')
             })
         </script>

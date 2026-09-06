@@ -14,6 +14,10 @@ public interface PriceBookRepo extends JpaRepository<PriceBook, Long> {
     // PriceBook findPriceBookByBarCode(String productBarCode);
 
     List<PriceBook> findByProduct_Id(Long productId);
+
+    boolean existsByProductBarCode(String productBarCode);
+
+    List<PriceBook> findAllByOrderByModifiedDateDescIdDesc();
     
     /**
      * Finds a PriceBook by its product barcode.

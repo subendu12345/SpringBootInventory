@@ -47,9 +47,9 @@ public class ProductController {
         model.addAttribute("savedProducts", productForm.getProducts());
 
         List<Product> products = productForm.getProducts();
-        for(Product prd : products){
-            prd.setName(prd.getName() + prd.getVolumeMl().toString());
-        }
+        // for(Product prd : products){
+        //     prd.setName(prd.getName() + prd.getVolumeMl().toString());
+        // }
         String message = productService.doInsertProducts(products);
         if(message=="success"){
             session.setAttribute("message", new Message("Product Successfully inserted.. ", "alert-success"));
@@ -64,6 +64,8 @@ public class ProductController {
     @GetMapping("/product")
     public String getProductManager(Model model){
         model.addAttribute("products", productService.findAllProduct());
+        model.addAttribute("inventoryQuantities", productService.findQuantityOnHandByProduct());
+        model.addAttribute("latestPrices", productService.findLatestPriceByProduct());
         model.addAttribute("categories", categoryService.findAllCategories());
         model.addAttribute("priceBookForm", new PriceBookDTO());
         return "product/productManager";

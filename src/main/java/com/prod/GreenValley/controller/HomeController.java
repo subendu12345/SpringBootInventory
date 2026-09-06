@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 
 import org.springframework.ui.Model;
+import org.springframework.security.core.Authentication;
 
 @Controller
 public class HomeController {
@@ -44,9 +45,10 @@ public class HomeController {
 
     // This is home page controller
     @GetMapping({ "/", "/home" })
-    public String home(Model model) throws IOException, InterruptedException, MessagingException {
+    public String home(Model model, Authentication authentication) throws IOException, InterruptedException, MessagingException {
         List<Product> products = new ArrayList<>();
         model.addAttribute("products", products);
+        model.addAttribute("loggedInUser", authentication != null ? authentication.getName() : "User");
 
         ProductForm productForm = new ProductForm();
         PurchaseEntryForm purchaseEntryForm = new PurchaseEntryForm();
@@ -87,7 +89,7 @@ public class HomeController {
         try {
              sendDBBackupFile();
             jsonResponse.put("status", "success");
-            jsonResponse.put("message", "backup sucessfully send to this email address "+ toAddress +" please check.");
+            jsonResponse.put("message", "Backup sucessfully.");
         } catch (Exception e) {
             jsonResponse.put("status", "error");
             jsonResponse.put("message", "Faild to send backup "+ e.getMessage());
