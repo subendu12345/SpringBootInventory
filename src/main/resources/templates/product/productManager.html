@@ -46,26 +46,94 @@
             border-bottom: 1px solid rgba(226, 182, 109, 0.35);
         }
 
+        #barcodePrintArea {
+            position: absolute;
+            left: -100000px;
+            top: 0;
+            width: 4in;
+            overflow: hidden;
+        }
+
         @media print {
+            @page {
+                size: 4in auto;
+                margin: 0;
+            }
+
+            html,
+            body {
+                width: 4in !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+            }
+
             body * {
-                visibility: hidden;
+                visibility: hidden !important;
             }
 
-            #barcodePrintLabels,
-            #barcodePrintLabels * {
-                visibility: visible;
+            #barcodePrintArea,
+            #barcodePrintArea * {
+                visibility: visible !important;
             }
 
-            #barcodePrintLabels {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 58mm;
+            #barcodePrintArea {
+                display: grid !important;
+                grid-template-columns: 2in 2in !important;
+                width: 4in !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+                color: #000 !important;
+                box-sizing: border-box !important;
             }
 
             .barcode-print-label {
-                break-inside: avoid;
-                margin: 0;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 2in !important;
+                min-width: 2in !important;
+                max-width: 2in !important;
+                min-height: 30mm !important;
+                box-sizing: border-box !important;
+                margin: 0 !important;
+                padding: 2mm !important;
+                overflow: hidden !important;
+                background: #fff !important;
+                color: #000 !important;
+                text-align: center !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+
+            .barcode-print-label .barcode-product-name {
+                display: none !important;
+            }
+
+            .barcode-print-label .barcode-price {
+                display: block !important;
+                font-size: 10px !important;
+                line-height: 1.2 !important;
+                margin-top: 1mm !important;
+            }
+
+            .barcode-print-label svg {
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 18mm !important;
+                margin: 0 auto !important;
+            }
+
+            #barcodePrintModal,
+            #barcodePreviewModal,
+            .modal-backdrop {
+                display: none !important;
             }
         }
     </style>
@@ -284,6 +352,10 @@
         </div>
 
 
+        <!-- Dedicated print-only container for 58mm thermal printers.
+             It stays empty on screen and is populated immediately before printing. -->
+        <div id="barcodePrintArea" aria-hidden="true"></div>
+
         <div id="liveToast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive"
             aria-atomic="true">
             <div class="d-flex">
@@ -481,18 +553,34 @@
 
                 const labels = document.getElementById('barcodePrintLabels');
                 labels.innerHTML = '';
+
+                const price = document.getElementById('printProductPrice').textContent.trim();
+
                 for (let index = 0; index < count; index += 1) {
                     const label = document.createElement('div');
                     label.className = 'barcode-print-label';
-                    label.innerHTML = '<svg class="barcode-svg"></svg>';
+
+                    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.classList.add('barcode-svg');
+
+                    const priceEl = document.createElement('div');
+                    priceEl.className = 'barcode-price';
+                    priceEl.textContent = price ? `Price: ${price}` : '';
+
+                    label.appendChild(svg);
+                    label.appendChild(priceEl);
                     labels.appendChild(label);
-                    JsBarcode(label.querySelector('.barcode-svg'), barcode, {
+
+                    JsBarcode(svg, barcode, {
                         format: 'CODE128',
                         displayValue: true,
-                        fontSize: 11,
-                        height: 42,
-                        margin: 0,
-                        textMargin: 1
+                        fontSize: 10,
+                        fontOptions: 'bold',
+                        height: 48,
+                        width: 1.5,
+                        margin: 4,
+                        textMargin: 2,
+                        flat: false
                     });
                 }
 
@@ -501,7 +589,55 @@
             });
 
             document.getElementById('printBarcodeLabelsBtn').addEventListener('click', () => {
-                window.print();
+                const source = document.getElementById('barcodePrintLabels');
+                const printArea = document.getElementById('barcodePrintArea');
+
+                if (!source || !printArea || !source.children.length) {
+                    console.error('No barcode labels available for printing.');
+                    return;
+                }
+
+                // Clone the already-rendered SVG labels into a dedicated print-only area.
+                // This avoids Bootstrap modal/backdrop CSS affecting the browser print preview.
+                printArea.innerHTML = source.innerHTML;
+
+                const previewModalEl = document.getElementById('barcodePreviewModal');
+                const previewModal = bootstrap.Modal.getInstance(previewModalEl);
+
+                if (previewModal) {
+                    previewModal.hide();
+                }
+
+                // Wait for Bootstrap to finish removing the modal/backdrop, then print.
+                const startPrint = () => {
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            window.print();
+                        });
+                    });
+                };
+
+                if (previewModalEl.classList.contains('show')) {
+                    previewModalEl.addEventListener('hidden.bs.modal', startPrint, { once: true });
+                } else {
+                    startPrint();
+                }
+            });
+
+            // Clear the print-only DOM after the browser finishes printing.
+            window.addEventListener('afterprint', () => {
+                const printArea = document.getElementById('barcodePrintArea');
+                if (printArea) {
+                    printArea.innerHTML = '';
+                }
+
+                // Re-open the preview after printing if the user is still on this workflow.
+                const previewModalEl = document.getElementById('barcodePreviewModal');
+                if (previewModalEl) {
+                    const previewModal = bootstrap.Modal.getInstance(previewModalEl)
+                        || new bootstrap.Modal(previewModalEl);
+                    previewModal.show();
+                }
             });
 
             function refreshPriceBooks(productId) {
