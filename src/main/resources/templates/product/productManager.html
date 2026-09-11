@@ -46,26 +46,43 @@
             border-bottom: 1px solid rgba(226, 182, 109, 0.35);
         }
 
+        /* Screen-only: keep the real print DOM outside the visible page. */
         #barcodePrintArea {
-            position: absolute;
-            left: -100000px;
+            position: fixed;
+            left: -10000px;
             top: 0;
-            width: 4in;
+            width: 50mm;
+            margin: 0;
+            padding: 0;
             overflow: hidden;
+            background: #fff;
         }
 
         @media print {
+            /*
+             * IMPORTANT:
+             * The physical label is 50mm wide x 25mm high.
+             * The printer/driver should be configured for the same label size
+             * and 2mm gap. We print ONE label per browser page.
+             */
             @page {
-                size: 4in auto;
-                margin: 0;
+                size: 50mm 25mm;
+                margin: 0 !important;
             }
 
             html,
             body {
-                width: 4in !important;
+                width: 50mm !important;
+                min-width: 50mm !important;
+                max-width: 50mm !important;
+                height: auto !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 background: #fff !important;
+            }
+
+            body {
+                overflow: visible !important;
             }
 
             body * {
@@ -78,56 +95,91 @@
             }
 
             #barcodePrintArea {
-                display: grid !important;
-                grid-template-columns: 2in 2in !important;
-                width: 4in !important;
+                display: block !important;
                 position: absolute !important;
                 left: 0 !important;
                 top: 0 !important;
+                width: 50mm !important;
                 margin: 0 !important;
                 padding: 0 !important;
+                overflow: visible !important;
                 background: #fff !important;
                 color: #000 !important;
                 box-sizing: border-box !important;
             }
 
+            /*
+             * Each label occupies exactly one 50 x 25mm physical label.
+             * No two-column/grid layout is used because the media itself is
+             * only 50mm wide.
+             */
             .barcode-print-label {
                 display: flex !important;
                 flex-direction: column !important;
                 align-items: center !important;
                 justify-content: center !important;
-                width: 2in !important;
-                min-width: 2in !important;
-                max-width: 2in !important;
-                min-height: 30mm !important;
+
+                width: 50mm !important;
+                min-width: 50mm !important;
+                max-width: 50mm !important;
+
+                height: 25mm !important;
+                min-height: 25mm !important;
+                max-height: 25mm !important;
+
                 box-sizing: border-box !important;
                 margin: 0 !important;
-                padding: 2mm !important;
+                padding: 1.5mm 2mm !important;
+
                 overflow: hidden !important;
                 background: #fff !important;
                 color: #000 !important;
                 text-align: center !important;
+
+                break-after: page !important;
+                page-break-after: always !important;
                 break-inside: avoid !important;
                 page-break-inside: avoid !important;
             }
 
+            .barcode-print-label:last-child {
+                break-after: auto !important;
+                page-break-after: auto !important;
+            }
+
+            /* Product name is not printed. */
             .barcode-print-label .barcode-product-name {
                 display: none !important;
             }
 
-            .barcode-print-label .barcode-price {
+            /*
+             * Fixed printable barcode width.
+             * 46mm leaves 2mm on both sides of the 50mm label.
+             */
+            .barcode-print-label svg.barcode-svg {
                 display: block !important;
-                font-size: 10px !important;
-                line-height: 1.2 !important;
-                margin-top: 1mm !important;
+                width: 46mm !important;
+                min-width: 46mm !important;
+                max-width: 46mm !important;
+                height: 13mm !important;
+                max-height: 13mm !important;
+                margin: 0 auto !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                box-sizing: border-box !important;
             }
 
-            .barcode-print-label svg {
+            .barcode-print-label .barcode-price {
                 display: block !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                height: 18mm !important;
-                margin: 0 auto !important;
+                width: 46mm !important;
+                margin: 0.7mm 0 0 !important;
+                padding: 0 !important;
+                font-family: Arial, sans-serif !important;
+                font-size: 8.5pt !important;
+                font-weight: 600 !important;
+                line-height: 1 !important;
+                text-align: center !important;
+                white-space: nowrap !important;
             }
 
             #barcodePrintModal,
@@ -562,6 +614,7 @@
 
                     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                     svg.classList.add('barcode-svg');
+                    svg.setAttribute('aria-hidden', 'true');
 
                     const priceEl = document.createElement('div');
                     priceEl.className = 'barcode-price';
@@ -571,16 +624,24 @@
                     label.appendChild(priceEl);
                     labels.appendChild(label);
 
+                    /*
+                     * CODE128:
+                     * - width 1.0 keeps the bars compact enough for a 50mm label.
+                     * - margin 0 lets the CSS-controlled 46mm print area determine
+                     *   the final horizontal position.
+                     * - displayValue prints the barcode number under the bars.
+                     */
                     JsBarcode(svg, barcode, {
                         format: 'CODE128',
                         displayValue: true,
-                        fontSize: 10,
+                        fontSize: 9,
                         fontOptions: 'bold',
-                        height: 48,
-                        width: 1.5,
-                        margin: 4,
-                        textMargin: 2,
-                        flat: false
+                        height: 38,
+                        width: 1.0,
+                        margin: 0,
+                        textMargin: 1,
+                        background: '#ffffff',
+                        lineColor: '#000000'
                     });
                 }
 
@@ -597,19 +658,14 @@
                     return;
                 }
 
-                // Clone the already-rendered SVG labels into a dedicated print-only area.
-                // This avoids Bootstrap modal/backdrop CSS affecting the browser print preview.
+                // Copy only the barcode labels to the print-only DOM.
                 printArea.innerHTML = source.innerHTML;
 
                 const previewModalEl = document.getElementById('barcodePreviewModal');
                 const previewModal = bootstrap.Modal.getInstance(previewModalEl);
 
-                if (previewModal) {
-                    previewModal.hide();
-                }
-
-                // Wait for Bootstrap to finish removing the modal/backdrop, then print.
                 const startPrint = () => {
+                    // Give the browser one paint cycle to apply @media print.
                     requestAnimationFrame(() => {
                         requestAnimationFrame(() => {
                             window.print();
@@ -617,8 +673,9 @@
                     });
                 };
 
-                if (previewModalEl.classList.contains('show')) {
+                if (previewModal && previewModalEl.classList.contains('show')) {
                     previewModalEl.addEventListener('hidden.bs.modal', startPrint, { once: true });
+                    previewModal.hide();
                 } else {
                     startPrint();
                 }
@@ -629,14 +686,6 @@
                 const printArea = document.getElementById('barcodePrintArea');
                 if (printArea) {
                     printArea.innerHTML = '';
-                }
-
-                // Re-open the preview after printing if the user is still on this workflow.
-                const previewModalEl = document.getElementById('barcodePreviewModal');
-                if (previewModalEl) {
-                    const previewModal = bootstrap.Modal.getInstance(previewModalEl)
-                        || new bootstrap.Modal(previewModalEl);
-                    previewModal.show();
                 }
             });
 
