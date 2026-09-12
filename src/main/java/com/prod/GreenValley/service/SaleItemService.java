@@ -12,11 +12,13 @@ import com.prod.GreenValley.Entities.Sale;
 import com.prod.GreenValley.Entities.SaleItem;
 import com.prod.GreenValley.repository.ProductRepo;
 import com.prod.GreenValley.repository.SalesItemRepo;
+import com.prod.GreenValley.service.ProductStockService;
 import com.prod.GreenValley.util.SaleItemRecord;
 import com.prod.GreenValley.wrapper.SalesForm;
 import com.prod.GreenValley.wrapper.SalesItemForm;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 @Service
 public class SaleItemService {
@@ -26,15 +28,25 @@ public class SaleItemService {
     @Autowired
     private SalesItemRepo salesItemRepo;
 
+    @Autowired
+    private ProductStockService productStockService;
+
+    @Transactional
     public void saveItems(SalesForm salesForm, Sale sale){
         List<SaleItem> salesItems = new ArrayList<>();
         for(SalesItemForm salesItemForm : salesForm.getSalesItems()){
             SaleItem item = new SaleItem();
             Product prod =  productRepo.findById(salesItemForm.getProductId()).orElseThrow(() -> new EntityNotFoundException("Product not found with Name: " + salesItemForm.getProductInfo()));
+            int quantity = salesItemForm.getQuantitySold() == null ? 0 : salesItemForm.getQuantitySold();
+            long availableStock = productStockService.getAvailableStockByProductId(prod.getId());
+            if (quantity < 1 || availableStock < quantity) {
+                throw new IllegalArgumentException("Insufficient stock for product: " + prod.getName());
+            }
             item.setProduct(prod);
-            item.setQuantitySold(salesItemForm.getQuantitySold());
+            item.setQuantitySold(quantity);
             item.setSale(sale);
             item.setUnitPriceAtSale(salesItemForm.getUnitPriceAtSale());
+            item.setBarcode(salesItemForm.getBarcode());
             salesItems.add(item);
         }
         salesItemRepo.saveAll(salesItems);

@@ -44,7 +44,7 @@ public class PurchaseEntryController {
         return "redirect:/home";
     }
 
-    @GetMapping("/purchase/purchase-detail")
+    @GetMapping("/purchase")
     public String getPurchaseDetail(){
         return "/purchase/purchaseDetail";
     }

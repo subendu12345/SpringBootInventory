@@ -10,7 +10,6 @@ import com.prod.GreenValley.Entities.Product;
 import com.prod.GreenValley.Entities.PurchaseEntryItem;
 import com.prod.GreenValley.Entities.SaleItem;
 import com.prod.GreenValley.Entities.SubCategory;
-import com.prod.GreenValley.repository.InventoryRepo;
 import com.prod.GreenValley.repository.PriceBookRepo;
 import com.prod.GreenValley.repository.ProductRepo;
 import com.prod.GreenValley.repository.PurchaseEntryItemRepo;
@@ -41,7 +40,7 @@ public class ProductService {
     private SubCategoryRepo subCategoryRepo;
 
     @Autowired
-    private InventoryRepo inventoryRepo;
+    private ProductStockService productStockService;
 
     public List<Product> findAllProduct() {
         return productRepo.findAll();
@@ -51,11 +50,11 @@ public class ProductService {
         return productRepo.findById(id).orElse(null);
     }
 
-    public Map<Long, Long> findQuantityOnHandByProduct() {
-        return inventoryRepo.getQuantityOnHandByProduct().stream()
+    public Map<Long, Long> findStockQuantityByProduct() {
+        return productStockService.getProductStock().stream()
             .collect(Collectors.toMap(
-                row -> ((Number) row[0]).longValue(),
-                row -> ((Number) row[1]).longValue()
+                stock -> stock.getId(),
+                stock -> stock.getPurchaseQuantity() - stock.getSaleQuantity()
             ));
     }
 
@@ -124,8 +123,13 @@ public class ProductService {
 
             // Create and return a DTO with the stock data
             Long stockOnHand = totalPurchased - totalSold;
-            return new ProductSearchDTO(product.getId(), product.getName(), product.getPricePerUnit(), stockOnHand,
+                ProductSearchDTO result = new ProductSearchDTO(product.getId(), product.getName(), product.getPricePerUnit(), stockOnHand,
                     (stockOnHand <= 0 ? "Stock not avialable" : ""));
+                List<PriceBookDTO> priceBooks = bookService.getPriceBooksByProductId(product.getId());
+                if (!priceBooks.isEmpty()) {
+                result.setBarcode(priceBooks.get(priceBooks.size() - 1).getProductBarCode());
+                }
+                return result;
         }).collect(Collectors.toList());
     }
 

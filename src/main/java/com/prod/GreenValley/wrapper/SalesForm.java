@@ -12,12 +12,20 @@ public class SalesForm {
     private Date saleDate;
     private BigDecimal totalAmount;
     private String paymentMethod;
+    private String customerName;
+    private String customerMobile;
+    private String customerAddress;
+    private BigDecimal discountAmount;
+    private BigDecimal taxAmount;
+    private String notes;
     List<SalesItemForm> salesItems;
 
     public SalesForm(){
         this.paymentMethod = "";
         this.saleDate = new Date();
         this.totalAmount = BigDecimal.ZERO;
+        this.discountAmount = BigDecimal.ZERO;
+        this.taxAmount = BigDecimal.ZERO;
         this.salesItems = new ArrayList<>();
     }
 
@@ -44,6 +52,19 @@ public class SalesForm {
     public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
+
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
+    public String getCustomerMobile() { return customerMobile; }
+    public void setCustomerMobile(String customerMobile) { this.customerMobile = customerMobile; }
+    public String getCustomerAddress() { return customerAddress; }
+    public void setCustomerAddress(String customerAddress) { this.customerAddress = customerAddress; }
+    public BigDecimal getDiscountAmount() { return discountAmount; }
+    public void setDiscountAmount(BigDecimal discountAmount) { this.discountAmount = discountAmount; }
+    public BigDecimal getTaxAmount() { return taxAmount; }
+    public void setTaxAmount(BigDecimal taxAmount) { this.taxAmount = taxAmount; }
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 
     public List<SalesItemForm> getSalesItems() {
         return salesItems;

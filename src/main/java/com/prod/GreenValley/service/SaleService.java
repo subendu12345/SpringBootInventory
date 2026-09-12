@@ -4,12 +4,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.prod.GreenValley.DTO.ProductSearchDTO;
 import com.prod.GreenValley.DTO.SaleReportDTO;
@@ -17,6 +19,7 @@ import com.prod.GreenValley.Entities.PriceBook;
 import com.prod.GreenValley.Entities.Product;
 import com.prod.GreenValley.Entities.Sale;
 import com.prod.GreenValley.Entities.SaleItem;
+import com.prod.GreenValley.DTO.SaleAdjustmentRequest;
 import com.prod.GreenValley.repository.PriceBookRepo;
 import com.prod.GreenValley.repository.ProductRepo;
 import com.prod.GreenValley.repository.SaleRepo;
@@ -41,14 +44,123 @@ public class SaleService {
     @Autowired
     private ProductRepo productRepo;
 
+    @Autowired
+    private ProductStockService productStockService;
+
     public Sale saveSaleItem(SalesForm salesForm) {
         Sale sale = new Sale();
         sale.setPaymentMethod(salesForm.getPaymentMethod());
         sale.setTotalAmount(salesForm.getTotalAmount());
         sale.setSaleDate(salesForm.getSaleDate());
+        sale.setBillNumber(generateBillNumber(salesForm.getSaleDate()));
+        sale.setCustomerName(salesForm.getCustomerName());
+        sale.setCustomerMobile(salesForm.getCustomerMobile());
+        sale.setCustomerAddress(salesForm.getCustomerAddress());
+        sale.setDiscountAmount(defaultAmount(salesForm.getDiscountAmount()));
+        sale.setTaxAmount(defaultAmount(salesForm.getTaxAmount()));
+        sale.setNotes(salesForm.getNotes());
         saleRepo.save(sale);
 
         return sale;
+    }
+
+    private String generateBillNumber(Date saleDate) {
+        Date billDate = saleDate == null ? new Date() : saleDate;
+        long dailySequence = saleRepo.countBySaleDate(billDate) + 1;
+        return new SimpleDateFormat("MMddyyyy").format(billDate) + dailySequence;
+    }
+
+    private BigDecimal defaultAmount(BigDecimal amount) {
+        return amount == null ? BigDecimal.ZERO : amount;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Sale> getSaleHistory() {
+        return saleRepo.findAll(org.springframework.data.domain.Sort.by(
+                org.springframework.data.domain.Sort.Direction.DESC, "saleDate", "id"));
+    }
+
+    @Transactional
+    public Sale adjustSale(Long saleId, SaleAdjustmentRequest request) {
+        Sale sale = saleRepo.findById(saleId)
+                .orElseThrow(() -> new IllegalArgumentException("Sale not found: " + saleId));
+        boolean changed = false;
+        Map<Long, Integer> returnedByProduct = new java.util.HashMap<>();
+        java.util.Set<Long> processedReturnItems = new java.util.HashSet<>();
+
+        for (SaleAdjustmentRequest.ReturnItem adjustment : request.getReturns()) {
+            if (adjustment.getSaleItemId() == null || !processedReturnItems.add(adjustment.getSaleItemId())) {
+                throw new IllegalArgumentException("Duplicate or missing return item");
+            }
+            SaleItem item = sale.getSaleItems().stream()
+                    .filter(candidate -> candidate.getId().equals(adjustment.getSaleItemId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Sale item not found"));
+            if (adjustment.getBarcode() == null || adjustment.getBarcode().isBlank()
+                    || item.getBarcode() == null
+                    || !item.getBarcode().equals(adjustment.getBarcode().trim())) {
+                throw new IllegalArgumentException("Return barcode is not an item in this bill");
+            }
+            int returnQuantity = adjustment.getQuantity() == null ? item.getQuantitySold() : adjustment.getQuantity();
+            if (returnQuantity < 0 || returnQuantity > item.getQuantitySold()) {
+                throw new IllegalArgumentException("Return quantity is invalid for " + item.getProduct().getName());
+            }
+            if (returnQuantity == 0) {
+                if (adjustment.getUnitPrice() != null) {
+                    item.setUnitPriceAtSale(adjustment.getUnitPrice());
+                    changed = true;
+                }
+                continue;
+            }
+            returnedByProduct.merge(item.getProduct().getId(), returnQuantity, Integer::sum);
+            int remaining = item.getQuantitySold() - returnQuantity;
+            if (remaining == 0) {
+                sale.getSaleItems().remove(item);
+            } else {
+                item.setQuantitySold(remaining);
+                if (adjustment.getUnitPrice() != null) item.setUnitPriceAtSale(adjustment.getUnitPrice());
+            }
+            changed = true;
+        }
+
+        Map<Long, Integer> additionsByProduct = new java.util.HashMap<>();
+        for (SaleAdjustmentRequest.AddItem addition : request.getAdditions()) {
+            if (addition.getBarcode() == null || addition.getBarcode().isBlank()) continue;
+            int addQuantity = addition.getQuantity() == null ? 1 : addition.getQuantity();
+            if (addQuantity < 1) throw new IllegalArgumentException("Add quantity is invalid");
+            PriceBook priceBook = priceBookRepo.findByProductBarCode(addition.getBarcode().trim());
+            if (priceBook == null) throw new IllegalArgumentException("Barcode is not in the price book: " + addition.getBarcode());
+            Long productId = priceBook.getProduct().getId();
+            additionsByProduct.merge(productId, addQuantity, Integer::sum);
+            long availableStock = productStockService.getAvailableStockByProductId(productId)
+                    + returnedByProduct.getOrDefault(productId, 0);
+            if (availableStock < additionsByProduct.get(productId)) {
+                throw new IllegalArgumentException("Insufficient stock for added product: " + priceBook.getProduct().getName());
+            }
+            SaleItem item = new SaleItem();
+            item.setSale(sale);
+            item.setProduct(priceBook.getProduct());
+            item.setBarcode(priceBook.getProductBarCode());
+            item.setQuantitySold(addQuantity);
+            item.setUnitPriceAtSale(addition.getUnitPrice() == null
+                    ? BigDecimal.valueOf(priceBook.getProductPrice()) : addition.getUnitPrice());
+            sale.getSaleItems().add(item);
+            changed = true;
+        }
+
+        if (request.getPaymentMethod() != null && !request.getPaymentMethod().isBlank()) {
+            sale.setPaymentMethod(request.getPaymentMethod());
+            changed = true;
+        }
+
+        if (!changed) throw new IllegalArgumentException("Choose a return or add an item");
+        BigDecimal subtotal = sale.getSaleItems().stream()
+                .map(item -> item.getUnitPriceAtSale().multiply(BigDecimal.valueOf(item.getQuantitySold())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal discount = sale.getDiscountAmount() == null ? BigDecimal.ZERO : sale.getDiscountAmount();
+        BigDecimal tax = sale.getTaxAmount() == null ? BigDecimal.ZERO : sale.getTaxAmount();
+        sale.setTotalAmount(subtotal.subtract(discount).add(tax).max(BigDecimal.ZERO));
+        return saleRepo.save(sale);
     }
 
     public List<Sale> getSaleDataByDate(LocalDate saleDate, LocalDate endDate) {

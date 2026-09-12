@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.ui.Model;
 import com.prod.GreenValley.DTO.CategoryDto;
 import com.prod.GreenValley.DTO.CategoryResponseDto;
@@ -35,8 +36,13 @@ public class CategoryController {
     }
 
     @PostMapping("/add")
-    public String addCategory(@ModelAttribute CategoryDto categoryDto) {
-        categoryService.saveCategoryWithSubCategories(categoryDto);
+    public String addCategory(@ModelAttribute CategoryDto categoryDto, RedirectAttributes redirectAttributes) {
+        try {
+            categoryService.saveCategoryWithSubCategories(categoryDto);
+            redirectAttributes.addFlashAttribute("categorySuccess", "Category saved successfully");
+        } catch (Exception exception) {
+            redirectAttributes.addFlashAttribute("categoryError", exception.getMessage());
+        }
         return "redirect:/category";
     }
 

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.prod.GreenValley.DTO.PriceBookDTO;
 import com.prod.GreenValley.DTO.SaleInfoDTO;
 import com.prod.GreenValley.DTO.SaleItemDTO;
+import com.prod.GreenValley.DTO.SaleAdjustmentRequest;
 import com.prod.GreenValley.Entities.Sale;
 import com.prod.GreenValley.Entities.SaleItem;
 import com.prod.GreenValley.service.PricaeBookService;
@@ -63,11 +64,15 @@ public class SaleRestApiController {
                 
                 dto.setQuantitySold(saleItem.getQuantitySold());
                 dto.setUnitPriceAtSale(saleItem.getUnitPriceAtSale());
+                dto.setBarcode(saleItem.getBarcode());
                 dto.setProductInfo(saleItem.getProduct().getName());
                 saleItemDTOList.add(dto);
             }
             SaleInfoDTO saleInfoDTO = new SaleInfoDTO(sl.getId(), sl.getSaleDate(), sl.getTotalAmount(),
                     saleItemDTOList);
+                saleInfoDTO.setBillNumber(sl.getBillNumber());
+                saleInfoDTO.setDiscountAmount(sl.getDiscountAmount());
+                saleInfoDTO.setTaxAmount(sl.getTaxAmount());
             saleDto.add(saleInfoDTO);
         }
         return saleDto;
@@ -172,6 +177,18 @@ public class SaleRestApiController {
             return "success";
         } catch (Exception e) {
             return e.getMessage();
+        }
+    }
+
+    @PostMapping("/api/adjust/{saleId}")
+    public ResponseEntity<Map<String, String>> adjustSale(
+            @PathVariable Long saleId,
+            @RequestBody SaleAdjustmentRequest request) {
+        try {
+            saleService.adjustSale(saleId, request);
+            return ResponseEntity.ok(Map.of("status", "success", "message", "Sale adjusted successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("status", "error", "message", e.getMessage()));
         }
     }
 

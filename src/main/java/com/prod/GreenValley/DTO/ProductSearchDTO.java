@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 public class ProductSearchDTO {
     private Long id;
     private String name;
+    private String barcode;
     private BigDecimal pricePerUnit;
     private Long stockOnHeand;
     private String message;
@@ -22,6 +23,8 @@ public class ProductSearchDTO {
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+    public String getBarcode() { return barcode; }
+    public void setBarcode(String barcode) { this.barcode = barcode; }
 
     public BigDecimal getPricePerUnit() {
         return pricePerUnit;

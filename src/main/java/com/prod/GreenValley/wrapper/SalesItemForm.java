@@ -7,6 +7,7 @@ public class SalesItemForm {
     private Integer quantitySold;
     private BigDecimal unitPriceAtSale;
     private Long productId;
+    private String barcode;
 
     public String getProductInfo() {
         return productInfo;
@@ -38,6 +39,21 @@ public class SalesItemForm {
 
     public void setProductId(Long productId) {
         this.productId = productId;
+    }
+
+    public String getBarcode() {
+        return barcode;
+    }
+
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
+    }
+
+    public BigDecimal getLineTotal() {
+        if (unitPriceAtSale == null || quantitySold == null) {
+            return BigDecimal.ZERO;
+        }
+        return unitPriceAtSale.multiply(BigDecimal.valueOf(quantitySold));
     }
 
     

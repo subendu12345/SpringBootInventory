@@ -9,6 +9,9 @@ import com.prod.GreenValley.Entities.SubCategory;
 
 public interface SubCategoryRepo extends JpaRepository<SubCategory, Long> {
 
+    boolean existsByNameIgnoreCase(String name);
+    boolean existsByCodeIgnoreCase(String code);
+
     @Modifying // Tells Spring this is a data modification query
     @Transactional // Ensures the operation runs in a transaction
     @Query("DELETE FROM SubCategory s WHERE s.category.id = :parentId")

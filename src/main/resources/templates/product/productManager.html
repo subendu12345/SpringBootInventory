@@ -199,7 +199,7 @@
                 <tr th:each="product : ${products}">
                     <td th:text="${product.id}">1</td>
                     <td th:text="${product.name}">Example Product</td>
-                    <td th:text="${inventoryQuantities[product.id] ?: 0}">0</td>
+                    <td th:text="${stockQuantities[product.id] ?: 0}">0</td>
                     <td th:text="${product.subCategory?.category?.name ?: 'Category Missing'}">Category</td>
                     <td th:text="${product.subCategory?.name ?: 'Category Missing add it'}">Sub-Category X</td>
                     <td th:text="${latestPrices[product.id] ?: 0}">0</td>

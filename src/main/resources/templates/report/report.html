@@ -142,6 +142,11 @@
 
                 //handle Category selection
 
+                function formatReportDate(value) {
+                    const parts = String(value || '').substring(0, 10).split('-');
+                    return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : '';
+                }
+
                 // Event listener for Category dropdown change
                 categorySelect.addEventListener('change', (event) => {
                     categoryValue = event.target.value;
@@ -149,9 +154,13 @@
 
 
                 function buildSaleReport(reportData, startDate, endDate) {
+                    const displayData = reportData.map(row => ({
+                        ...row,
+                        saleDate: formatReportDate(row.saleDate)
+                    }));
                     // 1. Create a new worksheet from the JSON data.
                     // The 'header' option ensures the key names become the column headers.
-                    const worksheet = XLSX.utils.json_to_sheet(reportData, {
+                    const worksheet = XLSX.utils.json_to_sheet(displayData, {
                         header: ["saleDate", "categoryName", "productName", "unitPrice", "totalQuantity", "totalSalePrice", "totalVolume"]
                     });
 
@@ -172,9 +181,13 @@
 
                 function buildPurchaseReport(reportData, startDate, endDate) {
                     console.log('purchase report calling......')
+                    const displayData = reportData.map(row => ({
+                        ...row,
+                        dateOfPurchase: formatReportDate(row.dateOfPurchase)
+                    }));
                     // 1. Create a new worksheet from the JSON data.
                     // The 'header' option ensures the key names become the column headers.
-                    const worksheet = XLSX.utils.json_to_sheet(reportData, {
+                    const worksheet = XLSX.utils.json_to_sheet(displayData, {
                         header: ["dateOfPurchase", "categoryName", "productName", "unitPrice", "totalQuantity", "totaPurchasePrice", "totalVolume"]
                     });
 

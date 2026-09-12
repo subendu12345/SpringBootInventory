@@ -2,6 +2,7 @@ package com.prod.GreenValley.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Date;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +11,8 @@ import com.prod.GreenValley.DTO.SaleReportDTO;
 import com.prod.GreenValley.Entities.Sale;
 
 public interface SaleRepo extends JpaRepository<Sale, Long>{
+
+    long countBySaleDate(Date saleDate);
     
 
     /**

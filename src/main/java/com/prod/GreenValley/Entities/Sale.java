@@ -17,6 +17,9 @@ public class Sale {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "bill_number", unique = true, length = 24)
+    private String billNumber;
+
     @Temporal(TemporalType.DATE)
     @Column(name = "sale_date")
     private Date saleDate;
@@ -27,8 +30,26 @@ public class Sale {
     @Column(name = "total_amount", precision = 10, scale = 2)
     private BigDecimal totalAmount;
 
-    @Column(name = "payment_method", updatable = false)
+    @Column(name = "payment_method")
     private String paymentMethod;
+
+    @Column(name = "customer_name")
+    private String customerName;
+
+    @Column(name = "customer_mobile")
+    private String customerMobile;
+
+    @Column(name = "customer_address")
+    private String customerAddress;
+
+    @Column(name = "discount_amount", precision = 10, scale = 2)
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+
+    @Column(name = "tax_amount", precision = 10, scale = 2)
+    private BigDecimal taxAmount = BigDecimal.ZERO;
+
+    @Column(name = "notes")
+    private String notes;
     
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SaleItem> saleItems = new ArrayList<>();

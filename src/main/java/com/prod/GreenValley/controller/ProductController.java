@@ -64,7 +64,7 @@ public class ProductController {
     @GetMapping("/product")
     public String getProductManager(Model model){
         model.addAttribute("products", productService.findAllProduct());
-        model.addAttribute("inventoryQuantities", productService.findQuantityOnHandByProduct());
+        model.addAttribute("stockQuantities", productService.findStockQuantityByProduct());
         model.addAttribute("latestPrices", productService.findLatestPriceByProduct());
         model.addAttribute("categories", categoryService.findAllCategories());
         model.addAttribute("priceBookForm", new PriceBookDTO());

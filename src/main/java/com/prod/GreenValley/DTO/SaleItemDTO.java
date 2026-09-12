@@ -6,6 +6,7 @@ public class SaleItemDTO {
     private Long saleItemId;
     private Integer quantitySold ;
     private BigDecimal unitPriceAtSale;
+    private String barcode;
     private String productInfo;
     private String productType;
     private Integer volumeMl;
@@ -28,6 +29,12 @@ public class SaleItemDTO {
     }
     public void setUnitPriceAtSale(BigDecimal unitPriceAtSale) {
         this.unitPriceAtSale = unitPriceAtSale;
+    }
+    public String getBarcode() {
+        return barcode;
+    }
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
     }
     public String getProductInfo() {
         return productInfo;

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
 import com.prod.GreenValley.DTO.CategoryDto;
 import com.prod.GreenValley.DTO.CategoryResponseDto;
 import com.prod.GreenValley.DTO.SubCategoryDto;
@@ -20,6 +21,9 @@ public class CategoryService {
 
     @Autowired
     private CategoryRepo categoryRepo;
+
+    @Autowired
+    private SubCategoryRepo subCategoryRepo;
 
     @Autowired
     private SubCategoryService subCategoryService;
@@ -67,17 +71,41 @@ public class CategoryService {
      * @param categoryDto The DTO containing the category and sub-category names.
      * @return the newly saved Category entity.
      */
+    @Transactional
     public MasterCategory saveCategoryWithSubCategories(CategoryDto categoryDto) {
+        if (categoryDto == null || categoryDto.getName() == null || categoryDto.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Category name is required");
+        }
+        String categoryName = categoryDto.getName().trim();
+        if (categoryRepo.existsByNameIgnoreCase(categoryName)) {
+            throw new IllegalArgumentException("Category already exists: " + categoryName);
+        }
+
         MasterCategory category = new MasterCategory();
-        category.setName(categoryDto.getName());
+        category.setName(categoryName);
 
         // 2. Create and link the SubCategory entities from the DTO
-        List<SubCategory> subCategories = categoryDto.getSubCategories().stream()
+        List<SubCategoryDto> submittedSubCategories = categoryDto.getSubCategories() == null
+                ? java.util.Collections.emptyList() : categoryDto.getSubCategories();
+        java.util.Set<String> names = new java.util.HashSet<>();
+        java.util.Set<String> codes = new java.util.HashSet<>();
+        List<SubCategory> subCategories = submittedSubCategories.stream()
                 .filter(dto -> dto != null && dto.getName() != null && !dto.getName().trim().isEmpty())
                 .map(dto -> {
                     SubCategory subCategory = new SubCategory();
-                    subCategory.setName(dto.getName().trim());
-                    subCategory.setCode(dto.getCode() != null ? dto.getCode().trim() : null); // NEW: Set the code
+                    String subCategoryName = dto.getName().trim();
+                    String subCategoryCode = dto.getCode() == null ? "" : dto.getCode().trim();
+                    if (subCategoryCode.isEmpty()) {
+                        throw new IllegalArgumentException("Sub-category code is required for: " + subCategoryName);
+                    }
+                    if (!names.add(subCategoryName.toLowerCase()) || subCategoryRepo.existsByNameIgnoreCase(subCategoryName)) {
+                        throw new IllegalArgumentException("Sub-category name already exists: " + subCategoryName);
+                    }
+                    if (!codes.add(subCategoryCode.toLowerCase()) || subCategoryRepo.existsByCodeIgnoreCase(subCategoryCode)) {
+                        throw new IllegalArgumentException("Sub-category code already exists: " + subCategoryCode);
+                    }
+                    subCategory.setName(subCategoryName);
+                    subCategory.setCode(subCategoryCode);
                     subCategory.setCategory(category); // Link to the parent category
                     return subCategory;
                 })

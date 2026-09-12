@@ -145,6 +145,11 @@
             }
 
             // Function to render purchases in the table
+            function formatDisplayDate(value) {
+                const parts = String(value || '').substring(0, 10).split('-');
+                return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : '';
+            }
+
             function renderPurchases(purchases) {
                 purchaseTableBody.innerHTML = '';
                 if (purchases.length === 0) {
@@ -158,7 +163,7 @@
                     row.innerHTML = `
                         <td>${purchase.id}</td>
                         <td>${(purchase.productsInfo != "" ? purchase.productsInfo : "<p style='color:red;'><b>Please delete this purchase as purchase-item missing</b></p>")}</td>
-                        <td>${new Date(purchase.dateOfPurchase).toISOString().split('T')[0]}</td>
+                        <td>${formatDisplayDate(purchase.dateOfPurchase)}</td>
                         <td>${purchase.supplierInfo}</td>
                         <td>${purchase.totalAmount.toFixed(2)}</td>
                         <td class="text-center">

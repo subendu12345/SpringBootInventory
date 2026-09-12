@@ -89,6 +89,7 @@ public class PricaeBookService {
         PriceBookRecordDTO pb = priceBookRepo.getPriceBookByBarcode(barcode);
         if(pb != null && pb.productId() != null){
             pbObj.setProductId(pb.productId());
+            pbObj.setProductBarCode(pb.productBarCode());
             pbObj.setProductName(pb.productName());
             pbObj.setProductPrice(pb.productPrice());
             pbObj.setId(pb.id());

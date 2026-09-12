@@ -1,19 +1,1045 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-	th:replace="base::layout(~{::section})">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::section})">
 
 <head>
-	<meta charset='utf-8'>
-	<meta http-equiv='X-UA-Compatible' content='IE=edge'>
-	<title>Sale Detail</title>
-	<meta name='viewport' content='width=device-width, initial-scale=1'>
-
+	<meta charset="UTF-8">
+	<title>Sales</title>
 </head>
+<section class="sales-page">
+	<style>
+		.sales-page {
+			padding: 22px 18px 34px;
+			background: #f4f6f8;
+			min-height: calc(100vh - 70px);
+			color: #27303a
+		}
 
-<section>
-	<div class="container-fluid mt-5">
-		<div class="alert alert-info text-center" role="status">
-			Sales page is under progress.
+		.sales-shell {
+			max-width: 1500px;
+			margin: auto
+		}
+
+		.sales-tabs {
+			display: flex;
+			gap: 8px;
+			margin-bottom: 12px
+		}
+
+		.sales-tab {
+			border: 1px solid rgba(18, 24, 35, .16);
+			background: #fff;
+			color: #27303a;
+			border-radius: 7px;
+			padding: 10px 24px;
+			font-weight: 700
+		}
+
+		.sales-tab.active {
+			background: #121823;
+			border-color: #121823;
+			color: #e2b66d
+		}
+
+		.sales-panel {
+			background: #fff;
+			border: 1px solid rgba(18, 24, 35, .1);
+			border-radius: 9px;
+			box-shadow: 0 6px 18px rgba(18, 24, 35, .08);
+			padding: 14px
+		}
+
+		.sale-grid {
+			display: grid;
+			grid-template-columns: minmax(0, 1.55fr) minmax(270px, .8fr) minmax(245px, .72fr);
+			gap: 10px
+		}
+
+		.section-title {
+			font-size: .95rem;
+			font-weight: 800;
+			margin-bottom: 12px;
+			color: #1b2028;
+			display: flex;
+			align-items: center;
+			gap: 8px
+		}
+
+		.section-title i {
+			color: #a86c2d
+		}
+
+		.search-row {
+			display: flex;
+			gap: 8px
+		}
+
+		.sales-page .form-control {
+			border-color: #d6e0ec;
+			min-height: 38px;
+			font-size: .84rem
+		}
+
+		.btn-gold {
+			background: linear-gradient(135deg, #e2b66d, #c98842);
+			color: #1b2028;
+			border: 1px solid #c98842;
+			border-radius: 6px;
+			font-weight: 800
+		}
+
+		.product-result {
+			margin: 8px 0;
+			padding: 10px;
+			border: 1px solid #cde8db;
+			background: #f1fbf6;
+			border-radius: 6px;
+			display: none
+		}
+
+		.bill-table,
+		.history-table {
+			width: 100%;
+			font-size: .78rem
+		}
+
+		.bill-table {
+			margin-top: 12px
+		}
+
+		.bill-table th,
+		.history-table th {
+			background: #121823;
+			color: #fff;
+			border-color: rgba(226, 182, 109, .35);
+			white-space: nowrap
+		}
+
+		.bill-table td,
+		.bill-table th,
+		.history-table td,
+		.history-table th {
+			padding: 8px 6px;
+			border-bottom: 1px solid #e4e9ef;
+			vertical-align: middle
+		}
+
+		.qty {
+			width: 62px
+		}
+
+		.price {
+			width: 86px
+		}
+
+		.summary {
+			background: #f8fbff;
+			border: 1px solid #dbe7f5;
+			border-radius: 7px;
+			padding: 12px
+		}
+
+		.summary-line {
+			display: flex;
+			justify-content: space-between;
+			padding: 8px 0;
+			font-size: .84rem
+		}
+
+		.grand-total {
+			background: #e8f7ef;
+			color: #126c4d;
+			border-radius: 6px;
+			padding: 12px 10px;
+			font-size: 1.06rem;
+			font-weight: 800
+		}
+
+		.payment-options {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 12px;
+			font-size: .82rem
+		}
+
+		.history-panel {
+			display: none
+		}
+
+		.history-tools {
+			display: grid;
+			grid-template-columns: minmax(220px, 1fr) 150px 150px 150px auto;
+			gap: 8px;
+			margin-bottom: 14px
+		}
+
+		.paid {
+			color: #08764f;
+			background: #d9f5e8;
+			border-radius: 14px;
+			padding: 4px 9px;
+			font-weight: 700
+		}
+
+		.due {
+			color: #8a4b00;
+			background: #fff0c2;
+			border-radius: 14px;
+			padding: 4px 9px;
+			font-weight: 700
+		}
+
+		.returned {
+			color: #6b3f8f;
+			background: #eee1fa;
+			border-radius: 14px;
+			padding: 4px 9px;
+			font-weight: 700
+		}
+
+		@media(max-width:1050px) {
+			.sale-grid {
+				grid-template-columns: 1fr 1fr
+			}
+
+			.summary {
+				grid-column: span 2
+			}
+
+			.history-tools {
+				grid-template-columns: 1fr 1fr
+			}
+		}
+
+		@media(max-width:650px) {
+			.sales-page {
+				padding: 12px 8px
+			}
+
+			.sale-grid {
+				grid-template-columns: 1fr
+			}
+
+			.summary {
+				grid-column: auto
+			}
+
+			.history-tools {
+				grid-template-columns: 1fr
+			}
+
+			.search-row {
+				flex-direction: column
+			}
+		}
+	</style>
+	<div class="sales-shell">
+		<div th:if="${saleError != null}" class="alert alert-danger" role="alert" th:text="${saleError}"></div>
+		<div class="sales-tabs"><button type="button" class="sales-tab active" data-tab="new-sale"><i
+					class="bi bi-plus-square mr-2"></i>New Sale</button><button type="button" class="sales-tab"
+				data-tab="sale-history"><i class="bi bi-list-ul mr-2"></i>Sales History</button></div>
+		<div id="new-sale" class="sales-panel">
+			<form id="salesForm" th:action="@{/sale/save}" th:object="${salesForm}" method="post">
+				<div class="sale-grid">
+					<div>
+						<div class="section-title"><i class="bi bi-upc-scan"></i>Scan / Add Items</div>
+						<div class="search-row"><input id="productSearch" class="form-control"
+								placeholder="Scan barcode or enter item name..." autocomplete="off"><button
+								type="button" id="searchButton" class="btn btn-gold px-4"><i
+									class="bi bi-search mr-1"></i>Search</button></div>
+						<div id="productResult" class="product-result"></div>
+						<div class="d-flex justify-content-between align-items-center mt-3 mb-1"><strong>Current Bill
+								Items</strong><button type="button" id="clearItems" class="btn btn-link btn-sm">Clear
+								all</button></div>
+						<div class="table-responsive">
+							<table class="bill-table">
+								<thead>
+									<tr>
+										<th>#</th>
+										<th>Item</th>
+										<th>Qty</th>
+										<th>Price</th>
+										<th>Discount</th>
+										<th>Total</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody id="salesItemTableBody">
+									<tr th:each="item, stat : *{salesItems}" class="sale-item-row">
+										<td class="row-number">1</td>
+										<td><input class="form-control item-name"
+												th:field="*{salesItems[__${stat.index}__].productInfo}" readonly
+												required><input type="hidden" class="item-id"
+												th:field="*{salesItems[__${stat.index}__].productId}"><input
+												type="hidden" class="item-barcode"
+												th:field="*{salesItems[__${stat.index}__].barcode}"></td>
+										<td><input class="form-control qty" type="number" min="1" value="1"
+												th:field="*{salesItems[__${stat.index}__].quantitySold}" required></td>
+										<td><input class="form-control price" type="number" min="0" step=".01"
+												th:field="*{salesItems[__${stat.index}__].unitPriceAtSale}" required>
+										</td>
+										<td>&#8377;0.00</td>
+										<td class="line-total">&#8377;0.00</td>
+										<td><button type="button" class="btn btn-link text-danger remove-item"><i
+													class="bi bi-trash"></i></button></td>
+									</tr>
+								</tbody>
+							</table>
+						</div><button type="button" id="addItem" class="btn btn-outline-primary btn-sm mt-2"><i
+								class="bi bi-plus mr-1"></i>Add item</button><input type="hidden" id="totalAmount"
+							th:field="*{totalAmount}">
+					</div>
+					<div>
+						<div class="section-title"><i class="bi bi-person"></i>Customer Details</div><input
+							class="form-control mb-2" th:field="*{customerName}" placeholder="Customer name"><input
+							class="form-control mb-2" th:field="*{customerMobile}" placeholder="Mobile number"><textarea
+							class="form-control mb-3" th:field="*{customerAddress}" rows="3"
+							placeholder="Address"></textarea><label class="small font-weight-bold">Sale
+							date</label><input class="form-control mb-3" type="date" th:field="*{saleDate}"
+							required><label class="small font-weight-bold">Notes</label><textarea class="form-control"
+							th:field="*{notes}" rows="2" placeholder="Optional notes"></textarea>
+					</div>
+					<div>
+						<div class="section-title"><i class="bi bi-receipt"></i>Bill Summary</div>
+						<div class="summary">
+							<div class="summary-line"><span>Items</span><strong id="itemCount">0</strong></div>
+							<div class="summary-line"><span>Subtotal</span><strong id="subtotal">&#8377;0.00</strong>
+							</div><label class="small">Discount</label><input class="form-control mb-2" type="number"
+								min="0" step=".01" th:field="*{discountAmount}" id="discountAmount"><label
+								class="small">Tax</label><input class="form-control mb-2" type="number" min="0"
+								step=".01" th:field="*{taxAmount}" id="taxAmount">
+							<div class="grand-total d-flex justify-content-between"><span>GRAND TOTAL</span><span
+									id="grandTotal">&#8377;0.00</span></div>
+							<div class="mt-3 mb-2 font-weight-bold small">Payment Method</div>
+							<div class="payment-options"><label><input type="radio" th:field="*{paymentMethod}"
+										value="Cash" checked> Cash</label><label><input type="radio"
+										th:field="*{paymentMethod}" value="UPI"> UPI</label><label><input type="radio"
+										th:field="*{paymentMethod}" value="Card"> Card</label><label><input type="radio"
+										th:field="*{paymentMethod}" value="Credit"> Credit</label><label><input
+										type="radio" th:field="*{paymentMethod}" value="Other"> Other</label></div>
+							<button type="submit" class="btn btn-gold btn-block mt-4"><i
+									class="bi bi-printer mr-1"></i>Save &amp; Print Bill</button>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div id="sale-history" class="sales-panel history-panel">
+			<div class="section-title"><i class="bi bi-clock-history"></i>Sales History</div>
+			<div class="history-tools"><input id="historySearch" class="form-control"
+					placeholder="Search by bill no, customer or mobile..."><input id="fromDate" type="date"
+					class="form-control"><input id="toDate" type="date" class="form-control"><select id="paymentFilter"
+					class="form-control">
+					<option value="">All payments</option>
+					<option>Cash</option>
+					<option>UPI</option>
+					<option>Card</option>
+					<option>Credit</option>
+					<option>Other</option>
+				</select><button id="refreshHistory" type="button" class="btn btn-gold"><i
+						class="bi bi-arrow-clockwise mr-1"></i>Refresh</button></div>
+			<div class="table-responsive">
+				<table class="history-table">
+					<thead>
+						<tr>
+							<th>Bill No</th>
+							<th>Date</th>
+							<th>Customer</th>
+							<th>Mobile</th>
+							<th>Items</th>
+							<th>Amount</th>
+							<th>Payment</th>
+							<th>Status</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody id="historyBody">
+						<tr>
+							<td colspan="9" class="text-center text-muted py-4">Loading sales...</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
+	<style>
+		.receipt-paper {
+			width: 80mm;
+			margin: 0 auto;
+			padding: 4mm 4mm;
+			background: #fff;
+			color: #111;
+			font-family: Arial, sans-serif;
+		}
+
+		.receipt-brand {
+			display: grid;
+			grid-template-columns: 17mm 1fr;
+			column-gap: 3mm;
+			align-items: center;
+			text-align: left;
+			border-bottom: 1px dashed #777;
+			padding-bottom: 4px;
+			margin-bottom: 5px;
+		}
+
+		.receipt-brand img {
+			grid-row: 1 / span 3;
+			width: 17mm;
+			height: 17mm;
+			object-fit: contain;
+			border-radius: 50%;
+		}
+
+		.receipt-brand h1 {
+			margin: 0;
+			font-size: 16px;
+			letter-spacing: .6px;
+			text-transform: uppercase;
+		}
+
+		.receipt-brand p {
+			margin: 1px 0;
+			font-size: 8.5px;
+			line-height: 1.2;
+		}
+
+		.receipt-meta {
+			display: flex;
+			justify-content: space-between;
+			gap: 8px;
+			font-size: 10px;
+			margin-bottom: 7px;
+		}
+
+		.receipt-customer {
+			border-bottom: 1px dashed #777;
+			padding-bottom: 5px;
+			margin-bottom: 6px;
+			font-size: 10px;
+		}
+
+		.receipt-table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 10px;
+		}
+
+		.receipt-table th {
+			border-bottom: 1px solid #111;
+			padding: 4px 0;
+			text-align: left;
+		}
+
+		.receipt-table td {
+			padding: 4px 0;
+			vertical-align: top;
+		}
+
+		.receipt-table th:last-child,
+		.receipt-table td:last-child {
+			text-align: right;
+		}
+
+		.receipt-table .receipt-number,
+		.receipt-table .receipt-qty {
+			width: 10%;
+		}
+
+		.receipt-table .receipt-price,
+		.receipt-table .receipt-total {
+			width: 22%;
+			text-align: right;
+		}
+
+		.receipt-summary {
+			border-top: 1px dashed #777;
+			margin-top: 5px;
+			padding-top: 5px;
+			font-size: 10px;
+		}
+
+		.receipt-summary div {
+			display: flex;
+			justify-content: space-between;
+			padding: 2px 0;
+		}
+
+		.receipt-grand {
+			border-top: 1px solid #111;
+			border-bottom: 1px double #111;
+			margin-top: 3px;
+			padding: 6px 0 !important;
+			font-size: 14px;
+			font-weight: bold;
+		}
+
+		.receipt-footer {
+			border-top: 1px dashed #777;
+			margin-top: 8px;
+			padding-top: 7px;
+			text-align: center;
+			font-size: 10px;
+		}
+
+		.receipt-footer strong {
+			display: block;
+			font-size: 12px;
+			margin-bottom: 3px;
+		}
+
+		#savedBillModal .modal-body {
+			padding: 0;
+			background: #eef0f2;
+		}
+
+		@media print {
+			@page {
+				size: 80mm auto;
+				margin: 0;
+			}
+
+			body * {
+				visibility: hidden !important;
+			}
+
+			#savedBillModal,
+			#savedBillModal * {
+				visibility: visible !important;
+			}
+
+			#savedBillModal {
+				position: absolute !important;
+				left: 0 !important;
+				top: 0 !important;
+				width: 80mm !important;
+				margin: 0 !important;
+				padding: 0 !important;
+			}
+
+			#savedBillModal .modal-dialog,
+			#savedBillModal .modal-content {
+				width: 80mm !important;
+				max-width: 80mm !important;
+				margin: 0 !important;
+				border: 0 !important;
+				box-shadow: none !important;
+			}
+
+			#savedBillModal .modal-header,
+			#savedBillModal .modal-footer,
+			#savedBillModal .screen-bill-message {
+				display: none !important;
+			}
+
+			#savedBillModal .modal-body {
+				background: #fff !important;
+			}
+
+			.receipt-paper {
+				width: 80mm;
+				box-sizing: border-box;
+			}
+		}
+
+		#historyDetailsModal .modal-body {
+			padding: 0;
+			background: #eef0f2;
+		}
+
+		#historyDetailsModal .modal-footer {
+			justify-content: space-between;
+		}
+
+		#adjustSaleModal .modal-dialog {
+			width: calc(100% - 2rem);
+			max-width: 1200px;
+		}
+
+		#adjustSaleModal .adjustment-section-heading {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			margin: 18px 0 10px;
+		}
+
+		#adjustSaleModal .adjustment-section-heading h6 {
+			margin: 0;
+		}
+
+		#adjustSaleModal .adjustment-layout {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) 280px;
+			gap: 20px;
+			align-items: start;
+		}
+
+		#adjustSaleModal .adjustment-summary {
+			position: sticky;
+			top: 0;
+			background: #f8fbff;
+			border: 1px solid #dbe7f5;
+			border-radius: 7px;
+			padding: 14px;
+		}
+
+		#adjustSaleModal .adjustment-summary-title {
+			font-weight: 800;
+			color: #1b2028;
+			margin-bottom: 10px;
+		}
+
+		#adjustSaleModal .adjustment-summary-line {
+			display: flex;
+			justify-content: space-between;
+			gap: 12px;
+			padding: 8px 0;
+			border-bottom: 1px solid #e4e9ef;
+			font-size: .84rem;
+		}
+
+		#adjustSaleModal .adjustment-summary-final {
+			margin-top: 10px;
+			padding: 11px 10px;
+			background: #e8f7ef;
+			color: #126c4d;
+			border-radius: 6px;
+			font-size: 1rem;
+			font-weight: 800;
+		}
+
+		#adjustSaleModal .adjustment-summary-action {
+			margin-top: 10px;
+			padding: 10px;
+			border-radius: 6px;
+			font-weight: 800;
+			text-align: center;
+		}
+
+		#adjustSaleModal .adjustment-summary-action.collect {
+			background: #fff0c2;
+			color: #8a4b00;
+		}
+
+		#adjustSaleModal .adjustment-summary-action.refund {
+			background: #eee1fa;
+			color: #6b3f8f;
+		}
+
+		#adjustSaleModal .adjustment-table {
+			width: 100%;
+			margin-bottom: 18px;
+			font-size: .82rem;
+			table-layout: fixed;
+		}
+
+		#adjustSaleModal .adjustment-table th {
+			background: #121823;
+			color: #fff;
+			padding: 8px 6px;
+			white-space: nowrap;
+		}
+
+		#adjustSaleModal .adjustment-table td {
+			padding: 6px;
+			vertical-align: middle;
+			border-bottom: 1px solid #e4e9ef;
+		}
+
+		#adjustSaleModal .return-adjustment-table th:nth-child(1),
+		#adjustSaleModal .return-adjustment-table td:nth-child(1) {
+			width: 20%;
+		}
+
+		#adjustSaleModal .return-adjustment-table th:nth-child(2),
+		#adjustSaleModal .return-adjustment-table td:nth-child(2) {
+			width: 22%;
+		}
+
+		#adjustSaleModal .return-adjustment-table th:nth-child(3),
+		#adjustSaleModal .return-adjustment-table td:nth-child(3) {
+			width: 11%;
+		}
+
+		#adjustSaleModal .return-adjustment-table th:nth-child(4),
+		#adjustSaleModal .return-adjustment-table td:nth-child(4) {
+			width: 12%;
+		}
+
+		#adjustSaleModal .return-adjustment-table th:nth-child(5),
+		#adjustSaleModal .return-adjustment-table td:nth-child(5) {
+			width: 13%;
+		}
+
+		#adjustSaleModal .return-adjustment-table th:nth-child(6),
+		#adjustSaleModal .return-adjustment-table td:nth-child(6) {
+			width: 10%;
+		}
+
+		#adjustSaleModal .return-adjustment-table th:nth-child(7),
+		#adjustSaleModal .return-adjustment-table td:nth-child(7) {
+			width: 12%;
+		}
+
+		#adjustSaleModal .adjustment-table:not(.return-adjustment-table) th:nth-child(1),
+		#adjustSaleModal .adjustment-table:not(.return-adjustment-table) td:nth-child(1) {
+			width: 23%;
+		}
+
+		#adjustSaleModal .adjustment-table:not(.return-adjustment-table) th:nth-child(2),
+		#adjustSaleModal .adjustment-table:not(.return-adjustment-table) td:nth-child(2) {
+			width: 25%;
+		}
+
+		#adjustSaleModal .adjustment-table:not(.return-adjustment-table) th:nth-child(3),
+		#adjustSaleModal .adjustment-table:not(.return-adjustment-table) td:nth-child(3) {
+			width: 13%;
+		}
+
+		#adjustSaleModal .adjustment-table:not(.return-adjustment-table) th:nth-child(4),
+		#adjustSaleModal .adjustment-table:not(.return-adjustment-table) td:nth-child(4) {
+			width: 14%;
+		}
+
+		#adjustSaleModal .adjustment-table:not(.return-adjustment-table) th:nth-child(5),
+		#adjustSaleModal .adjustment-table:not(.return-adjustment-table) td:nth-child(5) {
+			width: 13%;
+		}
+
+		#adjustSaleModal .adjustment-table:not(.return-adjustment-table) th:nth-child(6),
+		#adjustSaleModal .adjustment-table:not(.return-adjustment-table) td:nth-child(6) {
+			width: 12%;
+		}
+
+		#adjustSaleModal .adjustment-table .adjustment-barcode {
+			width: 165px;
+			max-width: 100%;
+		}
+
+		#adjustSaleModal .adjustment-table .adjustment-quantity,
+		#adjustSaleModal .adjustment-table .adjustment-price {
+			width: 88px;
+			max-width: 100%;
+		}
+
+		#adjustSaleModal .adjustment-table .adjustment-total {
+			white-space: nowrap;
+		}
+
+		@media (max-width: 767px) {
+			#adjustSaleModal .adjustment-layout { grid-template-columns: 1fr; }
+			#adjustSaleModal .adjustment-summary { position: static; }
+			#adjustSaleModal .adjustment-table {
+				min-width: 720px;
+			}
+
+			#adjustSaleModal .adjustment-table-wrapper {
+				overflow-x: auto;
+			}
+		}
+
+		#adjustSaleModal .adjustment-row {
+			display: grid;
+			grid-template-columns: minmax(165px, 1.2fr) minmax(180px, 1.5fr) 90px 110px 90px 82px;
+			gap: 8px;
+			align-items: end;
+		}
+
+		#adjustSaleModal .adjustment-barcode-cell {
+			min-width: 190px;
+		}
+
+		#adjustSaleModal .adjustment-barcode {
+			width: 165px;
+			max-width: 100%;
+		}
+
+		#adjustSaleModal .adjustment-product-cell {
+			min-width: 220px;
+		}
+
+		#adjustSaleModal .adjustment-quantity-cell {
+			min-width: 115px;
+		}
+
+		#adjustSaleModal .adjustment-price-cell {
+			min-width: 135px;
+		}
+
+		#adjustSaleModal .adjustment-total-cell {
+			width: 90px;
+			max-width: 90px;
+			min-width: 0;
+			overflow: hidden;
+		}
+
+		#adjustSaleModal .adjustment-quantity,
+		#adjustSaleModal .adjustment-price {
+			width: 88px;
+		}
+
+		#adjustSaleModal .adjustment-delete-cell {
+			display: flex;
+			align-items: flex-end;
+			justify-content: center;
+			min-width: 88px;
+		}
+
+		#adjustSaleModal .remove-adjustment-row {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			min-width: 76px;
+			height: 36px;
+			padding: 0 10px;
+		}
+
+		#adjustSaleModal .adjustment-total {
+			min-height: 38px;
+			padding: 9px 4px;
+			white-space: nowrap;
+		}
+
+		@media (max-width: 767px) {
+			#adjustSaleModal .modal-dialog {
+				width: calc(100% - 1rem);
+				margin: .5rem auto;
+			}
+
+			#adjustSaleModal .adjustment-row {
+				grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr);
+			}
+
+			#adjustSaleModal .adjustment-row>[class*="col-"] {
+				margin-bottom: 8px;
+			}
+
+			#adjustSaleModal .adjustment-barcode-cell,
+			#adjustSaleModal .adjustment-product-cell,
+			#adjustSaleModal .adjustment-quantity-cell,
+			#adjustSaleModal .adjustment-price-cell,
+			#adjustSaleModal .adjustment-total-cell {
+				width: auto;
+				max-width: none;
+			}
+
+			#adjustSaleModal .adjustment-quantity,
+			#adjustSaleModal .adjustment-price {
+				width: 100%;
+			}
+
+			#adjustSaleModal .adjustment-delete-cell {
+				justify-content: flex-start;
+			}
+		}
+
+		@media print {
+			body * {
+				visibility: hidden !important;
+			}
+
+			#historyDetailsModal,
+			#historyDetailsModal * {
+				visibility: visible !important;
+			}
+
+			#historyDetailsModal {
+				position: absolute !important;
+				left: 0 !important;
+				top: 0 !important;
+				width: 80mm !important;
+				margin: 0 !important;
+				padding: 0 !important;
+			}
+
+			#historyDetailsModal .modal-dialog,
+			#historyDetailsModal .modal-content {
+				width: 80mm !important;
+				max-width: 80mm !important;
+				margin: 0 !important;
+				border: 0 !important;
+				box-shadow: none !important;
+			}
+
+			#historyDetailsModal .modal-header,
+			#historyDetailsModal .modal-footer {
+				display: none !important;
+			}
+
+			#historyDetailsModal .modal-body {
+				background: #fff !important;
+			}
+		}
+	</style>
+	<div class="modal fade" id="savedBillModal" tabindex="-1" role="dialog" th:if="${saleToDisplayInModal != null}">
+		<div class="modal-dialog modal-sm" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Sale Details</h5><button type="button" class="close"
+						data-dismiss="modal">&times;</button>
+				</div>
+				<div class="modal-body">
+					<!-- <div class="screen-bill-message px-3 pt-3">
+						<p>Bill saved successfully.</p>
+					</div> -->
+					<div class="receipt-paper">
+						<div class="receipt-brand"><img th:src="@{/img/das_fasion_logo.jpeg}" alt="DAS logo">
+							<h1>DAS</h1>
+							<p>fit &amp; fashion</p>
+							<p>Pro: Susanta Das<br>At+ PO: Chhatinasole<br>Dist: Jhargram<br>Mobile: 8670116323</p>
+						</div>
+						<div class="receipt-meta"><span>Bill: <strong
+									th:text="${saleToDisplayInModal.billNumber}"></strong></span><span
+								th:text="${#dates.format(saleToDisplayInModal.saleDate, 'dd-MM-yyyy')}"></span></div>
+						<div class="receipt-customer"
+							th:if="${saleToDisplayInModal.customerName != null and !#strings.isEmpty(saleToDisplayInModal.customerName)}">
+							<strong>Customer:</strong> <span
+								th:text="${saleToDisplayInModal.customerName}"></span><br><span
+								th:if="${saleToDisplayInModal.customerMobile != null}"
+								th:text="${saleToDisplayInModal.customerMobile}"></span>
+						</div>
+						<table class="receipt-table">
+							<thead>
+								<tr>
+									<th class="receipt-number">#</th>
+									<th>Item</th>
+									<th class="receipt-qty">Qty</th>
+									<th class="receipt-price">Price</th>
+									<th class="receipt-total">Amount</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="item, stat : ${saleToDisplayInModal.items}">
+									<td th:text="${stat.count}"></td>
+									<td th:text="${item.productInfo}"></td>
+									<td class="receipt-qty" th:text="${item.quantitySold}"></td>
+									<td class="receipt-price"
+										th:text="${#numbers.formatDecimal(item.unitPriceAtSale, 1, 2)}"></td>
+									<td class="receipt-total" th:text="${#numbers.formatDecimal(item.lineTotal, 1, 2)}">
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<div class="receipt-summary">
+							<div><span>Subtotal</span><span
+									th:text="${#numbers.formatDecimal(saleToDisplayInModal.totalAmount.add(saleToDisplayInModal.discountAmount ?: 0).subtract(saleToDisplayInModal.taxAmount ?: 0), 1, 2)}"></span>
+							</div>
+							<div><span>Discount</span><span
+									th:text="${#numbers.formatDecimal(saleToDisplayInModal.discountAmount ?: 0, 1, 2)}"></span>
+							</div>
+							<div><span>Tax</span><span
+									th:text="${#numbers.formatDecimal(saleToDisplayInModal.taxAmount ?: 0, 1, 2)}"></span>
+							</div>
+							<div class="receipt-grand"><span>Grand Total</span><span
+									th:text="${'&#8377;' + #numbers.formatDecimal(saleToDisplayInModal.totalAmount, 1, 2)}"></span>
+							</div>
+							<div><span>Payment</span><strong
+									th:text="${saleToDisplayInModal.paymentMethod ?: 'Cash'}"></strong></div>
+						</div>
+						<div class="receipt-footer"><strong>Thank you for shopping with us!</strong>Please visit again.
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer"><button type="button" class="btn btn-secondary"
+						data-dismiss="modal">Close</button><button type="button" id="savedBillPrintButton"
+						class="btn btn-gold"><i class="bi bi-printer mr-1"></i>Print Bill</button></div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="historyDetailsModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-sm" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Sale Details</h5><button type="button" class="close"
+						data-dismiss="modal">&times;</button>
+				</div>
+				<div id="historyDetailsContent" class="modal-body"></div>
+				<div class="modal-footer"><button type="button" id="adjustSaleButton" class="btn btn-outline-dark"><i
+							class="bi bi-pencil-square mr-1"></i>Adjust Bill</button><button type="button"
+						class="btn btn-secondary" data-dismiss="modal">Close</button><button type="button"
+						id="historyPrintButton" class="btn btn-gold"><i class="bi bi-printer mr-1"></i>Print</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="adjustSaleModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-xl" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Adjust Existing Bill</h5><button type="button" class="close"
+						data-dismiss="modal">&times;</button>
+				</div>
+				<div class="modal-body">
+					<p class="small text-muted">Scan a barcode first. The item, price and quantity limits will be filled
+						from the bill or price book.</p>
+					<div class="adjustment-layout">
+						<div class="adjustment-main">
+					<div class="adjustment-section-heading">
+						<h6>Return items</h6><button type="button" id="addReturnRow" class="btn btn-link btn-sm"><i
+								class="bi bi-plus mr-1"></i>Add item</button>
+					</div>
+					<div class="adjustment-table-wrapper">
+						<table class="adjustment-table return-adjustment-table">
+							<thead>
+								<tr>
+									<th>Barcode</th>
+									<th>Bill item</th>
+									<th>Sold Qty</th>
+									<th>Return Qty</th>
+									<th>Price</th>
+									<th>Total</th>
+									<th>Action</th>
+								</tr>
+							</thead>
+							<tbody id="returnRows"></tbody>
+						</table>
+					</div>
+					<div class="adjustment-section-heading">
+						<h6>Add items</h6><a href="#" id="addAdditionRow" class="btn btn-link btn-sm" role="button"><i
+								class="bi bi-plus mr-1"></i>Add item</a>
+					</div>
+					<div class="adjustment-table-wrapper">
+						<table class="adjustment-table">
+							<thead>
+								<tr>
+									<th>Barcode</th>
+									<th>Item</th>
+									<th>Qty</th>
+									<th>Price</th>
+									<th>Total</th>
+									<th>Action</th>
+								</tr>
+							</thead>
+							<tbody id="additionRows"></tbody>
+						</table>
+					</div>
+						</div>
+						<aside class="adjustment-summary" aria-label="Adjustment amount summary">
+							<div class="adjustment-summary-title">Adjustment Summary</div>
+							<div class="adjustment-summary-line"><span>Current bill</span><strong id="adjustmentOriginalTotal">&#8377;0.00</strong></div>
+							<div class="adjustment-summary-line"><span>Returned items</span><strong id="adjustmentReturnTotal">-&#8377;0.00</strong></div>
+							<div class="adjustment-summary-line"><span>Added items</span><strong id="adjustmentAdditionTotal">&#8377;0.00</strong></div>
+							<div class="adjustment-summary-final d-flex justify-content-between"><span>Final amount</span><span id="adjustmentFinalTotal">&#8377;0.00</span></div>
+							<div id="adjustmentPaymentDifference" class="adjustment-summary-action collect">Amount to collect: &#8377;0.00</div>
+							<div class="form-group mt-3 mb-0"><label for="adjustPaymentMethod">Payment Method</label><select
+								id="adjustPaymentMethod" class="form-control">
+								<option>Cash</option>
+								<option>UPI</option>
+								<option>Card</option>
+								<option>Credit</option>
+								<option>Other</option>
+							</select></div>
+						</aside>
+					</div>
+					<div id="adjustSaleMessage" class="alert d-none mt-3 mb-0"></div>
+				</div>
+				<div class="modal-footer"><button type="button" class="btn btn-outline-dark"
+						data-dismiss="modal">Cancel</button><button type="button" id="saveAdjustmentButton"
+						class="btn btn-gold"><i class="bi bi-check2 mr-1"></i>Save Adjustment</button></div>
+			</div>
+		</div>
+	</div>
+	<script th:src="@{/javaScript/SalesPage.js}" defer></script>
 </section>
+
+</html>
