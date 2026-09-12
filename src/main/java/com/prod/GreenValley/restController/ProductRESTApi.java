@@ -46,6 +46,9 @@ public class ProductRESTApi {
             dto.setSubCategoryId(pro.getSubCategory().getId());
         }
         dto.setVolumeMl(pro.getVolumeMl());
+        dto.setBrand(pro.getBrand());
+        dto.setSize(pro.getSize());
+        dto.setPricePerUnit(pro.getPricePerUnit());
         dto.setId(pro.getId());
         
         return dto;

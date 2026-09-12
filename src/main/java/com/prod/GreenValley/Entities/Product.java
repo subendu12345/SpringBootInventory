@@ -27,6 +27,9 @@ public class Product {
     @Column(name = "volume_ml")
     private Integer volumeMl;
 
+    @Column(name = "size")
+    private String size;
+
     @Column(name = "price_per_unit", precision = 10, scale = 2)
     private BigDecimal pricePerUnit;
 

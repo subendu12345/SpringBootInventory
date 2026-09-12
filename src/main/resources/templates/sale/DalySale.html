@@ -87,6 +87,23 @@
 			font-weight: 800
 		}
 
+		#addItem {
+			color: #a86c2d;
+			border-color: #c98842;
+			background: #fffaf0;
+			font-weight: 700;
+			transition: background-color .2s ease, color .2s ease, border-color .2s ease,
+				box-shadow .2s ease;
+		}
+
+		#addItem:hover,
+		#addItem:focus {
+			color: #1b2028;
+			border-color: #c98842;
+			background: linear-gradient(135deg, #e2b66d, #c98842);
+			box-shadow: 0 3px 8px rgba(201, 136, 66, .28);
+		}
+
 		.product-result {
 			margin: 8px 0;
 			padding: 10px;
@@ -279,8 +296,9 @@
 										</td>
 										<td>&#8377;0.00</td>
 										<td class="line-total">&#8377;0.00</td>
-										<td><button type="button" class="btn btn-link text-danger remove-item"><i
-													class="bi bi-trash"></i></button></td>
+										<td><button type="button" class="btn btn-danger btn-sm remove-item"
+													title="Remove item" aria-label="Remove item"><i
+														class="bi bi-trash"></i> Delete</button></td>
 									</tr>
 								</tbody>
 							</table>

@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td><input class="form-control qty" type="number" min="1" value="" name="salesItems[${index}].quantitySold" required></td>
             <td><input class="form-control price" type="number" min="0" step=".01" name="salesItems[${index}].unitPriceAtSale" required></td>
             <td>\u20b90.00</td><td class="line-total">\u20b90.00</td>
-            <td><button type="button" class="btn btn-link text-danger remove-item"><i class="bi bi-trash"></i></button></td>`;
+            <td><button type="button" class="btn btn-danger btn-sm remove-item" title="Remove item" aria-label="Remove item"><i class="bi bi-trash"></i> Delete</button></td>`;
         if (product) {
             applyProduct(row, product);
         }
@@ -182,8 +182,11 @@ document.addEventListener('DOMContentLoaded', () => {
     itemBody.addEventListener('input', recalculate);
     itemBody.addEventListener('click', event => {
         const removeButton = event.target.closest('.remove-item');
-        if (removeButton && itemBody.querySelectorAll('.sale-item-row').length > 1) {
+        if (removeButton) {
             removeButton.closest('.sale-item-row').remove();
+            if (!itemBody.querySelector('.sale-item-row')) {
+                addItem();
+            }
             reindexRows();
             recalculate();
         }

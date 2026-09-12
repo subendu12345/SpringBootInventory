@@ -1,10 +1,15 @@
 package com.prod.GreenValley.DTO;
 
+import java.math.BigDecimal;
+
 public class ProductDTO {
     private String name;
     private Long categoryId;
     private Long subCategoryId;
     private Integer volumeMl;
+    private String brand;
+    private String size;
+    private BigDecimal pricePerUnit;
     private Long id;
 
     public Long getId() {
@@ -45,6 +50,30 @@ public class ProductDTO {
 
     public void setVolumeMl(Integer volumeMl) {
         this.volumeMl = volumeMl;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public BigDecimal getPricePerUnit() {
+        return pricePerUnit;
+    }
+
+    public void setPricePerUnit(BigDecimal pricePerUnit) {
+        this.pricePerUnit = pricePerUnit;
     }
 
 }

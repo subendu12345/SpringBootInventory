@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.prod.GreenValley.Entities.Product;
+import com.prod.GreenValley.service.CategoryService;
 import com.prod.GreenValley.service.DataBaseBackupService;
 import com.prod.GreenValley.service.EmailService;
 import com.prod.GreenValley.wrapper.ProductForm;
@@ -43,6 +44,9 @@ public class HomeController {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private CategoryService categoryService;
+
     // This is home page controller
     @GetMapping({ "/", "/home" })
     public String home(Model model, Authentication authentication) throws IOException, InterruptedException, MessagingException {
@@ -58,6 +62,7 @@ public class HomeController {
 
         productForm.getProducts().add(new Product()); // Add one empty product to start
         model.addAttribute("productForm", productForm);
+        model.addAttribute("categories", categoryService.findAllCategories());
 
         SalesForm salesForm = new SalesForm();
         salesForm.getSalesItems().add(new SalesItemForm());

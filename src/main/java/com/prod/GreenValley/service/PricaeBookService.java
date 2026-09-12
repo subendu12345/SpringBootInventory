@@ -74,6 +74,15 @@ public class PricaeBookService {
         return message;
     }
 
+    public void updatePriceBookPrice(Long productId, double price) {
+        priceBookRepo.findByProduct_Id(productId).stream()
+                .findFirst()
+                .ifPresent(priceBook -> {
+                    priceBook.setProductPrice(price);
+                    priceBookRepo.save(priceBook);
+                });
+    }
+
     public PriceBookDTO getProductInfoByBarcode(String barcode){  
         if (barcodeCache.containsKey(barcode)) {
             PriceBookDTO cachedPb = barcodeCache.get(barcode);

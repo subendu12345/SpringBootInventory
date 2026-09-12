@@ -21,6 +21,23 @@
             display: none;
             /* Hidden by default, show with JavaScript */
         }
+
+        .purchase-add-new-button {
+            color: #a86c2d;
+            border: 1px solid #c98842;
+            background: #fffaf0;
+            font-weight: 700;
+            transition: background-color .2s ease, color .2s ease, border-color .2s ease,
+                box-shadow .2s ease;
+        }
+
+        .purchase-add-new-button:hover,
+        .purchase-add-new-button:focus {
+            color: #1b2028;
+            border-color: #c98842;
+            background: linear-gradient(135deg, #e2b66d, #c98842);
+            box-shadow: 0 3px 8px rgba(201, 136, 66, .28);
+        }
     </style>
 </head>
 
@@ -32,8 +49,8 @@
                 <div class="home-actions">
                     <button type="button" class="btn btn-info" data-toggle="modal" data-target="#productModal">Add
                         Products</button>
-                    <button type="button" class="btn btn-info" data-toggle="modal"
-                        data-target="#purchaseEntryFormModal">Purchase Entry</button>
+                    <button type="button" class="btn purchase-add-new-button" data-toggle="modal"
+                        data-target="#purchaseEntryFormModal">Add New Purchase</button>
                     <span class="badge badge-primary" id="totalBottoleCount"></span>
                     <span class="badge badge-success" id="totalStockAmount"></span>
                     <div class="home-status">
@@ -62,7 +79,7 @@
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="productModalLabel">Product Entry Form</h5>
+                        <h5 class="modal-title" id="productModalLabel">Add Products</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -81,7 +98,7 @@
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="purchaseEntryFormModal">Purchase Entry Form</h5>
+                        <h5 class="modal-title" id="purchaseEntryFormModal">Add new Purchase</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>

@@ -1,6 +1,8 @@
 package com.prod.GreenValley.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.prod.GreenValley.DTO.PriceBookDTO;
@@ -46,6 +48,10 @@ public class ProductService {
         return productRepo.findAll();
     }
 
+    public Page<Product> searchForManager(String query, Pageable pageable) {
+        return productRepo.searchForManager(query == null ? "" : query, pageable);
+    }
+
     public Product findProductById(Long id) {
         return productRepo.findById(id).orElse(null);
     }
@@ -86,8 +92,15 @@ public class ProductService {
 
             prod.setName(productDTO.getName());
             prod.setVolumeMl(productDTO.getVolumeMl());
+            prod.setBrand(productDTO.getBrand());
+            prod.setSize(productDTO.getSize());
+            prod.setPricePerUnit(productDTO.getPricePerUnit());
 
             productRepo.save(prod);
+
+            if (productDTO.getPricePerUnit() != null) {
+                bookService.updatePriceBookPrice(prod.getId(), productDTO.getPricePerUnit().doubleValue());
+            }
         }
     }
 

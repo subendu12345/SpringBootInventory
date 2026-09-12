@@ -1,101 +1,163 @@
 <!DOCTYPE html>
-<!-- <html lang="en" xmlns="http://www.thymeleaf.org" th:replace="base::layout(~{::section})"> -->
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Product Entry Form</title>
-
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-
-        .card {
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
-
-        .table-responsive {
-            margin-bottom: 1rem;
-        }
-    </style>
+    <title>Add Products</title>
 </head>
 
 <body>
     <div th:fragment="productEntryForm">
-        <div class="container py-5">
-            <div class="card">
-                <div class="card-body">
-                    <h1 class="card-title text-center mb-4">Add Multiple Products</h1>
+        <style>
+            #productModal .product-entry-form {
+                background: #fffaf0;
+                color: #27303a;
+            }
 
-                    <form id="productForm" th:action="@{/products/save}" th:object="${productForm}" method="post">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-bordered" id="productTable">
-                                <thead>
-                                    <tr>
-                                        <th>Product Name</th>
-                                        <!-- <th>Price</th> -->
-                                        <!-- <th>Volume/Qty.</th> -->
-                                        <th class="text-center">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- This block will be repeated for each product in the list -->
-                                    <tr th:each="product, stat : *{products}" th:id="'row-' + ${stat.index}">
-                                        <td>
-                                            <input type="text" class="form-control"
-                                                th:field="*{products[__${stat.index}__].name}"
-                                                placeholder="Product Name" required />
-                                        </td>
-                                        <!-- <td>
-                                            <input type="number" class="form-control"
-                                                th:field="*{products[__${stat.index}__].pricePerUnit}"
-                                                placeholder="Price Per Unit" step="0.01" min="0" required />
-                                        </td> -->
-                                        <!-- <td>
-                                            <input type="number" class="form-control"
-                                                th:field="*{products[__${stat.index}__].volumeMl}"
-                                                placeholder="Volume/Qty." min="0" required />
-                                        </td> -->
-                                        <td class="text-center">
-                                            <button type="button" class="btn btn-danger btn-sm remove-button"
-                                                th:if="${stat.index > 0}"
-                                                th:onclick="'removeRow(' + ${stat.index} + ');'">Remove</button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+            #productModal .product-entry-form h1 {
+                color: #14263d;
+                font-size: 1.45rem;
+                font-weight: 600;
+                margin: 0 0 1rem;
+            }
 
-                        <div class="d-flex justify-content-center">
-                            <button type="button" class="btn btn-success mr-2 add-button" onclick="addRow()">Add
-                                Product</button>
-                            <input type="submit" class="btn btn-primary" value="Save Products" />
-                        </div>
-                    </form>
+            #productModal .product-entry-table {
+                min-width: 980px;
+                margin-bottom: 1rem;
+            }
+
+            #productModal .product-entry-table thead th {
+                background: #14263d;
+                color: #fff;
+                border-color: #14263d;
+                font-size: .78rem;
+                letter-spacing: .04em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+
+            #productModal .product-entry-table td {
+                background: #fff;
+                vertical-align: middle;
+            }
+
+            #productModal .product-entry-table input,
+            #productModal .product-entry-table select {
+                min-width: 110px;
+                border-color: #d9c69b;
+                border-radius: 2px;
+            }
+
+            #productModal .product-entry-table .barcode-field {
+                min-width: 155px;
+                background: #f4f6f8;
+            }
+
+            #productModal .product-entry-actions {
+                border-top: 1px solid #e2b66d;
+                padding-top: 1rem;
+            }
+
+            #productModal .product-add-new-button {
+                color: #a86c2d;
+                border: 1px solid #c98842;
+                background: #fffaf0;
+                font-weight: 700;
+                transition: background-color .2s ease, color .2s ease, border-color .2s ease,
+                    box-shadow .2s ease;
+            }
+
+            #productModal .product-add-new-button:hover,
+            #productModal .product-add-new-button:focus {
+                color: #1b2028;
+                border-color: #c98842;
+                background: linear-gradient(135deg, #e2b66d, #c98842);
+                box-shadow: 0 3px 8px rgba(201, 136, 66, .28);
+            }
+        </style>
+
+        <div class="product-entry-form">
+            <!-- <h1>Add Multiple Products</h1> -->
+            <form id="productForm" th:action="@{/products/save}" th:object="${productForm}" method="post">
+                <div id="productFormMessage" class="alert d-none" role="alert"></div>
+                <div class="table-responsive">
+                    <table class="table table-bordered product-entry-table" id="productTable">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Brand</th>
+                                <th>Category</th>
+                                <th>Size</th>
+                                <th>Price</th>
+                                <th>New Barcode / Price Book</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="product, stat : *{products}" th:id="'row-' + ${stat.index}">
+                                <td><input type="text" class="form-control"
+                                        th:field="*{products[__${stat.index}__].name}" placeholder="Product" required>
+                                </td>
+                                <td><input type="text" class="form-control"
+                                        th:field="*{products[__${stat.index}__].brand}" placeholder="Brand"></td>
+                                <td>
+                                    <select class="form-control"
+                                        th:field="*{products[__${stat.index}__].subCategory.id}" required>
+                                        <option value="">Select category</option>
+                                        <optgroup th:each="category : ${categories}" th:label="${category.name}">
+                                            <option th:each="subCategory : ${category.subCategories}"
+                                                th:value="${subCategory.id}" th:text="${subCategory.name}"></option>
+                                        </optgroup>
+                                    </select>
+                                </td>
+                                <td><input type="text" class="form-control"
+                                        th:field="*{products[__${stat.index}__].size}"
+                                        placeholder="M,L/36,38/80CM"></td>
+                                <td><input type="number" class="form-control" min="0" step="0.01"
+                                        th:field="*{products[__${stat.index}__].pricePerUnit}" placeholder="Price"
+                                        required></td>
+                                <td><input type="text" class="form-control barcode-field"
+                                        th:field="*{products[__${stat.index}__].barcode}" readonly required></td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-outline-danger btn-sm remove-button"
+                                        th:if="${stat.index > 0}">Remove</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+                <div class="d-flex justify-content-between align-items-center product-entry-actions">
+                    <button type="button" class="btn product-add-new-button add-button" onclick="addRow()">Add New</button>
+                    <button type="submit" class="btn btn-primary">Save Products</button>
+                </div>
+            </form>
         </div>
 
-        <!-- The template row for adding new products -->
         <template id="product-row-template">
             <tr>
+                <td><input type="text" class="form-control" name="products[INDEX_PLACEHOLDER].name"
+                        placeholder="Product" required></td>
+                <td><input type="text" class="form-control" name="products[INDEX_PLACEHOLDER].brand"
+                        placeholder="Brand"></td>
                 <td>
-                    <input type="text" class="form-control" name="products[INDEX_PLACEHOLDER].name"
-                        placeholder="Product Name" required />
+                    <select class="form-control" name="products[INDEX_PLACEHOLDER].subCategory.id" required>
+                        <option value="">Select category</option>
+                        <th:block th:each="category : ${categories}">
+                            <optgroup th:label="${category.name}">
+                                <option th:each="subCategory : ${category.subCategories}" th:value="${subCategory.id}"
+                                    th:text="${subCategory.name}"></option>
+                            </optgroup>
+                        </th:block>
+                    </select>
                 </td>
-                <!-- <td>
-                    <input type="number" class="form-control" name="products[INDEX_PLACEHOLDER].pricePerUnit"
-                        placeholder="Price Per Unit" step="0.01" min="0" required />
-                </td> -->
-                <!-- <td>
-                    <input type="number" class="form-control" name="products[INDEX_PLACEHOLDER].volumeMl"
-                        placeholder="Volume/Qty." min="0" required />
-                </td> -->
-                <td class="text-center">
-                    <button type="button" class="btn btn-danger btn-sm remove-button">Remove</button>
-                </td>
+                <td><input type="text" class="form-control" name="products[INDEX_PLACEHOLDER].size"
+                        placeholder="M, L / 36, 38 / 80CM"></td>
+                <td><input type="number" class="form-control" name="products[INDEX_PLACEHOLDER].pricePerUnit" min="0"
+                        step="0.01" placeholder="Price" required></td>
+                <td><input type="text" class="form-control barcode-field" name="products[INDEX_PLACEHOLDER].barcode"
+                        readonly required></td>
+                <td class="text-center"><button type="button"
+                        class="btn btn-outline-danger btn-sm remove-button">Remove</button></td>
             </tr>
         </template>
         <script>
@@ -103,6 +165,56 @@
                 const form = document.getElementById('productForm');
                 const tableBody = document.querySelector('#productTable tbody');
                 const template = document.getElementById('product-row-template');
+                const formMessage = document.getElementById('productFormMessage');
+
+                form.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    formMessage.className = 'alert alert-info';
+                    formMessage.textContent = 'Saving products...';
+
+                    try {
+                        const response = await fetch(form.action, {
+                            method: form.method,
+                            body: new FormData(form),
+                            headers: { 'Accept': 'application/json' }
+                        });
+                        const result = await response.json();
+                        if (!response.ok || result.status !== 'success') {
+                            throw new Error(result.message || 'Unable to save products.');
+                        }
+
+                        form.reset();
+                        tableBody.querySelectorAll('tr').forEach(row => assignBarcode(row));
+                        formMessage.className = 'alert alert-success';
+                        formMessage.textContent = result.message;
+
+                        const productModal = document.getElementById('productModal');
+                        if (productModal && window.jQuery) {
+                            $('#productModal').one('hidden.bs.modal', () => window.location.reload());
+                            $('#productModal').modal('hide');
+                        } else {
+                            window.location.reload();
+                        }
+                    } catch (error) {
+                        formMessage.className = 'alert alert-danger';
+                        formMessage.textContent = error.message;
+                    }
+                });
+
+                async function assignBarcode(row) {
+                    const barcode = row.querySelector('.barcode-field');
+                    if (!barcode) return;
+                    barcode.value = 'Generating...';
+                    try {
+                        const response = await fetch('/products/api/pricebook/barcode');
+                        if (!response.ok) throw new Error('Unable to generate barcode.');
+                        barcode.value = await response.text();
+                    } catch (error) {
+                        barcode.value = '';
+                        formMessage.className = 'alert alert-danger';
+                        formMessage.textContent = error.message;
+                    }
+                }
 
                 // Function to add a new row to the table
                 window.addRow = function () {
@@ -110,7 +222,7 @@
                     const newIndex = tableBody.children.length;
 
                     // Update the names and ids to match the next index
-                    newRow.querySelectorAll('input').forEach(input => {
+                    newRow.querySelectorAll('input, select').forEach(input => {
                         input.name = input.name.replace('INDEX_PLACEHOLDER', newIndex);
                     });
                     newRow.id = 'row-' + newIndex;
@@ -119,6 +231,7 @@
                     removeButton.onclick = () => window.removeRow(newIndex);
 
                     tableBody.appendChild(newRow);
+                    assignBarcode(newRow);
                 }
 
                 // Function to remove a row from the table
@@ -137,7 +250,7 @@
                     for (let i = 0; i < rows.length; i++) {
                         const row = rows[i];
                         row.id = 'row-' + i;
-                        row.querySelectorAll('input').forEach(input => {
+                        row.querySelectorAll('input, select').forEach(input => {
                             input.name = input.name.replace(/products\[\d+\]/, `products[${i}]`);
                         });
 
@@ -163,6 +276,7 @@
                     if (removeButton) {
                         removeButton.onclick = () => window.removeRow(index);
                     }
+                    assignBarcode(row);
                 });
             });
         </script>

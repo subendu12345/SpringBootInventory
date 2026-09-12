@@ -28,6 +28,63 @@
             height: 15mm;
         }
 
+        .product-list-tools {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) auto auto;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .product-list-tools .product-search-input {
+            width: 100%;
+            min-height: 38px;
+            font-size: .84rem;
+            border-color: #d6e0ec;
+        }
+
+        .product-refresh-button {
+            color: #1b2028;
+            border: 1px solid #c98842;
+            background: linear-gradient(135deg, #e2b66d, #c98842);
+            font-weight: 700;
+        }
+
+        .product-refresh-button:hover,
+        .product-refresh-button:focus {
+            color: #fff;
+            border-color: #a86c2d;
+            background: #a86c2d;
+            box-shadow: 0 3px 8px rgba(201, 136, 66, .28);
+        }
+
+        .product-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .product-pagination .pagination {
+            margin: 0;
+        }
+
+        .product-pagination-tools {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .product-page-size {
+            width: 86px;
+        }
+
+        @media (max-width: 650px) {
+            .product-list-tools {
+                grid-template-columns: 1fr;
+            }
+        }
+
         #barcodePrintModal,
         #barcodePreviewModal {
             z-index: 1070;
@@ -57,138 +114,156 @@
             overflow: hidden;
             background: #fff;
         }
-@media print {
-    /* Set page to 4 inches wide */
-    @page {
-        size: 4in auto;
-        margin: 0 !important;
-    }
 
-    html,
-    body {
-        width: 4in !important;
-        min-width: 4in !important;
-        max-width: 4in !important;
-        height: auto !important;
-        margin: 0 auto !important;
-        padding: 0 !important;
-        background: #fff !important;
-    }
+        @media print {
 
-    body * {
-        visibility: hidden !important;
-    }
+            /* Set page to 4 inches wide */
+            @page {
+                size: 4in auto;
+                margin: 0 !important;
+            }
 
-    #barcodePrintArea,
-    #barcodePrintArea * {
-        visibility: visible !important;
-    }
+            html,
+            body {
+                width: 4in !important;
+                min-width: 4in !important;
+                max-width: 4in !important;
+                height: auto !important;
+                margin: 0 auto !important;
+                padding: 0 !important;
+                background: #fff !important;
+            }
 
-    /* 
+            body * {
+                visibility: hidden !important;
+            }
+
+            #barcodePrintArea,
+            #barcodePrintArea * {
+                visibility: visible !important;
+            }
+
+            /* 
      * Container setup for 4-inch paper:
      * 2 columns x 50mm = 100mm total width inside a 101.6mm (4in) page.
      * justify-content: center ensures the 1.6mm remainder is split evenly on both sides.
      */
-    #barcodePrintArea {
-        display: grid !important;
-        grid-template-columns: 50mm 50mm !important;
-        grid-auto-rows: 25mm !important;
-        justify-content: center !important;
-        align-content: start !important;
+            #barcodePrintArea {
+                display: grid !important;
+                grid-template-columns: 50mm 50mm !important;
+                grid-auto-rows: 25mm !important;
+                justify-content: center !important;
+                align-content: start !important;
 
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
 
-        width: 4in !important;
-        margin: 0 auto !important;
-        padding: 0 !important;
+                width: 4in !important;
+                margin: 0 auto !important;
+                padding: 0 !important;
 
-        overflow: visible !important;
-        background: #fff !important;
-        color: #000 !important;
-        box-sizing: border-box !important;
-    }
+                overflow: visible !important;
+                background: #fff !important;
+                color: #000 !important;
+                box-sizing: border-box !important;
+            }
 
-    /* Individual Label Block */
-    .barcode-print-label {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: center !important;
+            /* Individual Label Block */
+            .barcode-print-label {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
 
-        width: 50mm !important;
-        min-width: 50mm !important;
-        max-width: 50mm !important;
+                width: 50mm !important;
+                min-width: 50mm !important;
+                max-width: 50mm !important;
 
-        height: 25mm !important;
-        min-height: 25mm !important;
-        max-height: 25mm !important;
+                height: 25mm !important;
+                min-height: 25mm !important;
+                max-height: 25mm !important;
 
-        box-sizing: border-box !important;
-        margin: 0 !important;
-        padding: 1mm 1.5mm !important;
+                box-sizing: border-box !important;
+                margin: 0 !important;
+                padding: 1mm 1.5mm !important;
 
-        overflow: hidden !important;
-        background: #fff !important;
-        color: #000 !important;
-        text-align: center !important;
+                overflow: hidden !important;
+                background: #fff !important;
+                color: #000 !important;
+                text-align: center !important;
 
-        break-inside: avoid !important;
-        page-break-inside: avoid !important;
-    }
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
 
-    .barcode-print-label .barcode-product-name {
-        display: none !important;
-    }
+            .barcode-print-label .barcode-product-name {
+                display: none !important;
+            }
 
-    .barcode-print-label svg.barcode-svg {
-        display: block !important;
-        width: 46mm !important;
-        min-width: 46mm !important;
-        max-width: 46mm !important;
-        height: 14mm !important;
-        max-height: 14mm !important;
-        margin: 0 auto !important;
-        padding: 0 !important;
-        overflow: visible !important;
-        box-sizing: border-box !important;
-    }
+            .barcode-print-label svg.barcode-svg {
+                display: block !important;
+                width: 46mm !important;
+                min-width: 46mm !important;
+                max-width: 46mm !important;
+                height: 14mm !important;
+                max-height: 14mm !important;
+                margin: 0 auto !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                box-sizing: border-box !important;
+            }
 
-    .barcode-print-label .barcode-price {
-        display: block !important;
-        width: 100% !important;
-        margin: 0.5mm 0 0 !important;
-        padding: 0 !important;
-        font-family: Arial, sans-serif !important;
-        font-size: 8.5pt !important;
-        font-weight: 600 !important;
-        line-height: 1 !important;
-        text-align: center !important;
-        white-space: nowrap !important;
-    }
+            .barcode-print-label .barcode-price {
+                display: block !important;
+                width: 100% !important;
+                margin: 0.5mm 0 0 !important;
+                padding: 0 !important;
+                font-family: Arial, sans-serif !important;
+                font-size: 8.5pt !important;
+                font-weight: 600 !important;
+                line-height: 1 !important;
+                text-align: center !important;
+                white-space: nowrap !important;
+            }
 
-    #barcodePrintModal,
-    #barcodePreviewModal,
-    .modal-backdrop {
-        display: none !important;
-    }
-}
+            #barcodePrintModal,
+            #barcodePreviewModal,
+            .modal-backdrop {
+                display: none !important;
+            }
+        }
     </style>
     <div class="container">
         <div th:replace="/utill/MessageShow.html :: toast"></div>
         <!-- Message Box -->
         <div id="messageBox" class="message-box alert fade show d-none" role="alert"></div>
         <div class="page-heading-toolbar">
-            <h2>Product Management</h2>
+            <h2>Products</h2>
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#productModal">
+                Add New Product
+            </button>
         </div>
+
+        <form id="productSearchForm" class="product-list-tools" method="get" th:action="@{/product}">
+            <input id="productSearch" class="form-control product-search-input" type="text" name="query"
+                th:value="${productQuery}"
+                placeholder="Search by product name, brand, size or barcode..." autocomplete="off">
+            <button type="button" class="btn btn-primary" id="productSearchButton">
+                Search
+            </button>
+            <button type="button" class="btn product-refresh-button" id="refreshProductsButton">
+                Refresh
+            </button>
+        </form>
 
         <table class="table table-bordered table-striped table-hover">
             <thead class="table-dark">
                 <tr>
-                    <th>ID</th>
+                    <th>Sl. No</th>
                     <th>Name</th>
-                    <th>Volume/Qty.</th>
+                    <th>Brand</th>
+                    <th>Size</th>
                     <th>Category</th>
                     <th>Sub-Category</th>
                     <th>Price</th>
@@ -199,7 +274,8 @@
                 <tr th:each="product : ${products}">
                     <td th:text="${product.id}">1</td>
                     <td th:text="${product.name}">Example Product</td>
-                    <td th:text="${stockQuantities[product.id] ?: 0}">0</td>
+                    <td th:text="${product.brand ?: '-'}">Brand</td>
+                    <td th:text="${product.size ?: '-'}">Size</td>
                     <td th:text="${product.subCategory?.category?.name ?: 'Category Missing'}">Category</td>
                     <td th:text="${product.subCategory?.name ?: 'Category Missing add it'}">Sub-Category X</td>
                     <td th:text="${latestPrices[product.id] ?: 0}">0</td>
@@ -219,10 +295,60 @@
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(products)}">
-                    <td colspan="7" class="text-center">No products found.</td>
+                    <td colspan="8" class="text-center">No products found.</td>
                 </tr>
             </tbody>
         </table>
+
+        <div class="product-pagination" th:if="${productPage.totalPages > 0}">
+            <span class="text-muted small"
+                th:text="${'Showing page ' + (productPage.number + 1) + ' of ' + productPage.totalPages + ' (' + productPage.totalElements + ' products)'}">
+                Showing page 1 of 1
+            </span>
+            <div class="product-pagination-tools">
+                <select class="form-control product-page-size" name="size" form="productSearchForm"
+                    aria-label="Products per page">
+                    <option value="10" th:selected="${productPageSize == 10}">10</option>
+                    <option value="25" th:selected="${productPageSize == 25}">25</option>
+                    <option value="50" th:selected="${productPageSize == 50}">50</option>
+                </select>
+                <nav aria-label="Product pages">
+                    <ul class="pagination pagination-sm">
+                        <li class="page-item" th:classappend="${productPage.first ? 'disabled' : ''}">
+                            <a class="page-link"
+                                th:href="@{/product(query=${productQuery}, page=${productPage.number - 1}, size=${productPageSize})}">Previous</a>
+                        </li>
+                        <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, productPage.totalPages - 1)}"
+                            th:classappend="${pageNumber == productPage.number ? 'active' : ''}">
+                            <a class="page-link"
+                                th:href="@{/product(query=${productQuery}, page=${pageNumber}, size=${productPageSize})}"
+                                th:text="${pageNumber + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${productPage.last ? 'disabled' : ''}">
+                            <a class="page-link"
+                                th:href="@{/product(query=${productQuery}, page=${productPage.number + 1}, size=${productPageSize})}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="productModalLabel">Add Products</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div th:replace="/product/productEntryForm.html :: productEntryForm"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
         <!-- Product Modal for Add/Edit -->
@@ -251,11 +377,20 @@
                                     <input type="text" id="productName" name="productName" class="form-control"
                                         required>
                                 </div>
-                                <!-- <div class="col-md-6 form-group">
-                                    <label for="productVolume">Volume/Qty.</label>
-                                    <input type="number" id="productVolume" name="productVolume" class="form-control"
-                                        required>
-                                </div> -->
+                                <div class="col-md-6 form-group">
+                                    <label for="productBrand">Brand</label>
+                                    <input type="text" id="productBrand" name="productBrand" class="form-control">
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="productSize">Size</label>
+                                    <input type="text" id="productSize" name="productSize" class="form-control"
+                                        placeholder="M, L / 36, 38 / 80CM">
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="productPricePerUnit">Price</label>
+                                    <input type="number" id="productPricePerUnit" name="productPricePerUnit"
+                                        class="form-control" min="0" step="0.01" required>
+                                </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="category" class="form-label">Category</label>
@@ -354,8 +489,8 @@
                     <div class="modal-body text-center">
                         <div id="printProductName" class="fw-bold mb-3"></div>
                         <label for="printBarcodeCount" class="form-label">Number of labels</label>
-                        <input type="number" class="form-control mb-3" id="printBarcodeCount" min="1" step="1"
-                            value="1" required>
+                        <input type="number" class="form-control mb-3" id="printBarcodeCount" min="1" step="1" value="1"
+                            required>
                         <div class="border rounded p-3">
                             <div class="small text-muted">Barcode number</div>
                             <strong id="printBarcodeNumber" class="d-block fs-4"></strong>
@@ -409,6 +544,29 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const productSearchForm = document.getElementById('productSearchForm');
+            const productSearchInput = productSearchForm?.querySelector('input[name="query"]');
+            const productPageSize = document.querySelector('select[form="productSearchForm"]');
+
+            productSearchInput?.addEventListener('keydown', event => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    productSearchForm.submit();
+                }
+            });
+
+            document.getElementById('productSearchButton')?.addEventListener('click', () => {
+                productSearchForm.submit();
+            });
+
+            productPageSize?.addEventListener('change', () => {
+                productSearchForm.submit();
+            });
+
+            document.getElementById('refreshProductsButton')?.addEventListener('click', () => {
+                window.location.href = '/product';
+            });
+
             const productModal = document.getElementById('productManagerEdit');
             const form = document.getElementById('productManagerEditForm');
             const priceBookForm = document.getElementById('priceBookForm');
@@ -506,7 +664,9 @@
                             // Populate the form fields with the product data
                             document.getElementById('productId').value = product.id;
                             document.getElementById('productName').value = product.name;
-                            // document.getElementById('productVolume').value = product.volumeMl;
+                            document.getElementById('productBrand').value = product.brand || '';
+                            document.getElementById('productSize').value = product.size || '';
+                            document.getElementById('productPricePerUnit').value = product.pricePerUnit ?? '';
                             categorySelect.value = product.categoryId != null ? product.categoryId : '';
                             populateSubCategories(product.categoryId, product.subCategoryId);
                         })
@@ -756,11 +916,15 @@
                 const subCategoryId = subCategorySelect.value;
                 const categoryId = categorySelect.value;
                 const name = document.getElementById('productName').value;
-                // const volumeMl = document.getElementById('productVolume').value;
-                // You can now use the value, for example, to log it to the console
+                const brand = document.getElementById('productBrand').value;
+                const size = document.getElementById('productSize').value;
+                const pricePerUnit = document.getElementById('productPricePerUnit').value;
 
                 const productDTO = {
                     name,
+                    brand,
+                    size,
+                    pricePerUnit: pricePerUnit ? Number(pricePerUnit) : null,
                     categoryId,
                     subCategoryId,
                     // volumeMl,
