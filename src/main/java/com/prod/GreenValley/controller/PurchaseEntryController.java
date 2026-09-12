@@ -45,7 +45,10 @@ public class PurchaseEntryController {
     }
 
     @GetMapping("/purchase")
-    public String getPurchaseDetail(){
+    public String getPurchaseDetail(Model model){
+        PurchaseEntryForm purchaseEntryForm = new PurchaseEntryForm();
+        purchaseEntryForm.getItems().add(new com.prod.GreenValley.wrapper.PurchaseEntryItemForm());
+        model.addAttribute("purchaseEntry", purchaseEntryForm);
         return "/purchase/purchaseDetail";
     }
 }

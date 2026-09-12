@@ -1,430 +1,117 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.thymeleaf.org" th:replace="base::layout(~{::section})">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::section})">
 <section>
-
-    <!-- Message Box -->
     <div id="messageBox" class="message-box alert fade show d-none" role="alert"></div>
-    <!-- Main Content Area -->
     <div class="container-fluid">
         <div class="row">
-
             <main role="main" class="w-100 px-4">
                 <div class="page-heading-toolbar">
                     <h1>Purchase History</h1>
-
+                    <button type="button" class="btn btn-primary" data-toggle="modal"
+                        data-target="#purchaseEntryFormModal">
+                        <i class="fas fa-plus mr-1"></i>New Purchase
+                    </button>
                 </div>
-
-                <!-- Purchases Table -->
                 <table class="table table-bordered table-striped table-hover">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th>Purchase ID</th>
-                                <th>Products</th>
-                                <th>Date</th>
-                                <th>Supplier</th>
-                                <th>Total Amount</th>
-                                <th class="text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="purchaseTableBody">
-                            <!-- Purchase data will be populated by JavaScript -->
-                            <tr>
-                                <td colspan="5" class="text-center">Loading purchases...</td>
-                            </tr>
-                        </tbody>
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Sl. No</th>
+                            <th>Products</th>
+                            <th>Date</th>
+                            <th>Supplier</th>
+                            <th>Total Amount</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="purchaseTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center">Loading purchases...</td>
+                        </tr>
+                    </tbody>
                 </table>
             </main>
         </div>
     </div>
 
-
-    <!-- Purchase Modal for Add/Edit -->
-    <div class="modal fade" id="purchaseModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="false">
-        <div class="modal-dialog modal-lg">
+    <div class="modal fade" id="purchaseEntryFormModal" tabindex="-1" role="dialog"
+        aria-labelledby="purchaseEntryFormModal" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Add New Purchase</h5>
-                    <div class="text-right">
-                        <label for="totalAmount" class="mb-0">Total Amount</label>
-                        <input type="text" id="totalAmount" name="totalAmount" readonly
-                            class="form-control form-control-sm text-right font-weight-bold" value="0.00">
-                    </div>
-                    <button type="button" onclick="purchaseDetailCloseModal()" class="close" data-dismiss="purchaseModal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 class="modal-title" id="purchaseEntryFormModal">Purchase Entry Form</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <form id="purchaseForm">
-                        <input type="hidden" id="purchaseId" name="id">
-
-                        <div class="row">
-                            <div class="col-md-6 form-group">
-                                <label for="purchaseDate">Purchase Date</label>
-                                <input type="date" id="purchaseDate" name="purchaseDate" class="form-control" required>
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label for="supplierInfo">Supplier Info</label>
-                                <input type="text" id="supplierInfo" name="supplierInfo"
-                                    placeholder="Supplier Name or ID" class="form-control" required>
-                            </div>
-                        </div>
-
-                        <h5 class="mt-4">Items</h5>
-                        <div class="table-responsive">
-                            <table class="table table-sm" id="purchaseItemTable">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Quantity</th>
-                                        <th>Unit Price</th>
-                                        <th class="text-center">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="purchaseItemTableBody">
-                                    <!-- Form rows will be added by JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <!-- <div class="d-flex justify-content-between align-items-center mb-3">
-                            <button type="button" id="addItemBtn" class="btn btn-info btn-sm">
-                                <i class="fas fa-plus"></i> Add Item
-                            </button>
-                        </div> -->
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" onclick="purchaseDetailCloseModal()" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" id="savePurchaseBtn" class="btn btn-primary">Save Purchase</button>
+                    <div th:replace="/purchase/PurchaseEntryForm.html :: purchaseEntryForm"></div>
                 </div>
             </div>
         </div>
     </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const purchaseTableBody = document.getElementById('purchaseTableBody');
-            const purchaseModal = $('#purchaseModal'); // Use jQuery for Bootstrap modal functions
-            const purchaseForm = document.getElementById('purchaseForm');
-            const modalTitle = document.getElementById('modalTitle');
-            const addItemBtn = document.getElementById('addItemBtn');
-            const purchaseItemTableBody = document.getElementById('purchaseItemTableBody');
-            const totalAmountInput = document.getElementById('totalAmount');
-            const savePurchaseBtn = document.getElementById('savePurchaseBtn');
             const messageBox = document.getElementById('messageBox');
 
-            // Helper function to show a dismissible message box
-            function showMessage(text, isError = false) {
-                messageBox.textContent = text;
-                messageBox.className = 'message-box alert fade show';
-                messageBox.classList.add(isError ? 'alert-danger' : 'alert-success');
-                messageBox.classList.remove('d-none');
-                setTimeout(() => {
-                    messageBox.classList.remove('show');
-                    setTimeout(() => {
-                        messageBox.classList.add('d-none');
-                    }, 300);
-                }, 3000);
-            }
-
-            // Function to fetch all purchases from the backend
-            async function fetchPurchases() {
-                try {
-                    // Note: The controller provides a Thymeleaf endpoint at /purchases,
-                    // but the API endpoints are at /api/purchases. We should fetch from the API.
-                    const response = await fetch('/api/purchases');
-
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch purchases.');
-                    }
-                    const purchases = await response.json();
-                    renderPurchases(purchases);
-                } catch (error) {
-                    console.error('Error fetching purchases:', error);
-                    purchaseTableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Failed to load purchases.</td></tr>`;
-                    showMessage('Failed to load purchases.', true);
-                }
-            }
-
-            // Function to render purchases in the table
             function formatDisplayDate(value) {
                 const parts = String(value || '').substring(0, 10).split('-');
                 return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : '';
             }
 
+            function showMessage(text, isError = false) {
+                messageBox.textContent = text;
+                messageBox.className = `message-box alert fade show ${isError ? 'alert-danger' : 'alert-success'}`;
+                window.setTimeout(() => messageBox.classList.add('d-none'), 3000);
+            }
+
             function renderPurchases(purchases) {
-                purchaseTableBody.innerHTML = '';
-                if (purchases.length === 0) {
-                    purchaseTableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No purchases found.</td></tr>`;
+                if (!purchases.length) {
+                    purchaseTableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No purchases found.</td></tr>';
                     return;
                 }
-
-                purchases.forEach(purchase => {
-
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${purchase.id}</td>
-                        <td>${(purchase.productsInfo != "" ? purchase.productsInfo : "<p style='color:red;'><b>Please delete this purchase as purchase-item missing</b></p>")}</td>
-                        <td>${formatDisplayDate(purchase.dateOfPurchase)}</td>
-                        <td>${purchase.supplierInfo}</td>
-                        <td>${purchase.totalAmount.toFixed(2)}</td>
-                        <td class="text-center">
-                            
-                            <button ${purchase.productsInfo != "" ? "" : "disabled"} class="viewBtn btn btn-success btn-sm" data-id="${purchase.id}">
-                                <i class="fas fa-trash"></i> View
-                            </button>
-                            <button ${purchase.productsInfo != "" ? "" : "disabled"} class="editBtn btn btn-warning btn-sm mr-2" data-id="${purchase.id}">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button class="deleteBtn btn btn-danger btn-sm" data-id="${purchase.id}">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </td>
-                    `;
-                    purchaseTableBody.appendChild(row);
+                purchaseTableBody.innerHTML = purchases.map(purchase => `<tr>
+                    <td>${purchase.id}</td>
+                    <td>${purchase.productsInfo || '<span class="text-danger">Purchase items missing</span>'}</td>
+                    <td>${formatDisplayDate(purchase.dateOfPurchase)}</td>
+                    <td>${purchase.supplierInfo || ''}</td>
+                    <td>${Number(purchase.totalAmount || 0).toFixed(2)}</td>
+                    <td class="text-center"><button class="deleteBtn btn btn-danger btn-sm" data-id="${purchase.id}"><i class="fas fa-trash"></i> Delete</button></td>
+                </tr>`).join('');
+                purchaseTableBody.querySelectorAll('.deleteBtn').forEach(button => {
+                    button.addEventListener('click', () => deletePurchase(button.dataset.id));
                 });
-                attachPurchaseEventListeners();
             }
 
-            // Function to open the modal for adding/editing a purchase
-            function openModal(purchase = null) {
-                purchaseForm.reset();
-                purchaseItemTableBody.innerHTML = '';
-                totalAmountInput.value = '0.00';
-
-                if (purchase) {
-                    modalTitle.textContent = 'Edit Purchase';
-                    document.getElementById('purchaseId').value = purchase.id;
-                    document.getElementById('purchaseDate').value = new Date(purchase.dateOfPurchase).toISOString().split('T')[0];
-                    document.getElementById('purchaseDate').removeAttribute("readonly")
-                    document.getElementById('supplierInfo').value = purchase.supplierInfo;
-                    if(purchase.purchaseEntryItems && purchase.purchaseEntryItems.length > 0){
-                        purchase.purchaseEntryItems.forEach(item => addPurchaseItemRow(item, false));
-                        updateTotalAmount();
-                    }else{
-                        const newRow = document.createElement('tr');
-                        let innerHTMLStr = `
-                            <p>Please delete this Purchase as Purchase-Items missing..</p>
-                        `;
-                        newRow.innerHTML = innerHTMLStr;
-                    }
-                    
-                } else {
-                    modalTitle.textContent = 'Add New Purchase';
-                    document.getElementById('purchaseId').value = '';
-                    addPurchaseItemRow();
-                }
-                purchaseModal.modal('show');
-            }
-
-            // Function to close the modal
-            window.purchaseDetailCloseModal = function() {
-                purchaseModal.modal('hide');
-            }
-
-            // Function to add a new row to the purchase item table
-            function addPurchaseItemRow(item = null, isReadOnly) {
-                const newRow = document.createElement('tr');
-                let innerHTMLStr = `
-                    <td>
-                        <input type="text" name="productInfo" value="${item ? item.productName : ''}" placeholder="Product name" class="form-control form-control-sm" readonly required>
-                        <input type="text" name="pproduct-id" style="visibility: hidden;" value="${item ? item.productId : ''}">
-                    </td>
-                    <td>
-                        <input type="number" ${isReadOnly ? 'readonly' : ''} name="quantity" value="${item ? item.quantity : '1'}" min="1" class="form-control form-control-sm purchase-quantity"  required>
-                        
-                    </td>
-                    <td>
-                        <input type="number" ${isReadOnly ? 'readonly' : ''} name="unitPrice" value="${item ? item.price : '0.00'}" min="0" step="0.01" class="form-control form-control-sm purchase-price" required>
-                    </td>
-                `;
-                if (!isReadOnly) {
-                    innerHTMLStr += `<td class="purchase-item-actions text-center">
-                        <button type="button" class="removeBtn btn btn-danger btn-sm">
-                            remove
-                        </button>
-                    </td>`;
-                } else {
-                    innerHTMLStr += '<td class="purchase-item-actions text-center text-muted">&mdash;</td>';
-                }
-
-                newRow.innerHTML = innerHTMLStr;
-
-                purchaseItemTableBody.appendChild(newRow);
-                attachItemRowEventListeners(newRow);
-            }
-
-            // Function to update the total amount of the purchase
-            function updateTotalAmount() {
-                let total = 0;
-                purchaseItemTableBody.querySelectorAll('tr').forEach(row => {
-                    const quantity = parseFloat(row.querySelector('.purchase-quantity').value) || 0;
-                    const price = parseFloat(row.querySelector('.purchase-price').value) || 0;
-                    total += quantity * price;
-                });
-                totalAmountInput.value = total.toFixed(2);
-            }
-
-            // Function to handle the form submission
-            async function handleFormSubmit(event) {
-                event.preventDefault();
-
-                const purchaseId = document.getElementById('purchaseId').value;
-                const url = purchaseId ? `/api/purchases/${purchaseId}` : '/api/purchases';
-                const method = purchaseId ? 'PUT' : 'POST';
-
-                const dateOfPurchase = document.getElementById('purchaseDate').value;
-                const supplierInfo = document.getElementById('supplierInfo').value;
-                const totalAmount = parseFloat(totalAmountInput.value);
-
-                const items = [];
-                purchaseItemTableBody.querySelectorAll('tr').forEach(row => {
-                    const productInfo = row.querySelector('input[name="productInfo"]').value;
-                    const quantity = parseInt(row.querySelector('input[name="quantity"]').value);
-                    const productId = parseInt(row.querySelector('input[name="pproduct-id"]').value);
-                    const price = parseFloat(row.querySelector('input[name="unitPrice"]').value);
-                    items.push({ productInfo, quantity, price, productId });
-                });
-
-                const purchaseData = {
-                    dateOfPurchase,
-                    supplierInfo,
-                    totalAmount,
-                    items
-                };
-
-                savePurchaseBtn.textContent = 'Saving...';
-                savePurchaseBtn.disabled = true;
-
+            async function fetchPurchases() {
                 try {
-                    const response = await fetch(url, {
-                        method,
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(purchaseData)
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.message || 'Failed to save purchase.');
-                    }
-
-                    purchaseDetailCloseModal();
-                    await fetchPurchases(); // Refresh the list
-                    showMessage('Purchase saved successfully!');
+                    const response = await fetch('/api/purchases');
+                    if (!response.ok) throw new Error('Failed to fetch purchases.');
+                    renderPurchases(await response.json());
                 } catch (error) {
-                    console.error('Error saving purchase:', error);
+                    purchaseTableBody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load purchases.</td></tr>';
                     showMessage(error.message, true);
-                } finally {
-                    savePurchaseBtn.textContent = 'Save Purchase';
-                    savePurchaseBtn.disabled = false;
                 }
             }
 
-            // Function to delete a purchase
             async function deletePurchase(id) {
-                // IMPORTANT: For a production app, use a custom modal instead of alert/confirm.
-                if (!confirm('Are you sure you want to delete this purchase?')) {
-                    return;
-                }
-
+                if (!window.confirm('Are you sure you want to delete this purchase?')) return;
                 try {
                     const response = await fetch(`/api/purchase/delete/${id}`, { method: 'DELETE' });
-                    if (!response.ok) {
-                        throw new Error('Failed to delete purchase.');
-                    }
+                    if (!response.ok) throw new Error('Failed to delete purchase.');
                     await fetchPurchases();
                     showMessage('Purchase deleted successfully!');
                 } catch (error) {
-                    console.error('Error deleting purchase:', error);
                     showMessage(error.message, true);
                 }
             }
 
-            // function view form
-            async function viewPurchase(id) {
-                try {
-                    const response = await fetch(`/api/purchases/${id}`);
-                    // if (!response.ok) throw new Error('Purchase not found.');
-                    const purchase = await response.json();
-                    openModalForView(purchase);
-                } catch (error) {
-                    console.error('Error fetching purchase details:', error);
-                    showMessage('Failed to load purchase details for editing.', true);
-                }
-            }
-
-            // view purchase record
-
-            function openModalForView(purchase = null) {
-                purchaseForm.reset();
-                purchaseItemTableBody.innerHTML = '';
-                totalAmountInput.value = '0.00';
-
-                if (purchase) {
-                    modalTitle.textContent = 'View Purchase';
-                    document.getElementById('purchaseId').value = purchase.id;
-
-                    document.getElementById('purchaseDate').value = new Date(purchase.dateOfPurchase).toISOString().split('T')[0];
-                    document.getElementById('purchaseDate').setAttribute("readonly", true);
-                    document.getElementById('supplierInfo').value = purchase.supplierInfo;
-                    document.getElementById('supplierInfo').setAttribute("readonly", true);
-
-                    purchase.purchaseEntryItems.forEach(item => addPurchaseItemRow(item, true));
-                    updateTotalAmount();
-                    purchaseModal.modal('show');
-                }
-
-            }
-
-            // Function to attach event listeners to a new item row
-            function attachItemRowEventListeners(row) {
-                if (row.querySelector('.removeBtn')) {
-                    row.querySelector('.removeBtn').addEventListener('click', (e) => {
-                        e.preventDefault();
-                        row.remove();
-                        updateTotalAmount();
-                    });
-                    row.querySelector('.purchase-quantity').addEventListener('input', updateTotalAmount);
-                    row.querySelector('.purchase-price').addEventListener('input', updateTotalAmount);
-                }
-
-            }
-
-            // Function to attach event listeners to the main purchase table buttons
-            async function attachPurchaseEventListeners() {
-                document.querySelectorAll('.editBtn').forEach(button => {
-                    button.addEventListener('click', async (e) => {
-                        const id = e.target.dataset.id;
-                        try {
-                            const response = await fetch(`/api/purchases/${id}`);
-                            // if (!response.ok) throw new Error('Purchase not found.');
-                            const purchase = await response.json();
-                            openModal(purchase);
-                        } catch (error) {
-                            console.error('Error fetching purchase details:', error);
-                            showMessage('Failed to load purchase details for editing.', true);
-                        }
-                    });
-                });
-                document.querySelectorAll('.deleteBtn').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const id = e.target.dataset.id;
-                        deletePurchase(id);
-                    });
-                });
-
-                //viewPurchase
-                document.querySelectorAll('.viewBtn').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const id = e.target.dataset.id;
-                        viewPurchase(id);
-                    });
-                });
-
-            }
-
-            // Initial setup
+            $('#purchaseEntryFormModal').on('show.bs.modal', () => {
+                if (window.resetPurchaseEntryForm) window.resetPurchaseEntryForm();
+            });
             fetchPurchases();
-            savePurchaseBtn.addEventListener('click', handleFormSubmit);
-            addItemBtn.addEventListener('click', () => addPurchaseItemRow());
         });
     </script>
 </section>
+
+</html>
